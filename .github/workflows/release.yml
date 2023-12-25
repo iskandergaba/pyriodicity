@@ -1,0 +1,31 @@
+# This workflow will install Poetry, resolve Python dependencies, run tests,
+# build and publish release package versions to PyPI upon upon publishing a new release version.
+
+name: Publish to PyPI
+on:
+  release:
+    types: [published]
+
+jobs:
+  PyPI-Release:
+    name: Build Using Poetry and Publish to TestPyPI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v3
+      - name: Install Poetry
+        run: |
+          # Run the installer
+          curl -sSL https://install.python-poetry.org | python3 -
+          # Add Poetry to path
+          echo "${HOME}/.poetry/bin" >> $GITHUB_PATH
+      - name: Install dependencies
+        run: poetry install
+      - name: Run tests
+        run: poetry run pytest
+      - name: Publish package to PyPI
+        run: |
+          # Configure the PyPI token
+          poetry config pypi-token.pypi "${{ secrets.PYPI_API_TOKEN }}"
+          # Build the and publish the package
+          poetry publish --build
