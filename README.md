@@ -70,9 +70,9 @@ poetry export --output requirements.txt
 An easy and quick way to find seasonality periods of a univariate time series is to check its autocorrelation function (ACF) and look for specific charecteristics in lag values that we will detail in a second. You can read more information about time series ACF [here](https://otexts.com/fpp3/acf.html), but intuitively, An autocorrelation coefficient $r_k$ measures the the linear relationship between $k$-lagged values of a given time series. In simpler terms, $r_k$ measures how similar/dissimilar time series values that $k$-length apart from each other. The set of $r_k$ values for each lag $k$ makes ACF. Equipped with this information, I developed a package for finding time series seasonality periods automatically using ACF information.
 
 Simply put, given a univariate time series $T$, the algorithm finds, iteratively, lag values $k$ such that:
-- $1 \lt k \leq \frac{\lvert T \rvert}{2}$
-- Autocorrelation coefficients $r_q$ are local maxima where $q \in \{k, 2k, 3k, ...\}$
-- $\forall p \in P, \forall n \in \mathbb{N}, k \neq n \times p$, where $P$ is the list of already found periods.
+1. $1 \lt k \leq \frac{\lvert T \rvert}{2}$
+2. Autocorrelation coefficients $r_q$ are local maxima where $q \in \{k, 2k, 3k, ...\}$
+3. $\forall p \in P, \forall n \in \mathbb{N}, k \neq n \times p$, where $P$ is the list of already found periods.
 
 The list of such $k$ values constitute the set of found seasonality periods $P$. To understand this further, consider this hypothetical time series of hourly frequency that has clear weekly seasonality below
 
@@ -82,8 +82,12 @@ Now let's look at the corresponding ACF for the time series above:
 
 [![Autocorrelation function of a time series with a weekly seasonality](assets/images/acf.png)](assets/images/acf.png)
 
-You can see that the autocorrelation coefficient for lag value 168 hours (i.e. one week) is a local maximum (Red square). Similarly, autocorrelation coefficient for lag values that are multiples of 168 (i.e. one week). We can therefore conclude that this time series has a weekly seasonality period.
+You can see that the autocorrelation coefficient for lag value 168 hours (i.e. one week) is a local maximum (red-border square). Similarly, autocorrelation coefficient for lag values that are multiples of 168 (gray-border squares). We can therefore conclude that this time series has a weekly seasonality period.
 
+### Notes
+- The first condition is needed because a seasonality period cannot neither be 1 (a trivial case), nor greater than half the length of the target time series (by definition, a seasonality has to manifest itself at least twice in a given time series).
+- The third condition favors eliminating redundant seasonality periods that are multiples of each others. The algorithm does allow, however, finding seasonality periods that divide already found seasonality periods.
+- The periods detection uses `argmax` on the ACF to select seasonality period candidates before checking they satisfy the conditions discussed above. Therefore, the list of seasonality periods are returned in the descending order of their corresponding ACF coefficients.
 
 ## References
 - [1] Hyndman, R.J., & Athanasopoulos, G. (2021) Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia. [OTexts.com/fpp3](https://otexts.com/fpp3). Accessed on 12-25-2023.
