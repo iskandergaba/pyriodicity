@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "auto-period-finder"
 version = "0.0.6rc0"
-description = ""
+description = "An autocorrelation function based seasonality periods automatic finder."
 authors = ["Iskander Gaba <iskander@hey.com>"]
 readme = "README.md"
 
