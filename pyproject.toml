@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "auto-period-finder"
-version = "0.0.5-rc"
+version = "0.0.5rc1"
 description = ""
 authors = ["Iskander Gaba <iskander@hey.com>"]
 readme = "README.md"
