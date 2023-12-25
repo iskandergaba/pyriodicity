@@ -69,3 +69,8 @@ poetry export --output requirements.txt
 
 ## ACF-Based Seasonality Detection
 TODO
+
+## References
+- [1] Hyndman, R.J., & Athanasopoulos, G. (2021)
+    Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia.
+        [OTexts.com/fpp3](https://otexts.com/fpp3). Accessed on 12-25-2023.
