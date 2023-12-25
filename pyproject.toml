@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "auto-period-finder"
-version = "0.0.6rc2"
+version = "0.0.6rc3"
 description = "An autocorrelation function-based seasonality periods automatic finder for univariate time series."
 authors = ["Iskander Gaba <iskander@hey.com>"]
 readme = "README.md"
