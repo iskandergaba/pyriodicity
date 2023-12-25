@@ -76,11 +76,11 @@ Simply put, given a univariate time series $T$, the algorithm finds, iteratively
 
 The list of such $k$ values constitute the set of found seasonality periods $P$. To understand this further, consider this hypothetical time series of hourly frequency that has clear weekly seasonality below
 
-[![Time series with a weekly seasonality](assets/images/timeseries.png)](assets/images/timeseries.png)
+[![Time series with a weekly seasonality](https://raw.githubusercontent.com/iskandergaba/auto-period-finder/master/assets/images/timeseries.png)](https://raw.githubusercontent.com/iskandergaba/auto-period-finder/master/assets/images/timeseries.png)
 
 Now let's look at the corresponding ACF for the time series above:
 
-[![Autocorrelation function of a time series with a weekly seasonality](assets/images/acf.png)](assets/images/acf.png)
+[![Autocorrelation function of a time series with a weekly seasonality](https://raw.githubusercontent.com/iskandergaba/auto-period-finder/master/assets/images/acf.png)](https://raw.githubusercontent.com/iskandergaba/auto-period-finder/master/assets/images/acf.png)
 
 You can see that the autocorrelation coefficient for lag value 168 hours (i.e. one week) is a local maximum (red-border square). Similarly, autocorrelation coefficient for lag values that are multiples of 168 (gray-border squares). We can therefore conclude that this time series has a weekly seasonality period.
 
