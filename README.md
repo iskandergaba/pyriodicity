@@ -1,6 +1,5 @@
 # `auto-period-finder`
-[![PyPI Version](https://img.shields.io/pypi/v/auto-period-finder.svg?label=PyPI)](
-https://pypi.org/project/auto-period-finder/)
+[![PyPI Version](https://img.shields.io/pypi/v/auto-period-finder.svg?label=PyPI)](https://pypi.org/project/auto-period-finder/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/auto-period-finder?label=Python)
 ![GitHub License](https://img.shields.io/github/license/iskandergaba/auto-period-finder?label=License)
 
@@ -75,7 +74,16 @@ Simply put, given a univariate time series $T$, the algorithm finds, iteratively
 - Autocorrelation coefficients $r_q$ are local maxima where $q \in \{k, 2k, 3k, ...\}$
 - $\forall p \in P, \forall n \in \mathbb{N}, k \neq n \times p$, where $P$ is the list of already found periods.
 
-The list of such $k$ values constitute the set of found seasonality periods $P$.
+The list of such $k$ values constitute the set of found seasonality periods $P$. To understand this further, consider this hypothetical time series of hourly frequency that has clear weekly seasonality below
+
+[![Time series with a weekly seasonality](assets/images/timeseries.png)](assets/images/timeseries.png)
+
+Now let's look at the corresponding ACF for the time series above:
+
+[![Autocorrelation function of a time series with a weekly seasonality](assets/images/acf.png)](assets/images/acf.png)
+
+You can see that the autocorrelation coefficient for lag value 168 hours (i.e. one week) is a local maximum (Red square). Similarly, autocorrelation coefficient for lag values that are multiples of 168 (i.e. one week). We can therefore conclude that this time series has a weekly seasonality period.
+
 
 ## References
 - [1] Hyndman, R.J., & Athanasopoulos, G. (2021) Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia. [OTexts.com/fpp3](https://otexts.com/fpp3). Accessed on 12-25-2023.
