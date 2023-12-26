@@ -41,11 +41,11 @@ def test_find_strongest_period_var_wise_stl_custom():
     strongest_period_var = period_finder.fit_find_strongest_var(
         decomposer=Decomposer.STL, decomposer_kwargs={"seasonal_deg": 0}
     )
-    assert strongest_period_var == 132
+    assert strongest_period_var == 180
 
 
 def test_find_strongest_period_var_wise_moving_averages():
     data = co2.load().data.resample("M").mean().ffill()
     period_finder = AutoPeriodFinder(data)
     strongest_period_var = period_finder.fit_find_strongest_var()
-    assert strongest_period_var == 132
+    assert strongest_period_var == 176

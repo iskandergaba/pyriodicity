@@ -175,17 +175,18 @@ class AutoPeriodFinder:
         acf_kwargs: Dict[str, Union[int, bool, None]],
     ) -> list:
         periods = []
-        acf_array = np.array(acf(y, nlags=len(y), **acf_kwargs))
+        acf_arr = np.array(acf(y, nlags=len(y), **acf_kwargs))
+        acf_arr_work = acf_arr.copy()
 
         # Eliminate the trivial seasonality period of 1
-        acf_array[0] = -1
+        acf_arr_work[0] = -1
 
         while True:
             # i is a period candidate: It cannot be greater than half the timeseries length
-            i = acf_array[: acf_array.size // 2].argmax()
+            i = acf_arr_work[: acf_arr_work.size // 2].argmax()
 
             # No more periods left or the maximum number of periods has been found
-            if acf_array[i] == -1 or (
+            if acf_arr_work[i] == -1 or (
                 max_period_count is not None and len(periods) == max_period_count
             ):
                 return periods
@@ -193,19 +194,19 @@ class AutoPeriodFinder:
             # Check that i and all of its multiples are local maxima
             elif all(
                 [
-                    acf_array[i * j - 1] < acf_array[i * j]
-                    and acf_array[i * j] > acf_array[i * j + 1]
-                    for j in range(1, len(acf_array) // i - 1)
+                    acf_arr[i * j - 1] < acf_arr[i * j]
+                    and acf_arr[i * j] > acf_arr[i * j + 1]
+                    for j in range(1, len(acf_arr) // i - 1)
                 ]
             ):
                 # Add to period return list
                 periods.append(i)
                 # Ignore i and its multiplies
-                acf_array[[i * j for j in range(1, len(acf_array) // i)]] = -1
+                acf_arr_work[[i * j for j in range(1, len(acf_arr_work) // i)]] = -1
 
             # Not a period, ignore it
             else:
-                acf_array[i] = -1
+                acf_arr_work[i] = -1
 
     @staticmethod
     def __seasonality_strength(seasonal, resid):
