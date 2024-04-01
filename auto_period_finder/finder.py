@@ -1,3 +1,4 @@
+import math
 from enum import Enum
 from typing import Dict, Optional, Union
 
@@ -82,12 +83,26 @@ class AutoPeriodFinder:
             acf_kwargs if acf_kwargs else {}
         )
 
-    def fit(self, max_period_count: Optional[Union[int, None]] = None) -> list:
+    def fit(
+        self,
+        vicinity_radius: Optional[Union[int, None]] = None,
+        max_period_count: Optional[Union[int, None]] = None,
+    ) -> list:
         """
         Find seasonality periods of the given time series automatically.
 
         Parameters
         ----------
+        vicinity_radius : int, optional, default = None
+            How many data points, before and after, a period candidate
+            value to consider for satisfying the periodicity conditions.
+            Essentially, the algorithm will verify that at least one point
+            in the vicinity (defined by this parameter) of every multiple
+            of the candidate value is a local maximum.
+            This helps mitigate the effects of the forward and backward
+            noise shifts of the period value. It is also effective
+            at reducing the number of detected period values that are
+            too tightly bunched together.
         max_period_count : int, optional, default = None
             Maximum number of periods to look for.
 
@@ -96,18 +111,35 @@ class AutoPeriodFinder:
         list
             List of periods.
         """
-        return self.__find_periods(self.y, max_period_count, self._acf_kwargs)
+        return self.__find_periods(
+            self.y, vicinity_radius, max_period_count, self._acf_kwargs
+        )
 
-    def fit_find_strongest_acf(self) -> int:
+    def fit_find_strongest_acf(
+        self, vicinity_radius: Optional[Union[int, None]] = None
+    ) -> int:
         """
         Find the strongest seasonality period ACF-wise of the given time series.
+
+        Parameters
+        ----------
+        vicinity_radius : int, optional, default = None
+            How many data points, before and after, a period candidate
+            value to consider for satisfying the periodicity conditions.
+            Essentially, the algorithm will verify that at least one point
+            in the vicinity (defined by this parameter) of every multiple
+            of the candidate value is a local maximum.
+            This helps mitigate the effects of the forward and backward
+            noise shifts of the period value. It is also effective
+            at reducing the number of detected period values that are
+            too tightly bunched together.
 
         Returns
         -------
         int
             The strongest seasonality period ACF-wise.
         """
-        periods = self.fit(max_period_count=1)
+        periods = self.fit(vicinity_radius=vicinity_radius, max_period_count=1)
         if len(periods) == 0:
             return None
         else:
@@ -115,6 +147,7 @@ class AutoPeriodFinder:
 
     def fit_find_strongest_var(
         self,
+        vicinity_radius: Optional[Union[int, None]] = None,
         max_period_count: Optional[Union[int, None]] = None,
         decomposer: Optional[Decomposer] = Decomposer.MOVING_AVERAGES,
         decomposer_kwargs: Optional[Dict[str, Union[int, bool, None]]] = None,
@@ -125,6 +158,16 @@ class AutoPeriodFinder:
 
         Parameters
         ----------
+        vicinity_radius : int, optional, default = None
+            How many data points, before and after, a period candidate
+            value to consider for satisfying the periodicity conditions.
+            Essentially, the algorithm will verify that at least one point
+            in the vicinity (defined by this parameter) of every multiple
+            of the candidate value is a local maximum.
+            This helps mitigate the effects of the forward and backward
+            noise shifts of the period value. It is also effective
+            at reducing the number of detected period values that are
+            too tightly bunched together.
         max_period_count : int, optional, default = None
             Maximum number of periods to look for.
         decomposer: Decomposer. optional, default = Decomposer.MOVING_AVERAGE_DECOMPOSER
@@ -139,7 +182,9 @@ class AutoPeriodFinder:
         int
             The strongest seasonality period.
         """
-        periods = self.fit(max_period_count)
+        periods = self.fit(
+            vicinity_radius=vicinity_radius, max_period_count=max_period_count
+        )
         if len(periods) == 0:
             return None
         elif len(periods) == 1:
@@ -171,19 +216,21 @@ class AutoPeriodFinder:
     def __find_periods(
         self,
         y: ArrayLike1D,
-        max_period_count: int,
+        vicinity_radius: Optional[Union[int, None]],
+        max_period_count: Optional[Union[int, None]],
         acf_kwargs: Dict[str, Union[int, bool, None]],
     ) -> list:
         periods = []
         acf_arr = np.array(acf(y, nlags=len(y), **acf_kwargs))
         acf_arr_work = acf_arr.copy()
 
-        # Eliminate the trivial seasonality period of 1
-        acf_arr_work[0] = -1
+        # Eliminate the trivial seasonality period of 0 and its vicinity
+        vicinity_radius = 0 if vicinity_radius is None else vicinity_radius
+        acf_arr_work[0 : vicinity_radius + 1] = -1
 
         while True:
             # i is a period candidate: It cannot be greater than half the timeseries length
-            i = acf_arr_work[: acf_arr_work.size // 2].argmax()
+            i = acf_arr_work[: (acf_arr_work.size - vicinity_radius - 1) // 2].argmax()
 
             # No more periods left or the maximum number of periods has been found
             if acf_arr_work[i] == -1 or (
@@ -192,21 +239,54 @@ class AutoPeriodFinder:
                 return periods
 
             # Check that i and all of its multiples are local maxima
-            elif all(
-                [
-                    acf_arr[i * j - 1] < acf_arr[i * j]
-                    and acf_arr[i * j] > acf_arr[i * j + 1]
-                    for j in range(1, len(acf_arr) // i - 1)
-                ]
-            ):
+            period = self.__get_period(acf_arr, i, vicinity_radius)
+            if period is not None:
                 # Add to period return list
-                periods.append(i)
-                # Ignore i and its multiplies
-                acf_arr_work[[i * j for j in range(1, len(acf_arr_work) // i)]] = -1
+                periods.append(period)
+                # Ignore i and its multiples
+                for offset in np.arange(-vicinity_radius, vicinity_radius + 1):
+                    acf_arr_work[
+                        [i * j + offset for j in np.arange(1, len(acf_arr_work) // i)]
+                    ] = -1
 
             # Not a period, ignore it
             else:
-                acf_arr_work[i] = -1
+                acf_arr_work[
+                    [
+                        i + offset
+                        for offset in np.arange(-vicinity_radius, vicinity_radius + 1)
+                    ]
+                ] = -1
+
+    @staticmethod
+    def __get_period(acf_arr, lag, vicinity_radius=0):
+        # Lag value vicinity offset range array
+        vicinity = np.arange(-vicinity_radius, vicinity_radius + 1)
+        # Possible lag value multipliers
+        multipliers = np.arange(
+            2, math.ceil((len(acf_arr) - vicinity_radius - 1) / lag)
+        )
+        # The total number of local maxima found
+        local_maxima_count = 0
+        # Lag value accumulator for local maxima found at the corresponding multiplier indices
+        lag_value_acc = np.zeros(len(multipliers), dtype=np.int64)
+        for offset in vicinity:
+            multiple_is_local_maxima = [
+                acf_arr[lag * j + offset - 1] < acf_arr[lag * j + offset]
+                and acf_arr[lag * j + offset] > acf_arr[lag * j + offset + 1]
+                for j in multipliers
+            ]
+            local_maxima_count += multiple_is_local_maxima.count(True)
+            lag_value_acc[multiple_is_local_maxima] = (
+                lag_value_acc[multiple_is_local_maxima] + lag + offset
+            )
+
+        # No lag value in the vicinity is a period
+        if any(f == 0 for f in lag_value_acc):
+            return None
+        # Return the average lag value
+        else:
+            return np.sum(lag_value_acc) // local_maxima_count
 
     @staticmethod
     def __seasonality_strength(seasonal, resid):
