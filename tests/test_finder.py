@@ -4,21 +4,21 @@ from auto_period_finder.finder import AutoPeriodFinder, Decomposer
 
 
 def test_find_all_periods():
-    data = co2.load().data.resample("M").mean().ffill()
+    data = co2.load().data.resample("ME").mean().ffill()
     period_finder = AutoPeriodFinder(data)
     periods = period_finder.fit()
     assert len(periods) != 0
 
 
 def test_find_first_two_periods():
-    data = co2.load().data.resample("M").mean().ffill()
+    data = co2.load().data.resample("ME").mean().ffill()
     period_finder = AutoPeriodFinder(data)
     periods = period_finder.fit(max_period_count=2)
     assert len(periods) == 2
 
 
 def test_find_strongest_period_acf_wise():
-    data = co2.load().data.resample("M").mean().ffill()
+    data = co2.load().data.resample("ME").mean().ffill()
     period_finder = AutoPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1)
     strongest_period_acf = period_finder.fit_find_strongest_acf()
@@ -27,7 +27,7 @@ def test_find_strongest_period_acf_wise():
 
 
 def test_find_strongest_period_var_wise_stl_default():
-    data = co2.load().data.resample("M").mean().ffill()
+    data = co2.load().data.resample("ME").mean().ffill()
     period_finder = AutoPeriodFinder(data)
     strongest_period_var = period_finder.fit_find_strongest_var(
         decomposer=Decomposer.STL
@@ -36,7 +36,7 @@ def test_find_strongest_period_var_wise_stl_default():
 
 
 def test_find_strongest_period_var_wise_stl_custom():
-    data = co2.load().data.resample("M").mean().ffill()
+    data = co2.load().data.resample("ME").mean().ffill()
     period_finder = AutoPeriodFinder(data)
     strongest_period_var = period_finder.fit_find_strongest_var(
         decomposer=Decomposer.STL, decomposer_kwargs={"seasonal_deg": 0}
@@ -45,7 +45,7 @@ def test_find_strongest_period_var_wise_stl_custom():
 
 
 def test_find_strongest_period_var_wise_moving_averages():
-    data = co2.load().data.resample("M").mean().ffill()
+    data = co2.load().data.resample("ME").mean().ffill()
     period_finder = AutoPeriodFinder(data)
     strongest_period_var = period_finder.fit_find_strongest_var()
     assert strongest_period_var == 180
