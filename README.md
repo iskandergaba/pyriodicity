@@ -64,6 +64,7 @@ poetry run pytest
 ```
 6. To export the list detailed list of dependencies, run the following command:
 ```shell
+poetry self add poetry-plugin-export
 poetry export --output requirements.txt
 ```
 
