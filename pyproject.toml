@@ -2,9 +2,14 @@
 name = "auto-period-finder"
 version = "0.0.10rc3"
 description = "An autocorrelation function-based seasonality periods automatic finder for univariate time series."
-authors = ["Iskander Gaba <iskander@hey.com>"]
-repository = "https://github.com/iskandergaba/auto-period-finder"
+
+license = "MIT"
 readme = ["README.md", "LICENSE"]
+repository = "https://github.com/iskandergaba/auto-period-finder"
+
+authors = ["Iskander Gaba <iskander@hey.com>"]
+keywords = ["time", "series", "forecast", "analysis", "seasonality", "trend", "decomposition"]
+
 
 [tool.poetry.dependencies]
 python = "^3.10"
