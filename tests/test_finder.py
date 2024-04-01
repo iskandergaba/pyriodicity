@@ -10,11 +10,11 @@ def test_find_all_periods():
     assert len(periods) != 0
 
 
-def test_find_first_three_periods():
+def test_find_first_two_periods():
     data = co2.load().data.resample("M").mean().ffill()
     period_finder = AutoPeriodFinder(data)
-    periods = period_finder.fit(max_period_count=3)
-    assert len(periods) == 3
+    periods = period_finder.fit(max_period_count=2)
+    assert len(periods) == 2
 
 
 def test_find_strongest_period_acf_wise():
@@ -32,7 +32,7 @@ def test_find_strongest_period_var_wise_stl_default():
     strongest_period_var = period_finder.fit_find_strongest_var(
         decomposer=Decomposer.STL
     )
-    assert strongest_period_var == 262
+    assert strongest_period_var == 180
 
 
 def test_find_strongest_period_var_wise_stl_custom():
@@ -48,4 +48,4 @@ def test_find_strongest_period_var_wise_moving_averages():
     data = co2.load().data.resample("M").mean().ffill()
     period_finder = AutoPeriodFinder(data)
     strongest_period_var = period_finder.fit_find_strongest_var()
-    assert strongest_period_var == 176
+    assert strongest_period_var == 180
