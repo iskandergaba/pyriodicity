@@ -23,7 +23,7 @@ data = co2.load().data
 You can resample the data to whatever frequency you want.
 
 ```python
-data = data.resample("M").mean().ffill()
+data = data.resample("ME").mean().ffill()
 ```
 
 Use `AutoPeriodFinder` to find the list of seasonality periods based on ACF.
