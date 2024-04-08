@@ -4,7 +4,7 @@ version = "0.0.11rc0"
 description = "An autocorrelation function-based seasonality periods automatic finder for univariate time series."
 
 license = "MIT"
-readme = ["README.md", "LICENSE"]
+readme = ["README.md"]
 repository = "https://github.com/iskandergaba/auto-period-finder"
 
 authors = ["Iskander Gaba <iskander@hey.com>"]
