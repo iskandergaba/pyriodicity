@@ -28,7 +28,7 @@ data = data.resample("ME").mean().ffill()
 
 Use `AutoPeriodFinder` to find the list of seasonality periods based on ACF.
 ```python
-from auto_period_finder.finder import AutoPeriodFinder
+from auto_period_finder import AutoPeriodFinder
 period_finder = AutoPeriodFinder(data)
 periods = period_finder.fit()
 ```
