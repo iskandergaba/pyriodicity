@@ -2,8 +2,8 @@ from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
-from statsmodels.tools.typing import ArrayLike1D
 from scipy.signal import get_window
+from statsmodels.tools.typing import ArrayLike1D
 
 
 class FourierPeriodFinder:
