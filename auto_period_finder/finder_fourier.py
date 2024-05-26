@@ -8,7 +8,7 @@ from statsmodels.tools.typing import ArrayLike1D
 
 class FourierPeriodFinder:
     """
-    Fast Fourier Transformation (FFT) based seasonality periods automatic finder.
+    Fast Fourier Transform (FFT) based seasonality periods automatic finder.
 
     Find the periods of a given time series using FFT.
 
