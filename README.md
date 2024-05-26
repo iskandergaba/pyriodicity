@@ -67,8 +67,10 @@ poetry run pytest
 poetry self add poetry-plugin-export
 poetry export --output requirements.txt
 ```
+## Fourier Transform-Based Seasonality Period Detection
+One popular method of quick periodicity detection is the the usage of [Discrete Fourier Transform (DFT)](https://en.wikipedia.org/wiki/Discrete_Fourier_transform). Essentially, we transform a time series from the time domain to the frequency domain and pick the periods corresponding to frequencies with the highest amplitudes, hence picking up the strongest and the most repetitive periods. We can also choose to pre-process the time series using a [window function](https://en.wikipedia.org/wiki/Window_function) like [Blackman](https://en.wikipedia.org/wiki/Window_function#Blackman_window) or [Prazen](https://en.wikipedia.org/wiki/Window_function#Parzen_window) for example.
 
-## ACF-Based Seasonality Period Detection Explained
+## ACF-Based Seasonality Period Detection
 An easy and quick way to find seasonality periods of a univariate time series is to check its autocorrelation function (ACF) and look for specific charecteristics in lag values that we will detail in a second. You can read more information about time series ACF [here](https://otexts.com/fpp3/acf.html), but intuitively, An autocorrelation coefficient $r_k$ measures the the linear relationship between $k$-lagged values of a given time series. In simpler terms, $r_k$ measures how similar/dissimilar time series values that $k$-length apart from each other. The set of $r_k$ values for each lag $k$ makes ACF. Equipped with this information, I developed a package for finding time series seasonality periods automatically using ACF information.
 
 Simply put, given a univariate time series $T$, the algorithm finds, iteratively, lag values $k$ such that:
