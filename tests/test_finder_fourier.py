@@ -3,14 +3,14 @@ from statsmodels.datasets import co2
 from auto_period_finder import FourierPeriodFinder
 
 
-def test_fourier_find_all_periods():
+def test_co2_monthly_fourier_find_all_periods():
     data = co2.load().data.resample("ME").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit()
     assert len(periods) != 0
 
 
-def test_fourier_find_first_two_periods():
+def test_co2_monthly_fourier_find_first_two_periods():
     data = co2.load().data.resample("ME").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=2)
