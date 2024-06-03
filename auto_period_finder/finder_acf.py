@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Dict, Optional, Union
 
 import numpy as np
@@ -10,7 +9,7 @@ from statsmodels.tsa.stattools import acf
 from .enums import TimeSeriesDecomposer
 
 
-class AcfPeriodFinder:
+class AutocorrelationPeriodFinder:
     """
     Autocorrelation function (ACF) based seasonality periods automatic finder.
 
@@ -50,9 +49,9 @@ class AcfPeriodFinder:
 
     >>> data = data.resample("M").mean().ffill()
 
-    Use AutoPeriodFinder to find the list of seasonality periods based on ACF.
+    Use AutocorrelationPeriodFinder to find the list of seasonality periods based on ACF.
 
-    >>> period_finder = AutoPeriodFinder(data)
+    >>> period_finder = AutocorrelationPeriodFinder(data)
     >>> periods = period_finder.fit()
 
     You can also find the most prominent period either ACF-wise or variance-wise.
@@ -85,7 +84,7 @@ class AcfPeriodFinder:
 
         Returns
         -------
-        list
+        np.ndarray
             List of periods.
         """
         return self.__find_periods(self.y, max_period_count, self._acf_kwargs)
@@ -94,22 +93,9 @@ class AcfPeriodFinder:
         """
         Find the strongest seasonality period ACF-wise of the given time series.
 
-        Parameters
-        ----------
-        vicinity_radius : int, optional, default = None
-            How many data points, before and after, a period candidate
-            value to consider for satisfying the periodicity conditions.
-            Essentially, the algorithm will verify that at least one point
-            in the vicinity (defined by this parameter) of every multiple
-            of the candidate value is a local maximum.
-            This helps mitigate the effects of the forward and backward
-            noise shifts of the period value. It is also effective
-            at reducing the number of detected period values that are
-            too tightly bunched together.
-
         Returns
         -------
-        int
+        np.int64
             The strongest seasonality period ACF-wise.
         """
         periods = self.fit(max_period_count=1)
@@ -132,16 +118,6 @@ class AcfPeriodFinder:
 
         Parameters
         ----------
-        vicinity_radius : int, optional, default = None
-            How many data points, before and after, a period candidate
-            value to consider for satisfying the periodicity conditions.
-            Essentially, the algorithm will verify that at least one point
-            in the vicinity (defined by this parameter) of every multiple
-            of the candidate value is a local maximum.
-            This helps mitigate the effects of the forward and backward
-            noise shifts of the period value. It is also effective
-            at reducing the number of detected period values that are
-            too tightly bunched together.
         max_period_count : int, optional, default = None
             Maximum number of periods to look for.
         decomposer: TimeSeriesDecomposer. optional, default = TimeSeriesDecomposer.MOVING_AVERAGE_DECOMPOSER
@@ -153,7 +129,7 @@ class AcfPeriodFinder:
 
         Returns
         -------
-        int
+        np.int64
             The strongest seasonality period.
         """
         periods = self.fit(max_period_count=max_period_count)
@@ -190,14 +166,17 @@ class AcfPeriodFinder:
         y: ArrayLike1D,
         max_period_count: Optional[Union[int, None]],
         acf_kwargs: Dict[str, Union[int, bool, None]],
-    ) -> list:
-        periods = []
-        # max_period_count = -1 if max_period_count is None else max_period_count
-        acf_arr = np.array(acf(y, nlags=len(y), **acf_kwargs))
+    ) -> np.ndarray:
+        # Calculate the autocorrelation function
+        acf_arr = np.array(acf(y, nlags=len(y) // 2, **acf_kwargs))
 
         # Find local maxima of the first half of the ACF array
-        periods = argrelmax(acf_arr[: y.size // 2])[0]
+        local_argmax = argrelmax(acf_arr)[0]
 
+        # Arg. sort the local maxima in the ACF array in a descending order
+        periods = local_argmax[acf_arr[local_argmax].argsort()][::-1]
+
+        # Return the requested maximum count of detectde periods
         return periods[:max_period_count]
 
     @staticmethod
