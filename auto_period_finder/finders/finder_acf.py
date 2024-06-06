@@ -8,8 +8,11 @@ from statsmodels.tsa.seasonal import STL, seasonal_decompose
 from statsmodels.tsa.stattools import acf
 
 from auto_period_finder.enums import TimeSeriesDecomposer
-from auto_period_finder.tools import (remove_overloaded_kwargs,
-                                      seasonality_strength, to_1d_array)
+from auto_period_finder.tools import (
+    remove_overloaded_kwargs,
+    seasonality_strength,
+    to_1d_array,
+)
 
 
 class AutocorrelationPeriodFinder:

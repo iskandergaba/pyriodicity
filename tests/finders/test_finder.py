@@ -1,6 +1,7 @@
 from statsmodels.datasets import co2
 
-from auto_period_finder import AutoPeriodFinder, TimeSeriesDecomposer
+from auto_period_finder import AutoPeriodFinder
+from auto_period_finder.enums import TimeSeriesDecomposer
 
 
 def test_find_all_periods():

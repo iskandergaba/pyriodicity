@@ -1,3 +1,5 @@
-from auto_period_finder.finders.finder import *
-from auto_period_finder.finders.finder_acf import *
-from auto_period_finder.finders.finder_fourier import *
+from .finder import AutoPeriodFinder
+from .finder_acf import AutocorrelationPeriodFinder
+from .finder_fourier import FourierPeriodFinder
+
+__all__ = ["AutoPeriodFinder", "AutocorrelationPeriodFinder", "FourierPeriodFinder"]
