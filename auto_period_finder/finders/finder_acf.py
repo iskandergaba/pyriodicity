@@ -8,7 +8,8 @@ from statsmodels.tsa.seasonal import STL, seasonal_decompose
 from statsmodels.tsa.stattools import acf
 
 from auto_period_finder.enums import TimeSeriesDecomposer
-from auto_period_finder.tools import seasonality_strength, to_1d_array
+from auto_period_finder.tools import (remove_overloaded_kwargs,
+                                      seasonality_strength, to_1d_array)
 
 
 class AutocorrelationPeriodFinder:
@@ -183,22 +184,16 @@ class AutocorrelationPeriodFinder:
     @staticmethod
     def __remove_overloaded_acf_kwargs(acf_kwargs: Dict) -> Dict:
         args = ["x", "nlags", "qstat", "alpha", "bartlett_confint"]
-        for arg in args:
-            acf_kwargs.pop(arg, None)
-        return acf_kwargs
+        return remove_overloaded_kwargs(acf_kwargs, args)
 
     @staticmethod
     def __remove_overloaded_stl_kwargs(stl_kwargs: Dict) -> Dict:
         args = ["endog", "period"]
-        for arg in args:
-            stl_kwargs.pop(arg, None)
-        return stl_kwargs
+        return remove_overloaded_kwargs(stl_kwargs, args)
 
     @staticmethod
     def __remove_overloaded_seasonal_decompose_kwargs(
         seasonal_decompose_kwargs: Dict,
     ) -> Dict:
         args = ["x", "period"]
-        for arg in args:
-            seasonal_decompose_kwargs.pop(arg, None)
-        return seasonal_decompose_kwargs
+        return remove_overloaded_kwargs(seasonal_decompose_kwargs, args)

@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Dict, List, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -12,6 +12,13 @@ def to_1d_array(x: Union[ArrayLike, DataFrame, Series]) -> NDArray:
     if y.ndim != 1:
         raise ValueError("y must be a 1d array")
     return y
+
+
+@staticmethod
+def remove_overloaded_kwargs(kwargs: Dict, args: List) -> Dict:
+    for arg in args:
+        kwargs.pop(arg, None)
+    return kwargs
 
 
 @staticmethod
