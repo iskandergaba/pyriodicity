@@ -1,12 +1,14 @@
 from typing import Dict, Optional, Union
 
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
+from pandas import DataFrame, Series
 from scipy.signal import argrelmax
-from statsmodels.tools.typing import ArrayLike1D
 from statsmodels.tsa.seasonal import STL, seasonal_decompose
 from statsmodels.tsa.stattools import acf
 
-from .enums import TimeSeriesDecomposer
+from auto_period_finder.enums import TimeSeriesDecomposer
+from auto_period_finder.tools import seasonality_strength, to_1d_array
 
 
 class AutocorrelationPeriodFinder:
@@ -62,10 +64,10 @@ class AutocorrelationPeriodFinder:
 
     def __init__(
         self,
-        endog: ArrayLike1D,
+        endog: Union[ArrayLike, DataFrame, Series],
         acf_kwargs: Optional[Dict[str, Union[int, bool, None]]] = None,
     ):
-        self.y = self.__to_1d_array(endog)
+        self.y = to_1d_array(endog)
         self._acf_kwargs = self.__remove_overloaded_acf_kwargs(
             acf_kwargs if acf_kwargs else {}
         )
@@ -73,7 +75,7 @@ class AutocorrelationPeriodFinder:
     def fit(
         self,
         max_period_count: Optional[Union[int, None]] = None,
-    ) -> np.ndarray:
+    ) -> NDArray:
         """
         Find seasonality periods of the given time series automatically.
 
@@ -84,7 +86,7 @@ class AutocorrelationPeriodFinder:
 
         Returns
         -------
-        np.ndarray
+        NDArray
             List of periods.
         """
         return self.__find_periods(self.y, max_period_count, self._acf_kwargs)
@@ -156,19 +158,18 @@ class AutocorrelationPeriodFinder:
             else:
                 raise ValueError("Invalid seasonality decomposer: " + decomposer)
         strengths = {
-            p: self.__seasonality_strength(d.seasonal, d.resid)
-            for p, d in decomps.items()
+            p: seasonality_strength(d.seasonal, d.resid) for p, d in decomps.items()
         }
         return max(strengths, key=strengths.get)
 
     def __find_periods(
         self,
-        y: ArrayLike1D,
+        y: Union[ArrayLike, DataFrame, Series],
         max_period_count: Optional[Union[int, None]],
         acf_kwargs: Dict[str, Union[int, bool, None]],
-    ) -> np.ndarray:
+    ) -> NDArray:
         # Calculate the autocorrelation function
-        acf_arr = np.array(acf(y, nlags=len(y) // 2, **acf_kwargs))
+        acf_arr = acf(y, nlags=len(y) // 2, **acf_kwargs)
 
         # Find local maxima of the first half of the ACF array
         local_argmax = argrelmax(acf_arr)[0]
@@ -178,10 +179,6 @@ class AutocorrelationPeriodFinder:
 
         # Return the requested maximum count of detectde periods
         return periods[:max_period_count]
-
-    @staticmethod
-    def __seasonality_strength(seasonal, resid):
-        return max(0, 1 - np.var(resid) / np.var(seasonal + resid))
 
     @staticmethod
     def __remove_overloaded_acf_kwargs(acf_kwargs: Dict) -> Dict:
@@ -205,10 +202,3 @@ class AutocorrelationPeriodFinder:
         for arg in args:
             seasonal_decompose_kwargs.pop(arg, None)
         return seasonal_decompose_kwargs
-
-    @staticmethod
-    def __to_1d_array(x):
-        y = np.ascontiguousarray(np.squeeze(np.asarray(x)), dtype=np.double)
-        if y.ndim != 1:
-            raise ValueError("y must be a 1d array")
-        return y

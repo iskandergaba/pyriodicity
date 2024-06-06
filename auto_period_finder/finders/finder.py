@@ -6,7 +6,8 @@ from statsmodels.tools.typing import ArrayLike1D
 from statsmodels.tsa.seasonal import STL, seasonal_decompose
 from statsmodels.tsa.stattools import acf
 
-from .enums import TimeSeriesDecomposer
+from auto_period_finder.enums import TimeSeriesDecomposer
+from auto_period_finder.tools import to_1d_array
 
 
 class AutoPeriodFinder:
@@ -70,7 +71,7 @@ class AutoPeriodFinder:
         endog: ArrayLike1D,
         acf_kwargs: Optional[Dict[str, Union[int, bool, None]]] = None,
     ):
-        self.y = self.__to_1d_array(endog)
+        self.y = to_1d_array(endog)
         self._acf_kwargs = self.__remove_overloaded_acf_kwargs(
             acf_kwargs if acf_kwargs else {}
         )
@@ -308,10 +309,3 @@ class AutoPeriodFinder:
         for arg in args:
             seasonal_decompose_kwargs.pop(arg, None)
         return seasonal_decompose_kwargs
-
-    @staticmethod
-    def __to_1d_array(x):
-        y = np.ascontiguousarray(np.squeeze(np.asarray(x)), dtype=np.double)
-        if y.ndim != 1:
-            raise ValueError("y must be a 1d array")
-        return y
