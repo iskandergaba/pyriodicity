@@ -43,7 +43,8 @@ class FourierPeriodFinder:
 
     >>> data = data.resample("ME").mean().ffill()
 
-    Use FourierPeriodFinder to find the list of seasonality periods using FFT, ordered in.
+    Use FourierPeriodFinder to find the list of seasonality periods using FFT, ordered
+    by corresponding frequency amplitudes in a descending order.
 
     >>> period_finder = FourierPeriodFinder(data)
     >>> periods = period_finder.fit()

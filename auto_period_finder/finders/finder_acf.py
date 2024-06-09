@@ -55,7 +55,8 @@ class AutocorrelationPeriodFinder:
 
     >>> data = data.resample("M").mean().ffill()
 
-    Use AutocorrelationPeriodFinder to find the list of seasonality periods based on ACF.
+    Use AutocorrelationPeriodFinder to find the list of seasonality periods based on
+    ACF.
 
     >>> period_finder = AutocorrelationPeriodFinder(data)
     >>> periods = period_finder.fit()
@@ -126,7 +127,8 @@ class AutocorrelationPeriodFinder:
         ----------
         max_period_count : int, optional, default = None
             Maximum number of periods to look for.
-        decomposer: TimeSeriesDecomposer. optional, default = TimeSeriesDecomposer.MOVING_AVERAGE_DECOMPOSER
+        decomposer: TimeSeriesDecomposer. optional,
+        default = TimeSeriesDecomposer.MOVING_AVERAGE_DECOMPOSER
             The seasonality decomposer that returns DecomposeResult to be used to
             determine the strongest seasonality period. The possible values are
             [TimeSeriesDecomposer.MOVING_AVERAGE_DECOMPOSER, TimeSeriesDecomposer.STL].

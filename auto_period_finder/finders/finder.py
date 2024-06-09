@@ -165,7 +165,8 @@ class AutoPeriodFinder:
             too tightly bunched together.
         max_period_count : int, optional, default = None
             Maximum number of periods to look for.
-        decomposer: TimeSeriesDecomposer. optional, default = TimeSeriesDecomposer.MOVING_AVERAGE_DECOMPOSER
+        decomposer: TimeSeriesDecomposer. optional,
+        default = TimeSeriesDecomposer.MOVING_AVERAGE_DECOMPOSER
             The seasonality decomposer that returns DecomposeResult to be used to
             determine the strongest seasonality period. The possible values are
             [TimeSeriesDecomposer.MOVING_AVERAGE_DECOMPOSER, TimeSeriesDecomposer.STL].
@@ -224,7 +225,8 @@ class AutoPeriodFinder:
         acf_arr_work[0 : vicinity_radius + 1] = -1
 
         while True:
-            # i is a period candidate: It cannot be greater than half the timeseries length
+            # i is a period candidate: It cannot be greater than half the timeseries
+            # length
             i = acf_arr_work[: (acf_arr_work.size - vicinity_radius - 1) // 2].argmax()
 
             # No more periods left or the maximum number of periods has been found
@@ -263,7 +265,8 @@ class AutoPeriodFinder:
         )
         # The total number of local maxima found
         local_maxima_count = 0
-        # Lag value accumulator for local maxima found at the corresponding multiplier indices
+        # Lag value accumulator for local maxima found at the corresponding multiplier
+        # indices
         lag_value_acc = np.zeros(len(multipliers), dtype=np.int64)
         for offset in vicinity:
             multiple_is_local_maxima = [
