@@ -1,6 +1,7 @@
 from statsmodels.datasets import co2
 
-from auto_period_finder import AutoPeriodFinder, Decomposer
+from auto_period_finder import AutoPeriodFinder
+from auto_period_finder.enums import TimeSeriesDecomposer
 
 
 def test_find_all_periods():
@@ -30,7 +31,7 @@ def test_find_strongest_period_var_wise_stl_default():
     data = co2.load().data.resample("ME").mean().ffill()
     period_finder = AutoPeriodFinder(data)
     strongest_period_var = period_finder.fit_find_strongest_var(
-        decomposer=Decomposer.STL
+        decomposer=TimeSeriesDecomposer.STL
     )
     assert strongest_period_var == 180
 
@@ -39,7 +40,7 @@ def test_find_strongest_period_var_wise_stl_custom():
     data = co2.load().data.resample("ME").mean().ffill()
     period_finder = AutoPeriodFinder(data)
     strongest_period_var = period_finder.fit_find_strongest_var(
-        decomposer=Decomposer.STL, decomposer_kwargs={"seasonal_deg": 0}
+        decomposer=TimeSeriesDecomposer.STL, decomposer_kwargs={"seasonal_deg": 0}
     )
     assert strongest_period_var == 180
 

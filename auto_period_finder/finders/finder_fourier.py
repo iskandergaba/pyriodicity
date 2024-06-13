@@ -2,8 +2,10 @@ from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
-from scipy.signal import get_window
-from statsmodels.tools.typing import ArrayLike1D
+from numpy.typing import ArrayLike, NDArray
+from pandas import DataFrame, Series
+
+from auto_period_finder.tools import apply_window_fun, to_1d_array
 
 
 class FourierPeriodFinder:
@@ -41,7 +43,8 @@ class FourierPeriodFinder:
 
     >>> data = data.resample("ME").mean().ffill()
 
-    Use FourierPeriodFinder to find the list of seasonality periods using FFT, ordered in.
+    Use FourierPeriodFinder to find the list of seasonality periods using FFT, ordered
+    by corresponding frequency amplitudes in a descending order.
 
     >>> period_finder = FourierPeriodFinder(data)
     >>> periods = period_finder.fit()
@@ -51,14 +54,14 @@ class FourierPeriodFinder:
     >>> periods = period_finder.fit(window_func="blackman")
     """
 
-    def __init__(self, endog: ArrayLike1D):
-        self.y = self.__to_1d_array(endog)
+    def __init__(self, endog: Union[ArrayLike, DataFrame, Series]):
+        self.y = to_1d_array(endog)
 
     def fit(
         self,
         max_period_count: Optional[Union[int, None]] = None,
         window_func: Optional[Union[float, str, tuple, None]] = None,
-    ) -> list:
+    ) -> NDArray:
         """
         Find seasonality periods of the given time series automatically.
 
@@ -85,40 +88,25 @@ class FourierPeriodFinder:
 
     def __find_periods(
         self,
-        y: ArrayLike1D,
+        y: Union[ArrayLike, DataFrame, Series],
         max_period_count: Optional[Union[int, None]],
         window_func: Optional[Union[str, float, tuple, None]],
-    ) -> list:
+    ) -> NDArray:
         # Apply window function on the series
-        y_windowed = (
-            y
-            if window_func is None
-            else self.__get_windowed_y(y, window_func=window_func)
-        )
+        y = y if window_func is None else apply_window_fun(y, window_func=window_func)
 
         # Compute DFT and ignore the zero frequency
-        freqs = np.fft.rfftfreq(len(y_windowed), d=1)[1:]
-        ft = np.fft.rfft(y_windowed)[1:]
+        freqs = np.fft.rfftfreq(len(y), d=1)[1:]
+        ft = np.fft.rfft(y)[1:]
 
         # Compute periods and their respective amplitudes
         periods = np.round(1 / freqs)
         amps = abs(ft)
 
         # A period cannot be greater than half the length of the series
-        result = pd.Series(index=periods, data=amps)[periods < len(y_windowed) // 2]
+        result = pd.Series(index=periods, data=amps)[periods < len(y) // 2]
 
         # Return periods in descending order of amplitudes
         return (
             result.sort_values(ascending=False).index.unique().values[:max_period_count]
         )
-
-    @staticmethod
-    def __get_windowed_y(y, window_func) -> np.ndarray:
-        return (y - np.median(y)) * get_window(window=window_func, Nx=len(y))
-
-    @staticmethod
-    def __to_1d_array(x):
-        y = np.ascontiguousarray(np.squeeze(np.asarray(x)), dtype=np.double)
-        if y.ndim != 1:
-            raise ValueError("y must be a 1d array")
-        return y

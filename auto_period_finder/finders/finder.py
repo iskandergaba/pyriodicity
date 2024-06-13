@@ -1,5 +1,4 @@
 import math
-from enum import Enum
 from typing import Dict, Optional, Union
 
 import numpy as np
@@ -7,14 +6,8 @@ from statsmodels.tools.typing import ArrayLike1D
 from statsmodels.tsa.seasonal import STL, seasonal_decompose
 from statsmodels.tsa.stattools import acf
 
-
-class Decomposer(Enum):
-    """
-    Seasonality decomposition method.
-    """
-
-    STL = 1
-    MOVING_AVERAGES = 2
+from auto_period_finder.enums import TimeSeriesDecomposer
+from auto_period_finder.tools import to_1d_array
 
 
 class AutoPeriodFinder:
@@ -78,7 +71,7 @@ class AutoPeriodFinder:
         endog: ArrayLike1D,
         acf_kwargs: Optional[Dict[str, Union[int, bool, None]]] = None,
     ):
-        self.y = self.__to_1d_array(endog)
+        self.y = to_1d_array(endog)
         self._acf_kwargs = self.__remove_overloaded_acf_kwargs(
             acf_kwargs if acf_kwargs else {}
         )
@@ -149,7 +142,9 @@ class AutoPeriodFinder:
         self,
         vicinity_radius: Optional[Union[int, None]] = None,
         max_period_count: Optional[Union[int, None]] = None,
-        decomposer: Optional[Decomposer] = Decomposer.MOVING_AVERAGES,
+        decomposer: Optional[
+            TimeSeriesDecomposer
+        ] = TimeSeriesDecomposer.MOVING_AVERAGES,
         decomposer_kwargs: Optional[Dict[str, Union[int, bool, None]]] = None,
     ) -> int:
         """
@@ -170,10 +165,11 @@ class AutoPeriodFinder:
             too tightly bunched together.
         max_period_count : int, optional, default = None
             Maximum number of periods to look for.
-        decomposer: Decomposer. optional, default = Decomposer.MOVING_AVERAGE_DECOMPOSER
+        decomposer: TimeSeriesDecomposer. optional,
+        default = TimeSeriesDecomposer.MOVING_AVERAGE_DECOMPOSER
             The seasonality decomposer that returns DecomposeResult to be used to
             determine the strongest seasonality period. The possible values are
-            [Decomposer.MOVING_AVERAGE_DECOMPOSER, Decomposer.STL].
+            [TimeSeriesDecomposer.MOVING_AVERAGE_DECOMPOSER, TimeSeriesDecomposer.STL].
         decomposer_kwargs: dict, optional
             Arguments to pass to the decomposer.
 
@@ -190,14 +186,14 @@ class AutoPeriodFinder:
         elif len(periods) == 1:
             return periods[0]
         else:
-            if decomposer == Decomposer.STL:
+            if decomposer == TimeSeriesDecomposer.STL:
                 decomposer_kwargs = self.__remove_overloaded_stl_kwargs(
                     decomposer_kwargs if decomposer_kwargs else {}
                 )
                 decomps = {
                     p: STL(self.y, p, **decomposer_kwargs).fit() for p in periods
                 }
-            elif decomposer == Decomposer.MOVING_AVERAGES:
+            elif decomposer == TimeSeriesDecomposer.MOVING_AVERAGES:
                 decomposer_kwargs = self.__remove_overloaded_seasonal_decompose_kwargs(
                     decomposer_kwargs if decomposer_kwargs else {}
                 )
@@ -229,7 +225,8 @@ class AutoPeriodFinder:
         acf_arr_work[0 : vicinity_radius + 1] = -1
 
         while True:
-            # i is a period candidate: It cannot be greater than half the timeseries length
+            # i is a period candidate: It cannot be greater than half the timeseries
+            # length
             i = acf_arr_work[: (acf_arr_work.size - vicinity_radius - 1) // 2].argmax()
 
             # No more periods left or the maximum number of periods has been found
@@ -268,7 +265,8 @@ class AutoPeriodFinder:
         )
         # The total number of local maxima found
         local_maxima_count = 0
-        # Lag value accumulator for local maxima found at the corresponding multiplier indices
+        # Lag value accumulator for local maxima found at the corresponding multiplier
+        # indices
         lag_value_acc = np.zeros(len(multipliers), dtype=np.int64)
         for offset in vicinity:
             multiple_is_local_maxima = [
@@ -314,10 +312,3 @@ class AutoPeriodFinder:
         for arg in args:
             seasonal_decompose_kwargs.pop(arg, None)
         return seasonal_decompose_kwargs
-
-    @staticmethod
-    def __to_1d_array(x):
-        y = np.ascontiguousarray(np.squeeze(np.asarray(x)), dtype=np.double)
-        if y.ndim != 1:
-            raise ValueError("y must be a 1d array")
-        return y
