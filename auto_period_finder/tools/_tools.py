@@ -23,12 +23,6 @@ def remove_overloaded_kwargs(kwargs: Dict, args: List) -> Dict:
     return kwargs
 
 
-# Deprecated
-@staticmethod
-def apply_window_fun(x: ArrayLike, window_func: Union[str, float, tuple]) -> NDArray:
-    return (x - np.median(x)) * get_window(window=window_func, Nx=len(x))
-
-
 @staticmethod
 def seasonality_strength(seasonal: ArrayLike, resid: ArrayLike) -> float:
     return max(0, 1 - np.var(resid) / np.var(seasonal + resid))
