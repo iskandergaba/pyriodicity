@@ -17,23 +17,31 @@ def test_co2_monthly_fourier_find_first_two_periods():
     assert len(periods) == 2
 
 
-def test_co2_daily_fourier_find_strongest_period_no_window_func():
+def test_co2_daily_fourier_find_strongest_period():
     data = co2.load().data.resample("D").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1)
     assert len(periods) == 1
-    assert periods[0] == 5327
+    assert periods[0] == 363
 
 
-def test_co2_monthly_fourier_find_strongest_period_no_window_func():
+def test_co2_weekly_fourier_find_strongest_period():
+    data = co2.load().data.resample("W").mean().ffill()
+    period_finder = FourierPeriodFinder(data)
+    periods = period_finder.fit(max_period_count=1)
+    assert len(periods) == 1
+    assert periods[0] == 52
+
+
+def test_co2_monthly_fourier_find_strongest_period():
     data = co2.load().data.resample("ME").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1)
     assert len(periods) == 1
-    assert periods[0] == 175
+    assert periods[0] == 12
 
 
-def test_co2_daily_fourier_find_strongest_period_barthann_window_func():
+def test_co2_daily_fourier_find_strongest_period_window_func_barthann():
     data = co2.load().data.resample("D").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="barthann")
@@ -41,7 +49,15 @@ def test_co2_daily_fourier_find_strongest_period_barthann_window_func():
     assert periods[0] == 363
 
 
-def test_co2_monthly_fourier_find_strongest_period_barthann_window_func():
+def test_co2_weekly_fourier_find_strongest_period_window_func_barthann():
+    data = co2.load().data.resample("W").mean().ffill()
+    period_finder = FourierPeriodFinder(data)
+    periods = period_finder.fit(max_period_count=1, window_func="barthann")
+    assert len(periods) == 1
+    assert periods[0] == 52
+
+
+def test_co2_monthly_fourier_find_strongest_period_window_func_barthann():
     data = co2.load().data.resample("ME").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="barthann")
@@ -49,7 +65,7 @@ def test_co2_monthly_fourier_find_strongest_period_barthann_window_func():
     assert periods[0] == 12
 
 
-def test_co2_daily_fourier_find_strongest_period_bartlett_window_func():
+def test_co2_daily_fourier_find_strongest_period_window_func_bartlett():
     data = co2.load().data.resample("D").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="bartlett")
@@ -57,7 +73,15 @@ def test_co2_daily_fourier_find_strongest_period_bartlett_window_func():
     assert periods[0] == 363
 
 
-def test_co2_monthly_fourier_find_strongest_period_bartlett_window_func():
+def test_co2_weekly_fourier_find_strongest_period_window_func_bartlett():
+    data = co2.load().data.resample("W").mean().ffill()
+    period_finder = FourierPeriodFinder(data)
+    periods = period_finder.fit(max_period_count=1, window_func="bartlett")
+    assert len(periods) == 1
+    assert periods[0] == 52
+
+
+def test_co2_monthly_fourier_find_strongest_period_window_func_bartlett():
     data = co2.load().data.resample("ME").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="bartlett")
@@ -65,7 +89,7 @@ def test_co2_monthly_fourier_find_strongest_period_bartlett_window_func():
     assert periods[0] == 12
 
 
-def test_co2_daily_fourier_find_strongest_period_blackman_window_func():
+def test_co2_daily_fourier_find_strongest_period_window_func_blackman():
     data = co2.load().data.resample("D").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="blackman")
@@ -73,7 +97,15 @@ def test_co2_daily_fourier_find_strongest_period_blackman_window_func():
     assert periods[0] == 363
 
 
-def test_co2_monthly_fourier_find_strongest_period_blackman_window_func():
+def test_co2_weekly_fourier_find_strongest_period_window_func_blackman():
+    data = co2.load().data.resample("W").mean().ffill()
+    period_finder = FourierPeriodFinder(data)
+    periods = period_finder.fit(max_period_count=1, window_func="blackman")
+    assert len(periods) == 1
+    assert periods[0] == 52
+
+
+def test_co2_monthly_fourier_find_strongest_period_window_func_blackman():
     data = co2.load().data.resample("ME").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="blackman")
@@ -81,7 +113,7 @@ def test_co2_monthly_fourier_find_strongest_period_blackman_window_func():
     assert periods[0] == 12
 
 
-def test_co2_daily_fourier_find_strongest_period_blackmanharris_window_func():
+def test_co2_daily_fourier_find_strongest_period_window_func_blackmanharris():
     data = co2.load().data.resample("D").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="blackmanharris")
@@ -89,7 +121,15 @@ def test_co2_daily_fourier_find_strongest_period_blackmanharris_window_func():
     assert periods[0] == 363
 
 
-def test_co2_monthly_fourier_find_strongest_period_blackmanharris_window_func():
+def test_co2_weekly_fourier_find_strongest_period_window_func_blackmanharris():
+    data = co2.load().data.resample("W").mean().ffill()
+    period_finder = FourierPeriodFinder(data)
+    periods = period_finder.fit(max_period_count=1, window_func="blackmanharris")
+    assert len(periods) == 1
+    assert periods[0] == 52
+
+
+def test_co2_monthly_fourier_find_strongest_period_window_func_blackmanharris():
     data = co2.load().data.resample("ME").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="blackmanharris")
@@ -97,23 +137,31 @@ def test_co2_monthly_fourier_find_strongest_period_blackmanharris_window_func():
     assert periods[0] == 12
 
 
-def test_co2_daily_fourier_find_strongest_period_boxcar_window_func():
+def test_co2_daily_fourier_find_strongest_period_window_func_boxcar():
     data = co2.load().data.resample("D").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="boxcar")
     assert len(periods) == 1
-    assert periods[0] == 5327
+    assert periods[0] == 363
 
 
-def test_co2_monthly_fourier_find_strongest_period_boxcar_window_func():
+def test_co2_weekly_fourier_find_strongest_period_window_func_boxcar():
+    data = co2.load().data.resample("W").mean().ffill()
+    period_finder = FourierPeriodFinder(data)
+    periods = period_finder.fit(max_period_count=1, window_func="boxcar")
+    assert len(periods) == 1
+    assert periods[0] == 52
+
+
+def test_co2_monthly_fourier_find_strongest_period_window_func_boxcar():
     data = co2.load().data.resample("ME").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="boxcar")
     assert len(periods) == 1
-    assert periods[0] == 175
+    assert periods[0] == 12
 
 
-def test_co2_daily_fourier_find_strongest_period_hamming_window_func():
+def test_co2_daily_fourier_find_strongest_period_window_func_hamming():
     data = co2.load().data.resample("D").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="hamming")
@@ -121,7 +169,15 @@ def test_co2_daily_fourier_find_strongest_period_hamming_window_func():
     assert periods[0] == 363
 
 
-def test_co2_monthly_fourier_find_strongest_period_hamming_window_func():
+def test_co2_weekly_fourier_find_strongest_period_window_func_hamming():
+    data = co2.load().data.resample("W").mean().ffill()
+    period_finder = FourierPeriodFinder(data)
+    periods = period_finder.fit(max_period_count=1, window_func="hamming")
+    assert len(periods) == 1
+    assert periods[0] == 52
+
+
+def test_co2_monthly_fourier_find_strongest_period_window_func_hamming():
     data = co2.load().data.resample("ME").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="hamming")
@@ -129,7 +185,7 @@ def test_co2_monthly_fourier_find_strongest_period_hamming_window_func():
     assert periods[0] == 12
 
 
-def test_co2_daily_fourier_find_strongest_period_hann_window_func():
+def test_co2_daily_fourier_find_strongest_period_window_func_hann():
     data = co2.load().data.resample("D").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="hann")
@@ -137,7 +193,15 @@ def test_co2_daily_fourier_find_strongest_period_hann_window_func():
     assert periods[0] == 363
 
 
-def test_co2_monthly_fourier_find_strongest_period_hann_window_func():
+def test_co2_weekly_fourier_find_strongest_period_window_func_hann():
+    data = co2.load().data.resample("W").mean().ffill()
+    period_finder = FourierPeriodFinder(data)
+    periods = period_finder.fit(max_period_count=1, window_func="hann")
+    assert len(periods) == 1
+    assert periods[0] == 52
+
+
+def test_co2_monthly_fourier_find_strongest_period_window_func_hann():
     data = co2.load().data.resample("ME").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="hann")
@@ -145,7 +209,7 @@ def test_co2_monthly_fourier_find_strongest_period_hann_window_func():
     assert periods[0] == 12
 
 
-def test_co2_daily_fourier_find_strongest_period_tukey_window_func():
+def test_co2_daily_fourier_find_strongest_period_window_func_tukey():
     data = co2.load().data.resample("D").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="tukey")
@@ -153,7 +217,15 @@ def test_co2_daily_fourier_find_strongest_period_tukey_window_func():
     assert periods[0] == 363
 
 
-def test_co2_monthly_fourier_find_strongest_period_tukey_window_func():
+def test_co2_weekly_fourier_find_strongest_period_window_func_tukey():
+    data = co2.load().data.resample("W").mean().ffill()
+    period_finder = FourierPeriodFinder(data)
+    periods = period_finder.fit(max_period_count=1, window_func="tukey")
+    assert len(periods) == 1
+    assert periods[0] == 52
+
+
+def test_co2_monthly_fourier_find_strongest_period_window_func_tukey():
     data = co2.load().data.resample("ME").mean().ffill()
     period_finder = FourierPeriodFinder(data)
     periods = period_finder.fit(max_period_count=1, window_func="tukey")
