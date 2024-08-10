@@ -13,11 +13,12 @@ keywords = ["time", "series", "forecast", "analysis", "seasonality", "trend", "d
 
 [tool.poetry.dependencies]
 python = "^3.10"
-statsmodels = "^0.14.1"
+scipy = "^1.14.0"
 
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.3"
+statsmodels = "^0.14.2"
 
 [build-system]
 requires = ["poetry-core"]
