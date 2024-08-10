@@ -1,3 +1,7 @@
-from .finders import AutocorrelationPeriodFinder, AutoPeriodFinder, FourierPeriodFinder
+from .finders import (
+    AutocorrelationPeriodFinder,
+    AutoperiodDetector,
+    FourierPeriodFinder,
+)
 
-__all__ = ["AutocorrelationPeriodFinder", "AutoPeriodFinder", "FourierPeriodFinder"]
+__all__ = ["AutocorrelationPeriodFinder", "AutoperiodDetector", "FourierPeriodFinder"]
