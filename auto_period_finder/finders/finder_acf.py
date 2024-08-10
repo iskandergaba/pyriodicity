@@ -100,12 +100,11 @@ class AutocorrelationPeriodFinder:
             List of detected seasonality periods.
         """
         return self.__find_periods(
-            self.y, max_period_count, detrend_func, window_func, correlation_func
+            max_period_count, detrend_func, window_func, correlation_func
         )
 
     def __find_periods(
         self,
-        y: ArrayLike,
         max_period_count: Optional[int],
         detrend_func: Optional[Union[str, Callable[[ArrayLike], NDArray]]] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
@@ -119,7 +118,7 @@ class AutocorrelationPeriodFinder:
         self.y = self.y if window_func is None else apply_window(self.y, window_func)
 
         # Compute the ACF
-        acf_arr = acf(self.y, len(y) // 2, correlation_func)
+        acf_arr = acf(self.y, len(self.y) // 2, correlation_func)
 
         # Find the local argmax of the first half of the ACF array
         local_argmax = argrelmax(acf_arr)[0]
