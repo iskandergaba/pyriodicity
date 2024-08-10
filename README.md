@@ -62,11 +62,18 @@ poetry env list
 ```shell
 poetry run pytest
 ```
-6. To export the list detailed list of dependencies, run the following command:
+6. To export the detailed dependency list, consider running the following:
 ```shell
+# Add poetry-plugin-export plugin to poetry
 poetry self add poetry-plugin-export
+
+# Export the package dependencies to requirements.txt
 poetry export --output requirements.txt
+
+# If you wish to export all the dependencies, including those needed for testing, run the following command
+poetry export --with test --output requirements-dev.txt
 ```
+
 ## Fourier Transform-Based Seasonality Period Detection
 One popular method of quick periodicity detection is the the usage of [Discrete Fourier Transform (DFT)](https://en.wikipedia.org/wiki/Discrete_Fourier_transform). Essentially, we transform a time series from the time domain to the frequency domain and pick the periods corresponding to frequencies with the highest amplitudes, hence picking up the strongest and the most repetitive periods. We can also choose to pre-process the time series using a [window function](https://en.wikipedia.org/wiki/Window_function) like [Blackman](https://en.wikipedia.org/wiki/Window_function#Blackman_window) or [Prazen](https://en.wikipedia.org/wiki/Window_function#Parzen_window) for example.
 
