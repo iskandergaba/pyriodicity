@@ -2,14 +2,13 @@ from typing import Callable, Dict, List, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from pandas import DataFrame, Series
 from scipy.signal import detrend as _detrend
 from scipy.signal import get_window
 from scipy.stats import kendalltau, pearsonr, spearmanr
 
 
 @staticmethod
-def to_1d_array(x: Union[ArrayLike, DataFrame, Series]) -> NDArray:
+def to_1d_array(x: ArrayLike) -> NDArray:
     y = np.ascontiguousarray(np.squeeze(np.asarray(x)), dtype=np.double)
     if y.ndim != 1:
         raise ValueError("y must be a 1d array")
@@ -35,8 +34,8 @@ def apply_window(x: ArrayLike, window_func: Union[str, float, tuple]) -> NDArray
 
 @staticmethod
 def detrend(
-    x: Union[ArrayLike, DataFrame, Series],
-    method: Union[str, Callable[[Union[ArrayLike, DataFrame, Series]], NDArray]],
+    x: ArrayLike,
+    method: Union[str, Callable[[ArrayLike], NDArray]],
 ) -> NDArray:
     if isinstance(method, str):
         return _detrend(x, type=method)
@@ -45,7 +44,7 @@ def detrend(
 
 @staticmethod
 def acf(
-    x: Union[ArrayLike, DataFrame, Series],
+    x: ArrayLike,
     nlags: int,
     correlation_func: Optional[str] = "pearson",
 ) -> NDArray:

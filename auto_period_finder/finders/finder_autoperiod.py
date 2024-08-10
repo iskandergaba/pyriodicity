@@ -2,7 +2,6 @@ from typing import Callable, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from pandas import DataFrame, Series
 from scipy.signal import argrelmax, periodogram
 from scipy.stats import linregress
 
@@ -45,7 +44,7 @@ class AutoperiodDetector:
     >>> periods = autoperiod_detector.fit()
     """
 
-    def __init__(self, endog: Union[ArrayLike, DataFrame, Series]):
+    def __init__(self, endog: ArrayLike):
         self.y = to_1d_array(endog)
 
     def fit(
