@@ -49,8 +49,8 @@ class AutoperiodDetector:
 
     def fit(
         self,
-        k: int = 300,
-        percentile: int = 95,
+        k: int = 100,
+        percentile: int = 99,
         detrend_func: Optional[Union[str, Callable[[ArrayLike], NDArray]]] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
         correlation_func: Optional[str] = "pearson",
@@ -60,10 +60,12 @@ class AutoperiodDetector:
 
         Parameters
         ----------
-        k : int, optional, default = 300
-            TODO explanation.
-        percentile : int, optional, default = 95
-            TODO explanation.
+        k : int, optional, default = 100
+            The number of permutations used to compute the power threshold
+            that filtersout potential false period detections in the periodogram.
+        percentile : int, optional, default = 99
+            Percentage for the percentile parameter used in computing the power
+            threshold. Value must be between 0 and 100 inclusive.
         detrend_func : str, callable, default = None
             The kind of detrending to be applied on the series. It can either be
             'linear' or 'constant' if it the parameter is of 'str' type, or a
