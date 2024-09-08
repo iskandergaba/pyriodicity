@@ -124,24 +124,21 @@ class AutoperiodDetector:
             q = length / p
             start = np.floor((p + length / (q + 1)) / 2 - 1).astype(int)
             end = np.ceil((p + length / (q - 1)) / 2 + 1).astype(int)
-            t = (
-                start
-                + 2
-                + np.array(
-                    [
-                        self._split_error(
-                            np.arange(len(acf_arr)), acf_arr, start, end, i
-                        )
-                        for i in range(start + 2, end)
-                    ]
-                ).argmin()
-            )
-            if self._is_split_valid(np.arange(len(acf_arr)), acf_arr, start, end, t):
+
+            splits = [
+                self._split(np.arange(len(acf_arr)), acf_arr, start, end, i)
+                for i in range(start + 2, end)
+            ]
+            line1, line2, _ = splits[
+                np.array([error for _, _, error in splits]).argmin()
+            ]
+
+            if line1.slope > 0 > line2.slope:
                 period_hints_valid.append(p)
 
         period_hints_valid = np.array(period_hints_valid)
 
-        # Return the ACF peaks for valid period hints
+        # Return the closest ACF peak for each valid period hint
         local_argmax = argrelmax(acf_arr)[0]
         return np.array(
             list(
@@ -165,24 +162,9 @@ class AutoperiodDetector:
         max_powers.sort()
         return np.percentile(max_powers, percentile)
 
-    ## Compute the split error
-    # TODO documentation
-    def _split_error(
-        self, x: ArrayLike, y: ArrayLike, start: int, end: int, split: int
-    ):
-        _, _, error = self._split(x, y, start, end, split)
-        return error
-
-    ## Check if the split is valid
-    # TODO documentation
-    def _is_split_valid(
-        self, x: ArrayLike, y: ArrayLike, start: int, end: int, split: int
-    ):
-        line1, line2, _ = self._split(x, y, start, end, split)
-        return line1.slope > 0 > line2.slope
-
     # Approximate a function at [start, end] with two line segments at [start, split - 1] and [split, end]
-    def _split(self, x: ArrayLike, y: ArrayLike, start: int, end: int, split: int):
+    @staticmethod
+    def _split(x: ArrayLike, y: ArrayLike, start: int, end: int, split: int):
         x1, y1, x2, y2 = (
             x[start:split],
             y[start:split],
