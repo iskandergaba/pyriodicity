@@ -120,7 +120,6 @@ class AutoperiodDetector:
         acf_arr = acf(self.y, nlags=length, correlation_func=correlation_func)
 
         # Validate period hints
-        # TODO Improve code
         period_hints_valid = []
         for p in period_hints:
             q = length / p
@@ -151,10 +150,35 @@ class AutoperiodDetector:
             )
         )
 
-    ## Compute the power threshold
-    # TODO documentation
     @staticmethod
-    def _power_threshold(y: ArrayLike, k: int, percentile: int):
+    def _power_threshold(y: ArrayLike, k: int, p: int) -> float:
+        """
+        Compute the power threshold as the p-th percentile of the maximum
+        power values of the periodogram of k permutations of the data.
+
+        Parameters
+        ----------
+        y : array_like
+            Data to be investigated. Must be squeezable to 1-d.
+        k : int
+            The number of times the data is randomly permuted to compute
+            the maximum power values.
+        p : int
+            The percentile value used to compute the power threshold.
+            It determines the cutoff point in the sorted list of the maximum
+            power values from the periodograms of the permuted data.
+            Value must be between 0 and 100 inclusive.
+
+        See Also
+        --------
+        scipy.signal.periodogram
+            Estimate power spectral density using a periodogram.
+
+        Returns
+        -------
+        float
+            Power threshold of the target data.
+        """
         max_powers = []
         while len(max_powers) < k:
             _, power_p = periodogram(
@@ -162,11 +186,41 @@ class AutoperiodDetector:
             )
             max_powers.append(power_p.max())
         max_powers.sort()
-        return np.percentile(max_powers, percentile)
+        return np.percentile(max_powers, p)
 
-    # Approximate a function at [start, end] with two line segments at [start, split - 1] and [split, end]
     @staticmethod
-    def _split(x: ArrayLike, y: ArrayLike, start: int, end: int, split: int):
+    def _split(x: ArrayLike, y: ArrayLike, start: int, end: int, split: int) -> tuple:
+        """
+        Approximate a function at [start, end] with two line segments at
+        [start, split - 1] and [split, end].
+
+        Parameters
+        ----------
+        x : array_like
+            The x-coordinates of the data points.
+        y : array_like
+            The y-coordinates of the data points.
+        start : int
+            The start index of the data points to be approximated.
+        end : int
+            The end index of the data points to be approximated.
+        split : int
+            The split index of the data points to be approximated.
+
+        See Also
+        --------
+        scipy.stats.linregress
+            Calculate a linear least-squares regression for two sets of measurements.
+
+        Returns
+        -------
+        linregress
+            The first line segment.
+        linregress
+            The second line segment.
+        float
+            The error of the approximation.
+        """
         x1, y1, x2, y2 = (
             x[start:split],
             y[start:split],
