@@ -33,7 +33,7 @@ class AutocorrelationPeriodFinder:
 
     You can resample the data to whatever frequency you want.
 
-    >>> data = data.resample("M").mean().ffill()
+    >>> data = data.resample("ME").mean().ffill()
 
     Use AutocorrelationPeriodFinder to find the list of seasonality periods based on
     ACF.
