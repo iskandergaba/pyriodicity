@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyriodicity"
-version = "0.2.0rc0"
+version = "0.2.0rc1"
 description = "An autocorrelation function-based seasonality periods automatic finder for univariate time series."
 
 license = "MIT"
@@ -8,7 +8,7 @@ readme = ["README.md"]
 repository = "https://github.com/iskandergaba/pyriodicity"
 
 authors = ["Iskander Gaba <iskander@hey.com>"]
-keywords = ["time", "series", "forecast", "analysis", "seasonality", "trend", "decomposition"]
+keywords = ["signal", "time", "series", "forecast", "analysis", "seasonality", "trend", "decomposition"]
 
 
 [tool.poetry.dependencies]
