@@ -3,7 +3,7 @@ from typing import Callable, Optional, Union
 from numpy.typing import ArrayLike, NDArray
 from scipy.signal import argrelmax
 
-from auto_period_finder.tools import acf, apply_window, detrend, to_1d_array
+from pyriodicity.tools import acf, apply_window, detrend, to_1d_array
 
 
 class AutocorrelationPeriodFinder:

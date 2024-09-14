@@ -1,16 +1,16 @@
-# `auto-period-finder`
-[![PyPI Version](https://img.shields.io/pypi/v/auto-period-finder.svg?label=PyPI)](https://pypi.org/project/auto-period-finder/)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/auto-period-finder?label=Python)
-![GitHub License](https://img.shields.io/github/license/iskandergaba/auto-period-finder?label=License)
+# `pyriodicity`
+[![PyPI Version](https://img.shields.io/pypi/v/pyriodicity.svg?label=PyPI)](https://pypi.org/project/pyriodicity/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyriodicity?label=Python)
+![GitHub License](https://img.shields.io/github/license/iskandergaba/pyriodicity?label=License)
 
-## About `auto-period-finder`
-`auto-period-finder` is an autocorrelation function (ACF) based seasonality periods automatic finder for univariate time series.
+## About `pyriodicity`
+`pyriodicity` is an autocorrelation function (ACF) based seasonality periods automatic finder for univariate time series.
 
 ## Installation
-To install the latest version of `auto-period-finder`, simply run:
+To install the latest version of `pyriodicity`, simply run:
 
 ```shell
-pip install auto-period-finder
+pip install pyriodicity
 ```
 
 ## Example
@@ -54,7 +54,7 @@ This project is built and published using [Poetry](https://python-poetry.org). T
 ```shell
 poetry install
 ```
-4. If everything worked properly, you should have `auto-period-finder-geinoPPi-py3.10` environment activated. You can verify this by running:
+4. If everything worked properly, you should have `pyriodicity-geinoPPi-py3.10` environment activated. You can verify this by running:
 ```shell
 poetry env list
 ```
@@ -87,11 +87,11 @@ Simply put, given a univariate time series $T$, the algorithm finds, iteratively
 
 The list of such $k$ values constitute the set of found seasonality periods $P$. To understand this further, consider this hypothetical time series of hourly frequency that has clear weekly seasonality below
 
-[![Time series with a weekly seasonality](https://raw.githubusercontent.com/iskandergaba/auto-period-finder/master/assets/images/timeseries.png)](https://raw.githubusercontent.com/iskandergaba/auto-period-finder/master/assets/images/timeseries.png)
+[![Time series with a weekly seasonality](https://raw.githubusercontent.com/iskandergaba/pyriodicity/master/assets/images/timeseries.png)](https://raw.githubusercontent.com/iskandergaba/pyriodicity/master/assets/images/timeseries.png)
 
 Now let's look at the corresponding ACF for the time series above:
 
-[![Autocorrelation function of a time series with a weekly seasonality](https://raw.githubusercontent.com/iskandergaba/auto-period-finder/master/assets/images/acf.png)](https://raw.githubusercontent.com/iskandergaba/auto-period-finder/master/assets/images/acf.png)
+[![Autocorrelation function of a time series with a weekly seasonality](https://raw.githubusercontent.com/iskandergaba/pyriodicity/master/assets/images/acf.png)](https://raw.githubusercontent.com/iskandergaba/pyriodicity/master/assets/images/acf.png)
 
 You can see that the autocorrelation coefficient for lag value 168 hours (i.e. one week) is a local maximum (red-border square). Similarly, autocorrelation coefficient for lag values that are multiples of 168 (gray-border squares). We can therefore conclude that this time series has a weekly seasonality period.
 

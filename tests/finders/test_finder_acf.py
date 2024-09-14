@@ -1,6 +1,6 @@
 from statsmodels.datasets import co2
 
-from auto_period_finder import AutocorrelationPeriodFinder
+from pyriodicity import AutocorrelationPeriodFinder
 
 
 def test_co2_daily_acf_default():

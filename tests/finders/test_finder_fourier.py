@@ -1,6 +1,6 @@
 from statsmodels.datasets import co2
 
-from auto_period_finder import FourierPeriodFinder
+from pyriodicity import FourierPeriodFinder
 
 
 def test_co2_monthly_fourier_find_all_periods():

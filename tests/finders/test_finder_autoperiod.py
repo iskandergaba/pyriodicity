@@ -1,7 +1,7 @@
 import numpy as np
 from statsmodels.datasets import co2
 
-from auto_period_finder import AutoperiodDetector
+from pyriodicity import AutoperiodDetector
 
 
 def test_co2_daily_autoperiod_default():

@@ -3,7 +3,7 @@ from typing import Callable, Optional, Union
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from auto_period_finder.tools import apply_window, detrend, to_1d_array
+from pyriodicity.tools import apply_window, detrend, to_1d_array
 
 
 class FourierPeriodFinder:
