@@ -44,7 +44,11 @@ class Autoperiod:
 
     You can specify a lower percentile value for a more lenient detection
 
-    >>> acf_detector.fit(percentile=90)
+    >>> autoperiod.fit(percentile=90)
+
+    Or increase the number of random data permutations for a better power threshold estimation
+
+    >>> autoperiod.fit(k=300)
     """
 
     def __init__(self, endog: ArrayLike):
@@ -64,8 +68,8 @@ class Autoperiod:
         Parameters
         ----------
         k : int, optional, default = 100
-            The number of permutations used to compute the power threshold
-            that filtersout potential false period detections in the periodogram.
+            The number of times the data is randomly permuted while estimating the
+            power threshold.
         percentile : int, optional, default = 95
             Percentage for the percentile parameter used in computing the power
             threshold. Value must be between 0 and 100 inclusive.
