@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "pyriodicity"
 version = "0.2.0rc2"
-description = "An autocorrelation function-based seasonality periods automatic finder for univariate time series."
+description = "Pyriodicity provides intuitive and easy-to-use Python implementation for periodicity (seasonality) detection in univariate time series."
 
 license = "MIT"
 readme = ["README.md"]
