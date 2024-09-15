@@ -3,15 +3,15 @@ from typing import Callable, Optional, Union
 from numpy.typing import ArrayLike, NDArray
 from scipy.signal import argrelmax
 
-from auto_period_finder.tools import acf, apply_window, detrend, to_1d_array
+from pyriodicity.tools import acf, apply_window, detrend, to_1d_array
 
 
-class AutocorrelationPeriodFinder:
+class ACFPeriodicityDetector:
     """
-    Autocorrelation function (ACF) based seasonality periods automatic finder.
+    Autocorrelation function (ACF) based periodicity detector.
 
-    Find the periods of a given time series using its ACF. A time delta
-    is considered a period if it is a local maximum of ACF.
+    Find the periods in a given signal or series using its ACF. A lag value
+    is considered a period if it is a local maximum of the ACF.
 
     Parameters
     ----------
@@ -22,11 +22,11 @@ class AutocorrelationPeriodFinder:
     ----------
     .. [1] Hyndman, R.J., & Athanasopoulos, G. (2021)
     Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia.
-    OTexts.com/fpp3/stlfeatures.html. Accessed on 12-23-2023.
+    OTexts.com/fpp3/acf.html. Accessed on 09-15-2024.
 
     Examples
     --------
-    Start by loading a timeseries dataset with a frequency.
+    Start by loading a timeseries datasets.
 
     >>> from statsmodels.datasets import co2
     >>> data = co2.load().data
@@ -35,19 +35,18 @@ class AutocorrelationPeriodFinder:
 
     >>> data = data.resample("ME").mean().ffill()
 
-    Use AutocorrelationPeriodFinder to find the list of seasonality periods based on
-    ACF.
+    Use ACFPeriodicityDetector to find the list of seasonality periods using the ACF.
 
-    >>> period_finder = AutocorrelationPeriodFinder(data)
-    >>> periods = period_finder.fit()
+    >>> acf_detector = ACFPeriodicityDetector(data)
+    >>> periods = acf_detector.fit()
 
     You can get the most prominent period by setting max_period_count to 1
 
-    >>> period_finder.fit(max_period_count=1)
+    >>> acf_detector.fit(max_period_count=1)
 
     You can also use a different correlation function like Spearman
 
-    >>> period_finder.fit(correlation_func="spearman")
+    >>> acf_detector.fit(correlation_func="spearman")
     """
 
     def __init__(self, endog: ArrayLike):
@@ -61,7 +60,7 @@ class AutocorrelationPeriodFinder:
         correlation_func: Optional[str] = "pearson",
     ) -> NDArray:
         """
-        Find seasonality periods of the given time series automatically.
+        Find periods in the given series.
 
         Parameters
         ----------
@@ -97,20 +96,8 @@ class AutocorrelationPeriodFinder:
         Returns
         -------
         NDArray
-            List of detected seasonality periods.
+            List of detected periods.
         """
-        return self.__find_periods(
-            max_period_count, detrend_func, window_func, correlation_func
-        )
-
-    def __find_periods(
-        self,
-        max_period_count: Optional[int],
-        detrend_func: Optional[Union[str, Callable[[ArrayLike], NDArray]]] = "linear",
-        window_func: Optional[Union[str, float, tuple]] = None,
-        correlation_func: Optional[str] = "pearson",
-    ) -> NDArray:
-
         # Detrend data
         self.y = self.y if detrend_func is None else detrend(self.y, detrend_func)
 
