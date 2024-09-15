@@ -1,10 +1,10 @@
-# `pyriodicity`
+# Pyriodicity
 [![PyPI Version](https://img.shields.io/pypi/v/pyriodicity.svg?label=PyPI)](https://pypi.org/project/pyriodicity/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyriodicity?label=Python)
 ![GitHub License](https://img.shields.io/github/license/iskandergaba/pyriodicity?label=License)
 
-## About `pyriodicity`
-`pyriodicity` is an autocorrelation function (ACF) based seasonality periods automatic finder for univariate time series.
+## About Pyriodicity
+Pyriodicity is an autocorrelation function (ACF) based seasonality periods automatic finder for univariate time series.
 
 ## Installation
 To install the latest version of `pyriodicity`, simply run:
@@ -14,36 +14,35 @@ pip install pyriodicity
 ```
 
 ## Example
-Start by loading a timeseries dataset with a frequency. We can use `co2` emissions sample dataset from `statsmodels`
+Start by loading a the `co2` timeseries emissions sample data from [`statsmodels`](https://www.statsmodels.org)
 ```python
 from statsmodels.datasets import co2
 data = co2.load().data
 ```
 
-You can resample the data to whatever frequency you want.
-
+You can then resample the data to whatever frequency you want. In this example, we downsample the data to a monthly frequency
 ```python
 data = data.resample("ME").mean().ffill()
 ```
 
-Use `AutoPeriodFinder` to find the list of seasonality periods based on ACF.
+Use `Autoperiod` to find the list of periods based in this data (if any).
 ```python
-from auto_period_finder import AutoPeriodFinder
-period_finder = AutoPeriodFinder(data)
-periods = period_finder.fit()
+from pyriodicity import Autoperiod
+autoperiod = AutoPeriodFinder(data)
+periods = autoperiod.fit()
 ```
 
-You can also find the most prominent period either ACF-wise:
+There are multiple parameters you can play with should you wish to. For example, you can specify a lower percentile value for a more lenient detection
 ```python
-strongest_period_acf = period_finder.fit_find_strongest_acf()
+autoperiod.fit(percentile=90)
 ```
 
-or variance-wise:
+Or increase the number of random data permutations for a better power threshold estimation
 ```python
-strongest_period_var = period_finder.fit_find_strongest_var()
+autoperiod.fit(k=300)
 ```
-You can learn more about calculating seasonality component through variance from [here](OTexts.com/fpp3/stlfeatures.html).
 
+Alternatively, you can use other detection methods such as `ACFPeriodicityDetector` and `FFTPeriodicityDetector`.
 
 ## How to Get Started
 This project is built and published using [Poetry](https://python-poetry.org). To setup development environment for this project you can follow these steps:
@@ -54,7 +53,7 @@ This project is built and published using [Poetry](https://python-poetry.org). T
 ```shell
 poetry install
 ```
-4. If everything worked properly, you should have `pyriodicity-geinoPPi-py3.10` environment activated. You can verify this by running:
+4. If everything worked properly, you should have `pyriodicity-py3.12` environment activated. You can verify this by running:
 ```shell
 poetry env list
 ```
