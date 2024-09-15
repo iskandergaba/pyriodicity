@@ -8,11 +8,11 @@ from scipy.stats import linregress
 from pyriodicity.tools import acf, apply_window, detrend, to_1d_array
 
 
-class AutoperiodDetector:
+class Autoperiod:
     """
     Autoperiod periodicity detector.
 
-    Find the seasonlity periods of a given time series using Autoperiod.
+    Find the periods in a given signal or series using Autoperiod.
 
     Parameters
     ----------
@@ -28,7 +28,7 @@ class AutoperiodDetector:
 
     Examples
     --------
-    Start by loading a timeseries dataset with a frequency.
+    Start by loading a timeseries dataset.
 
     >>> from statsmodels.datasets import co2
     >>> data = co2.load().data
@@ -37,11 +37,14 @@ class AutoperiodDetector:
 
     >>> data = data.resample("ME").mean().ffill()
 
-    Use AutoperiodDetector to find the list of seasonality periods based on
-    ACF.
+    Use Autoperiod to find the list of periods in the data.
 
-    >>> autoperiod_detector = AutoperiodDetector(data)
-    >>> periods = autoperiod_detector.fit()
+    >>> autoperiod = Autoperiod(data)
+    >>> periods = autoperiod.fit()
+
+    You can specify a lower percentile value for a more lenient detection
+
+    >>> acf_detector.fit(percentile=90)
     """
 
     def __init__(self, endog: ArrayLike):
@@ -56,7 +59,7 @@ class AutoperiodDetector:
         correlation_func: Optional[str] = "pearson",
     ) -> NDArray:
         """
-        Detect the seasonality periods of the given time series.
+        Find periods in the given series.
 
         Parameters
         ----------
@@ -95,7 +98,7 @@ class AutoperiodDetector:
         Returns
         -------
         NDArray
-            List of detected seasonality periods.
+            List of detected periods.
         """
         # Detrend data
         self.y = self.y if detrend_func is None else detrend(self.y, detrend_func)

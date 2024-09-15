@@ -1,7 +1,7 @@
-from .finders import (
-    AutocorrelationPeriodFinder,
-    AutoperiodDetector,
-    FourierPeriodFinder,
+from .detectors import (
+    ACFPeriodicityDetector,
+    Autoperiod,
+    FFTPeriodicityDetector,
 )
 
-__all__ = ["AutocorrelationPeriodFinder", "AutoperiodDetector", "FourierPeriodFinder"]
+__all__ = ["ACFPeriodicityDetector", "Autoperiod", "FFTPeriodicityDetector"]
