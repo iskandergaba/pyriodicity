@@ -21,7 +21,7 @@ class FFTPeriodicityDetector:
     ----------
     .. [1] Hyndman, R.J., & Athanasopoulos, G. (2021)
     Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia.
-    OTexts.com/fpp3/useful-predictors.html#fourier-series. Accessed on 05-22-2024.
+    OTexts.com/fpp3/useful-predictors.html#fourier-series. Accessed on 09-15-2024.
 
     Examples
     --------

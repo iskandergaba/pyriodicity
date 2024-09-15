@@ -22,7 +22,7 @@ class ACFPeriodicityDetector:
     ----------
     .. [1] Hyndman, R.J., & Athanasopoulos, G. (2021)
     Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia.
-    OTexts.com/fpp3/stlfeatures.html. Accessed on 12-23-2023.
+    OTexts.com/fpp3/acf.html. Accessed on 09-15-2024.
 
     Examples
     --------
