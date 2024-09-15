@@ -1,6 +1,6 @@
 # This workflow will install Poetry, resolve Python dependencies, run tests,
 # build and publish release candidate package versions to TestPyPI upon pushing
-# tags of the form "*.*.*rc*".
+# tags of the form "*.*.*".
 
 name: Publish to TestPyPI
 on:

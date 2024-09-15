@@ -1,23 +1,24 @@
 [tool.poetry]
-name = "auto-period-finder"
-version = "0.0.11"
-description = "An autocorrelation function-based seasonality periods automatic finder for univariate time series."
+name = "pyriodicity"
+version = "0.2.0"
+description = "Pyriodicity provides intuitive and easy-to-use Python implementation for periodicity (seasonality) detection in univariate time series."
 
 license = "MIT"
 readme = ["README.md"]
-repository = "https://github.com/iskandergaba/auto-period-finder"
+repository = "https://github.com/iskandergaba/pyriodicity"
 
 authors = ["Iskander Gaba <iskander@hey.com>"]
-keywords = ["time", "series", "forecast", "analysis", "seasonality", "trend", "decomposition"]
+keywords = ["signal", "time", "series", "forecast", "analysis", "seasonality", "trend", "decomposition"]
 
 
 [tool.poetry.dependencies]
 python = "^3.10"
-statsmodels = "^0.14.1"
+scipy = "^1.14.0"
 
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.3"
+statsmodels = "^0.14.2"
 
 [build-system]
 requires = ["poetry-core"]
