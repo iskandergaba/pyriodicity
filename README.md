@@ -1,10 +1,18 @@
-# Pyriodicity
+<div align="center">
+<h1>Pyriodicity</h1>
+
 [![PyPI Version](https://img.shields.io/pypi/v/pyriodicity.svg?label=PyPI)](https://pypi.org/project/pyriodicity/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyriodicity?label=Python)
 ![GitHub License](https://img.shields.io/github/license/iskandergaba/pyriodicity?label=License)
 
+</div>
+
+
 ## About Pyriodicity
-Pyriodicity is an autocorrelation function (ACF) based seasonality periods automatic finder for univariate time series.
+Pyriodicity provides intuitive and easy-to-use Python implementation for periodicity (seasonality) detection in univariate time series. Pyriodicity supports the following detection methods:
+- [Autocorrelation Function (ACF)](https://otexts.com/fpp3/acf.html)
+- [Autoperiod]( https://doi.org/10.1137/1.9781611972757.40)
+- [Fast Fourier Transform (FFT)](https://otexts.com/fpp3/useful-predictors.html#fourier-series)
 
 ## Installation
 To install the latest version of `pyriodicity`, simply run:
@@ -28,7 +36,7 @@ data = data.resample("ME").mean().ffill()
 Use `Autoperiod` to find the list of periods based in this data (if any).
 ```python
 from pyriodicity import Autoperiod
-autoperiod = AutoPeriodFinder(data)
+autoperiod = Autoperiod(data)
 periods = autoperiod.fit()
 ```
 
@@ -42,18 +50,18 @@ Or increase the number of random data permutations for a better power threshold 
 autoperiod.fit(k=300)
 ```
 
-Alternatively, you can use other detection methods such as `ACFPeriodicityDetector` and `FFTPeriodicityDetector`.
+Alternatively, you can use other periodicity detection methods such as `ACFPeriodicityDetector` and `FFTPeriodicityDetector` and compare results and performances.
 
-## How to Get Started
-This project is built and published using [Poetry](https://python-poetry.org). To setup development environment for this project you can follow these steps:
+## Development Environment Setup
+This project is built and published using [Poetry](https://python-poetry.org). To setup a development environment for this project you can follow these steps:
 
-1. First, you need to install [Python](https://www.python.org) of one of the compatible versions indicated above.
-2. Install Poetry. You can follow this [guide](https://python-poetry.org/docs/#installing-with-the-official-installer) and use their official installer.
+1. Install one of the compatible [Python](https://www.python.org) versions indicated above.
+2. Install [Poetry](https://python-poetry.org/docs/#installing-with-pipx).
 3. Navigate to the root folder and install dependencies in a virtual environment:
 ```shell
 poetry install
 ```
-4. If everything worked properly, you should have `pyriodicity-py3.12` environment activated. You can verify this by running:
+4. If everything worked properly, you should have an environment under the name `pyriodicity-py3.*` activated. You can verify this by running:
 ```shell
 poetry env list
 ```
@@ -73,31 +81,6 @@ poetry export --output requirements.txt
 poetry export --with test --output requirements-dev.txt
 ```
 
-## Fourier Transform-Based Seasonality Period Detection
-One popular method of quick periodicity detection is the the usage of [Discrete Fourier Transform (DFT)](https://en.wikipedia.org/wiki/Discrete_Fourier_transform). Essentially, we transform a time series from the time domain to the frequency domain and pick the periods corresponding to frequencies with the highest amplitudes, hence picking up the strongest and the most repetitive periods. We can also choose to pre-process the time series using a [window function](https://en.wikipedia.org/wiki/Window_function) like [Blackman](https://en.wikipedia.org/wiki/Window_function#Blackman_window) or [Prazen](https://en.wikipedia.org/wiki/Window_function#Parzen_window) for example.
-
-## ACF-Based Seasonality Period Detection
-An easy and quick way to find seasonality periods of a univariate time series is to check its autocorrelation function (ACF) and look for specific charecteristics in lag values that we will detail in a second. You can read more information about time series ACF [here](https://otexts.com/fpp3/acf.html), but intuitively, An autocorrelation coefficient $r_k$ measures the the linear relationship between $k$-lagged values of a given time series. In simpler terms, $r_k$ measures how similar/dissimilar time series values that $k$-length apart from each other. The set of $r_k$ values for each lag $k$ makes ACF. Equipped with this information, I developed a package for finding time series seasonality periods automatically using ACF information.
-
-Simply put, given a univariate time series $T$, the algorithm finds, iteratively, lag values $k$ such that:
-1. $1 \lt k \leq \frac{\lvert T \rvert}{2}$
-2. Autocorrelation coefficients $r_q$ are local maxima where $q \in \{k, 2k, 3k, ...\}$
-3. $\forall p \in P, \forall n \in \mathbb{N}, k \neq n \times p$, where $P$ is the list of already found periods.
-
-The list of such $k$ values constitute the set of found seasonality periods $P$. To understand this further, consider this hypothetical time series of hourly frequency that has clear weekly seasonality below
-
-[![Time series with a weekly seasonality](https://raw.githubusercontent.com/iskandergaba/pyriodicity/master/assets/images/timeseries.png)](https://raw.githubusercontent.com/iskandergaba/pyriodicity/master/assets/images/timeseries.png)
-
-Now let's look at the corresponding ACF for the time series above:
-
-[![Autocorrelation function of a time series with a weekly seasonality](https://raw.githubusercontent.com/iskandergaba/pyriodicity/master/assets/images/acf.png)](https://raw.githubusercontent.com/iskandergaba/pyriodicity/master/assets/images/acf.png)
-
-You can see that the autocorrelation coefficient for lag value 168 hours (i.e. one week) is a local maximum (red-border square). Similarly, autocorrelation coefficient for lag values that are multiples of 168 (gray-border squares). We can therefore conclude that this time series has a weekly seasonality period.
-
-### Notes
-- The first condition is needed because a seasonality period cannot neither be 1 (a trivial case), nor greater than half the length of the target time series (by definition, a seasonality has to manifest itself at least twice in a given time series).
-- The third condition favors eliminating redundant seasonality periods that are multiples of each others. The algorithm does allow, however, finding seasonality periods that divide already found seasonality periods.
-- The periods detection uses `argmax` on the ACF to select seasonality period candidates before checking they satisfy the conditions discussed above. Therefore, the list of seasonality periods are returned in the descending order of their corresponding ACF coefficients.
-
 ## References
-- [1] Hyndman, R.J., & Athanasopoulos, G. (2021) Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia. [OTexts.com/fpp3](https://otexts.com/fpp3). Accessed on 12-25-2023.
+- [1] Hyndman, R.J., & Athanasopoulos, G. (2021) Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia. [OTexts.com/fpp3](https://otexts.com/fpp3). Accessed on 09-15-2024.
+- [2] Vlachos, M., Yu, P., & Castelli, V. (2005). On periodicity detection and Structural Periodic similarity. Proceedings of the 2005 SIAM International Conference on Data Mining. [doi.org/10.1137/1.9781611972757.40](https://doi.org/10.1137/1.9781611972757.40).
