@@ -11,7 +11,7 @@ class Autoperiod:
     """
     Autoperiod periodicity detector.
 
-    Find the periods in a given signal or series using Autoperiod.
+    Find the periods in a given signal or series using Autoperiod [1]_.
 
     Parameters
     ----------
@@ -84,6 +84,11 @@ class Autoperiod:
             The correlation function to be used to calculate the ACF of the time
             series. Possible values are ['pearson', 'spearman', 'kendall'].
 
+        Returns
+        -------
+        NDArray
+            List of detected periods.
+
         See Also
         --------
         scipy.signal.detrend
@@ -97,10 +102,6 @@ class Autoperiod:
         scipy.stats.spearmanr
             Calculate a Spearman correlation coefficient with associated p-value.
 
-        Returns
-        -------
-        NDArray
-            List of detected periods.
         """
         # Detrend data
         self.y = self.y if detrend_func is None else detrend(self.y, type=detrend_func)
