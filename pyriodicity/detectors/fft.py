@@ -99,12 +99,18 @@ class FFTPeriodicityDetector:
         freqs = np.fft.rfftfreq(len(self.y), d=1)[1:]
         ft = np.fft.rfft(self.y)[1:]
 
-        # Compute periods and their respective amplitudes
-        periods = np.round(1 / freqs)
+        # Compute period lengths and their respective amplitudes
+        periods = np.round(1 / freqs).astype(int)
         amps = abs(ft)
 
         # A period cannot be greater than half the length of the series
         filter = periods < len(self.y) // 2
+        periods = periods[filter]
+        amps = amps[filter]
 
-        # Return periods in descending order of their corresponding amplitudes
-        return periods[filter][np.argsort(-amps[filter])][:max_period_count]
+        # Sort period length values in the descending order of their corresponding amplitudes
+        periods = periods[np.argsort(-amps)]
+
+        # Return unique period length values
+        _, unique_indices = np.unique(periods, return_index=True)
+        return periods[np.sort(unique_indices)][:max_period_count]
