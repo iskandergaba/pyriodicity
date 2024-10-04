@@ -2,7 +2,7 @@ from typing import Callable, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import argrelmax, detrend, periodogram
+from scipy.signal import argrelmax, butter, detrend, sosfiltfilt, periodogram
 
 from pyriodicity.tools import acf, apply_window, to_1d_array
 
@@ -65,7 +65,7 @@ class CFDAutoperiod:
     def fit(
         self,
         k: int = 100,
-        percentile: int = 95,
+        percentile: int = 99,
         detrend_func: Optional[str] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
         correlation_func: Optional[str] = "pearson",
@@ -243,12 +243,15 @@ class CFDAutoperiod:
         if correlation_func is None:
             correlation_func = "pearson"
 
-        # TODO: Apply a low pass filter with an adapted cutoff frequency
-        y_filtered = np.copy(y)
+        # Apply a low pass filter with an adapted cutoff frequency
+        length = len(y)
+        f_cuttoff = 1 / (length / (length / hint + 1) - 1)
+        filter = butter(N=5, Wn=f_cuttoff, output="sos")
+        y_filtered = sosfiltfilt(filter, y)
+
+        # Validate the hint
         hint_range = np.arange(hint // 2, 1 + hint + hint // 2, dtype=int)
-        acf_arr = acf(
-            y_filtered, nlags=len(y_filtered), correlation_func=correlation_func
-        )
+        acf_arr = acf(y_filtered, nlags=length, correlation_func=correlation_func)
         polynomial = np.polynomial.Polynomial.fit(
             hint_range, detrend(acf_arr[hint_range], type=detrend_func), deg=2
         ).convert()
