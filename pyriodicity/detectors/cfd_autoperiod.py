@@ -2,10 +2,9 @@ from typing import Callable, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import argrelmax, periodogram
-from scipy.stats import linregress
+from scipy.signal import argrelmax, detrend, periodogram
 
-from pyriodicity.tools import acf, apply_window, detrend, to_1d_array
+from pyriodicity.tools import acf, apply_window, to_1d_array
 
 
 class CFDAutoperiod:
@@ -39,24 +38,24 @@ class CFDAutoperiod:
     Use ``CFDAutoperiod`` to find the list of periods in the data.
 
     >>> from pyriodicity import CFDAutoperiod
-    >>> autoperiod = CFDAutoperiod(data)
-    >>> autoperiod.fit()
+    >>> cfd_autoperiod = CFDAutoperiod(data)
+    >>> cfd_autoperiod.fit()
     array([12])
 
     You can specify a lower percentile value should you wish for
     a more lenient detection
 
-    >>> autoperiod.fit(percentile=90)
+    >>> cfd_autoperiod.fit(percentile=90)
     array([12])
 
     You can also increase the number of random data permutations
     for a more robust power threshold estimation
 
-    >>> autoperiod.fit(k=300)
+    >>> cfd_autoperiod.fit(k=300)
     array([12])
 
-    ``CFDAutoperiod`` is generally a quite robust periodicity detection method.
-    The detection algorthim found exactly one periodicity of 12, suggesting
+    ``CFDAutoperiod`` is considered a more robust variant of ``Autoperiod``.
+    The detection algorithm found exactly one periodicity of 12, suggesting
     a strong yearly periodicity.
     """
 
@@ -67,7 +66,7 @@ class CFDAutoperiod:
         self,
         k: int = 100,
         percentile: int = 95,
-        detrend_func: Optional[Union[str, Callable[[ArrayLike], NDArray]]] = "linear",
+        detrend_func: Optional[str] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
         correlation_func: Optional[str] = "pearson",
     ) -> NDArray:
@@ -82,7 +81,7 @@ class CFDAutoperiod:
         percentile : int, optional, default = 95
             Percentage for the percentile parameter used in computing the power
             threshold. Value must be between 0 and 100 inclusive.
-        detrend_func : str, callable, default = None
+        detrend_func : str, default = 'linear'
             The kind of detrending to be applied on the series. It can either be
             'linear' or 'constant' if it the parameter is of 'str' type, or a
             custom function that returns a detrended series.
@@ -115,15 +114,19 @@ class CFDAutoperiod:
 
         """
         # Detrend data
-        self.y = self.y if detrend_func is None else detrend(self.y, detrend_func)
+        self.y = (
+            detrend(self.y, type="linear")
+            if detrend_func is None
+            else detrend(self.y, type=detrend_func)
+        )
         # Apply window on data
         self.y = self.y if window_func is None else apply_window(self.y, window_func)
 
         # Compute the power threshold
-        p_threshold = self._power_threshold(self.y, k, percentile)
+        p_threshold = self._power_threshold(self.y, detrend_func, k, percentile)
 
         # Find period hints
-        freq, power = periodogram(self.y, window=None, detrend=None)
+        freq, power = periodogram(self.y, detrend=detrend_func)
         period_hints = np.array(
             [
                 1 / f
@@ -135,42 +138,34 @@ class CFDAutoperiod:
         # Replace period hints with their density clustering centroids
         period_hints = self._cluster_period_hints(period_hints, len(self.y))
 
-        # TODO: Replace Autoperiod validation with CFDAutoperiod validation
         # Validate period hints
-        length = len(self.y)
-        acf_arr = acf(self.y, nlags=length, correlation_func=correlation_func)
-        period_hints_valid = []
-        for p in period_hints:
-            q = length / p
-            start = np.floor((p + length / (q + 1)) / 2 - 1).astype(int)
-            end = np.ceil((p + length / (q - 1)) / 2 + 1).astype(int)
-
-            splits = [
-                self._split(np.arange(len(acf_arr)), acf_arr, start, end, i)
-                for i in range(start + 2, end)
+        period_hints = np.array(
+            [
+                hint
+                for hint in period_hints
+                if self._is_hint_valid(
+                    self.y,
+                    hint,
+                    detrend_func=detrend_func,
+                    correlation_func=correlation_func,
+                )
             ]
-            line1, line2, _ = splits[
-                np.array([error for _, _, error in splits]).argmin()
-            ]
+        )
 
-            if line1.slope > 0 > line2.slope:
-                period_hints_valid.append(p)
-
-        period_hints_valid = np.array(period_hints_valid)
-
-        # Return the closest ACF peak for each valid period hint
+        # Return the closest ACF peak to each valid period hint
+        acf_arr = acf(self.y, nlags=len(self.y), correlation_func=correlation_func)
         local_argmax = argrelmax(acf_arr)[0]
         return np.array(
-            list(
-                {
-                    min(local_argmax, key=lambda x: abs(x - p))
-                    for p in period_hints_valid
-                }
-            )
+            list({min(local_argmax, key=lambda x: abs(x - p)) for p in period_hints})
         )
 
     @staticmethod
-    def _power_threshold(y: ArrayLike, k: int, p: int) -> float:
+    def _power_threshold(
+        y: ArrayLike,
+        detrend_func: str,
+        k: int,
+        p: int,
+    ) -> float:
         """
         Compute the power threshold as the p-th percentile of the maximum
         power values of the periodogram of k permutations of the data.
@@ -179,6 +174,9 @@ class CFDAutoperiod:
         ----------
         y : array_like
             Data to be investigated. Must be squeezable to 1-d.
+        detrend_func : str, default = 'linear'
+            The kind of detrending to be applied on the series. It can either be
+            'linear' or 'constant'.
         k : int
             The number of times the data is randomly permuted to compute
             the maximum power values.
@@ -200,9 +198,7 @@ class CFDAutoperiod:
         """
         max_powers = []
         while len(max_powers) < k:
-            _, power_p = periodogram(
-                np.random.permutation(y), window=None, detrend=None
-            )
+            _, power_p = periodogram(np.random.permutation(y), detrend=detrend_func)
             max_powers.append(power_p.max())
         max_powers.sort()
         return np.percentile(max_powers, p)
@@ -233,47 +229,28 @@ class CFDAutoperiod:
         return np.array([c.mean() for c in clusters])
 
     @staticmethod
-    def _split(x: ArrayLike, y: ArrayLike, start: int, end: int, split: int) -> tuple:
+    def _is_hint_valid(
+        y: ArrayLike,
+        hint: int,
+        detrend_func: Union[str, Callable[[ArrayLike], NDArray]],
+        correlation_func: str,
+    ) -> bool:
         """
-        Approximate a function at [start, end] with two line segments at
-        [start, split - 1] and [split, end].
-
-        Parameters
-        ----------
-        x : array_like
-            The x-coordinates of the data points.
-        y : array_like
-            The y-coordinates of the data points.
-        start : int
-            The start index of the data points to be approximated.
-        end : int
-            The end index of the data points to be approximated.
-        split : int
-            The split index of the data points to be approximated.
-
-        See Also
-        --------
-        scipy.stats.linregress
-            Calculate a linear least-squares regression for two sets of measurements.
-
-        Returns
-        -------
-        linregress
-            The first line segment.
-        linregress
-            The second line segment.
-        float
-            The error of the approximation.
+        TODO
         """
-        x1, y1, x2, y2 = (
-            x[start:split],
-            y[start:split],
-            x[split : end + 1],
-            y[split : end + 1],
+        if detrend_func is None:
+            detrend_func = "linear"
+        if correlation_func is None:
+            correlation_func = "pearson"
+
+        # TODO: Apply a low pass filter with an adapted cutoff frequency
+        y_filtered = np.copy(y)
+        hint_range = np.arange(hint // 2, 1 + hint + hint // 2, dtype=int)
+        acf_arr = acf(
+            y_filtered, nlags=len(y_filtered), correlation_func=correlation_func
         )
-        line1 = linregress(x1, y1)
-        line2 = linregress(x2, y2)
-        error = np.sum(np.abs(y1 - (line1.intercept + line1.slope * x1))) + np.sum(
-            np.abs(y2 - (line2.intercept + line2.slope * x2))
-        )
-        return line1, line2, error
+        polynomial = np.polynomial.Polynomial.fit(
+            hint_range, detrend(acf_arr[hint_range], type=detrend_func), deg=2
+        ).convert()
+        derivative = polynomial.deriv()
+        return polynomial.coef[-1] < 0 and int(derivative.roots()[0]) in hint_range
