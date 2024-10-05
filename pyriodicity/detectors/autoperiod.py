@@ -5,7 +5,7 @@ from numpy.typing import ArrayLike, NDArray
 from scipy.signal import argrelmax, periodogram
 from scipy.stats import linregress
 
-from pyriodicity.tools import acf, apply_window, detrend, to_1d_array
+from pyriodicity.tools import acf, apply_window, detrend, power_threshold, to_1d_array
 
 
 class Autoperiod:
@@ -73,10 +73,9 @@ class Autoperiod:
         percentile : int, optional, default = 95
             Percentage for the percentile parameter used in computing the power
             threshold. Value must be between 0 and 100 inclusive.
-        detrend_func : str, callable, default = None
-            The kind of detrending to be applied on the series. It can either be
-            'linear' or 'constant' if it the parameter is of 'str' type, or a
-            custom function that returns a detrended series.
+        detrend_func : str, default = 'linear'
+            The kind of detrending to be applied on the signal. It can either be
+            'linear' or 'constant'.
         window_func : float, str, tuple optional, default = None
             Window function to be applied to the time series. Check
             'window' parameter documentation for scipy.signal.get_window
@@ -110,11 +109,11 @@ class Autoperiod:
         self.y = self.y if window_func is None else apply_window(self.y, window_func)
 
         # Compute the power threshold
-        p_threshold = self._power_threshold(self.y, k, percentile)
+        p_threshold = power_threshold(self.y, detrend_func, k, percentile)
 
         # Find period hints
-        freq, power = periodogram(self.y, window=None, detrend=None)
-        period_hints = np.array(
+        freq, power = periodogram(self.y, window=None, detrend=False)
+        hints = np.array(
             [
                 1 / f
                 for f, p in zip(freq, power)
@@ -127,8 +126,8 @@ class Autoperiod:
         acf_arr = acf(self.y, nlags=length, correlation_func=correlation_func)
 
         # Validate period hints
-        period_hints_valid = []
-        for p in period_hints:
+        valid_hints = []
+        for p in hints:
             q = length / p
             start = np.floor((p + length / (q + 1)) / 2 - 1).astype(int)
             end = np.ceil((p + length / (q - 1)) / 2 + 1).astype(int)
@@ -142,58 +141,15 @@ class Autoperiod:
             ]
 
             if line1.slope > 0 > line2.slope:
-                period_hints_valid.append(p)
+                valid_hints.append(p)
 
-        period_hints_valid = np.array(period_hints_valid)
+        valid_hints = np.array(valid_hints)
 
-        # Return the closest ACF peak for each valid period hint
+        # Return the closest ACF peak to each valid period hint
         local_argmax = argrelmax(acf_arr)[0]
         return np.array(
-            list(
-                {
-                    min(local_argmax, key=lambda x: abs(x - p))
-                    for p in period_hints_valid
-                }
-            )
+            list({min(local_argmax, key=lambda x: abs(x - p)) for p in valid_hints})
         )
-
-    @staticmethod
-    def _power_threshold(y: ArrayLike, k: int, p: int) -> float:
-        """
-        Compute the power threshold as the p-th percentile of the maximum
-        power values of the periodogram of k permutations of the data.
-
-        Parameters
-        ----------
-        y : array_like
-            Data to be investigated. Must be squeezable to 1-d.
-        k : int
-            The number of times the data is randomly permuted to compute
-            the maximum power values.
-        p : int
-            The percentile value used to compute the power threshold.
-            It determines the cutoff point in the sorted list of the maximum
-            power values from the periodograms of the permuted data.
-            Value must be between 0 and 100 inclusive.
-
-        See Also
-        --------
-        scipy.signal.periodogram
-            Estimate power spectral density using a periodogram.
-
-        Returns
-        -------
-        float
-            Power threshold of the target data.
-        """
-        max_powers = []
-        while len(max_powers) < k:
-            _, power_p = periodogram(
-                np.random.permutation(y), window=None, detrend=None
-            )
-            max_powers.append(power_p.max())
-        max_powers.sort()
-        return np.percentile(max_powers, p)
 
     @staticmethod
     def _split(x: ArrayLike, y: ArrayLike, start: int, end: int, split: int) -> tuple:

@@ -4,7 +4,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.signal import argrelmax, butter, detrend, periodogram, sosfiltfilt
 
-from pyriodicity.tools import acf, apply_window, to_1d_array
+from pyriodicity.tools import acf, apply_window, power_threshold, to_1d_array
 
 
 class CFDAutoperiod:
@@ -122,7 +122,7 @@ class CFDAutoperiod:
         self.y = self.y if window_func is None else apply_window(self.y, window_func)
 
         # Compute the power threshold
-        p_threshold = self._power_threshold(self.y, detrend_func, k, percentile)
+        p_threshold = power_threshold(self.y, detrend_func, k, percentile)
 
         # Find period hints
         freq, power = periodogram(self.y, detrend=detrend_func)
@@ -156,52 +156,6 @@ class CFDAutoperiod:
         return np.array(
             list({min(local_argmax, key=lambda x: abs(x - h)) for h in valid_hints})
         )
-
-    @staticmethod
-    def _power_threshold(
-        y: ArrayLike,
-        detrend_func: str,
-        k: int,
-        p: int,
-    ) -> float:
-        """
-        Compute the power threshold as the p-th percentile of the maximum
-        power values of the periodogram of k permutations of the data.
-
-        Parameters
-        ----------
-        y : array_like
-            Data to be investigated. Must be squeezable to 1-d.
-        detrend_func : str, default = 'linear'
-            The kind of detrending to be applied on the series. It can either be
-            'linear' or 'constant'.
-        k : int
-            The number of times the data is randomly permuted to compute
-            the maximum power values.
-        p : int
-            The percentile value used to compute the power threshold.
-            It determines the cutoff point in the sorted list of the maximum
-            power values from the periodograms of the permuted data.
-            Value must be between 0 and 100 inclusive.
-
-        See Also
-        --------
-        scipy.signal.periodogram
-            Estimate power spectral density using a periodogram.
-
-        Returns
-        -------
-        float
-            Power threshold of the target data.
-        """
-        if detrend_func is None:
-            detrend_func = False
-        max_powers = []
-        while len(max_powers) < k:
-            _, power_p = periodogram(np.random.permutation(y), detrend=detrend_func)
-            max_powers.append(power_p.max())
-        max_powers.sort()
-        return np.percentile(max_powers, p)
 
     @staticmethod
     def _cluster_period_hints(period_hints: ArrayLike, n: int) -> NDArray:
