@@ -2,7 +2,7 @@ from typing import Callable, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import argrelmax, butter, detrend, sosfiltfilt, periodogram
+from scipy.signal import argrelmax, butter, detrend, periodogram, sosfiltfilt
 
 from pyriodicity.tools import acf, apply_window, to_1d_array
 
@@ -78,16 +78,15 @@ class CFDAutoperiod:
         k : int, optional, default = 100
             The number of times the data is randomly permuted while estimating the
             power threshold.
-        percentile : int, optional, default = 95
+        percentile : int, optional, default = 99
             Percentage for the percentile parameter used in computing the power
             threshold. Value must be between 0 and 100 inclusive.
         detrend_func : str, default = 'linear'
-            The kind of detrending to be applied on the series. It can either be
-            'linear' or 'constant' if it the parameter is of 'str' type, or a
-            custom function that returns a detrended series.
+            The kind of detrending to be applied on the signal. It can either be
+            'linear' or 'constant'.
         window_func : float, str, tuple optional, default = None
             Window function to be applied to the time series. Check
-            'window' parameter documentation for scipy.signal.get_window
+            'window' parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
         correlation_func : str, default = 'pearson'
@@ -127,7 +126,7 @@ class CFDAutoperiod:
 
         # Find period hints
         freq, power = periodogram(self.y, detrend=detrend_func)
-        period_hints = np.array(
+        hints = np.array(
             [
                 1 / f
                 for f, p in zip(freq, power)
@@ -136,27 +135,26 @@ class CFDAutoperiod:
         )
 
         # Replace period hints with their density clustering centroids
-        period_hints = self._cluster_period_hints(period_hints, len(self.y))
+        hints = self._cluster_period_hints(hints, len(self.y))
 
         # Validate period hints
-        period_hints = np.array(
-            [
-                hint
-                for hint in period_hints
-                if self._is_hint_valid(
-                    self.y,
-                    hint,
-                    detrend_func=detrend_func,
-                    correlation_func=correlation_func,
+        valid_hints = []
+        length = len(self.y)
+        y_filtered = np.array(self.y)
+        for h in hints:
+            if self._is_hint_valid(y_filtered, h, detrend_func, correlation_func):
+                # Apply a low pass filter with an adapted cutoff frequency for the next hint
+                f_cuttoff = 1 / (length / (length / h + 1) - 1)
+                y_filtered = sosfiltfilt(
+                    butter(N=5, Wn=f_cuttoff, output="sos"), y_filtered
                 )
-            ]
-        )
+                valid_hints.append(h)
 
         # Return the closest ACF peak to each valid period hint
-        acf_arr = acf(self.y, nlags=len(self.y), correlation_func=correlation_func)
+        acf_arr = acf(self.y, nlags=length, correlation_func=correlation_func)
         local_argmax = argrelmax(acf_arr)[0]
         return np.array(
-            list({min(local_argmax, key=lambda x: abs(x - p)) for p in period_hints})
+            list({min(local_argmax, key=lambda x: abs(x - h)) for h in valid_hints})
         )
 
     @staticmethod
@@ -196,6 +194,8 @@ class CFDAutoperiod:
         float
             Power threshold of the target data.
         """
+        if detrend_func is None:
+            detrend_func = False
         max_powers = []
         while len(max_powers) < k:
             _, power_p = periodogram(np.random.permutation(y), detrend=detrend_func)
@@ -231,27 +231,37 @@ class CFDAutoperiod:
     @staticmethod
     def _is_hint_valid(
         y: ArrayLike,
-        hint: int,
+        hint: float,
         detrend_func: Union[str, Callable[[ArrayLike], NDArray]],
         correlation_func: str,
     ) -> bool:
         """
-        TODO
+        Validate the period hint
+
+        Parameters
+        ----------
+        y : array_like
+            Data to be investigated. Must be squeezable to 1-d.
+        hint : float
+            The period hint to be validated.
+        detrend_func : str, default = 'linear'
+            The kind of detrending to be applied on the signal. It can either be
+            'linear' or 'constant'.
+        correlation_func : str, default = 'pearson'
+            The correlation function to be used to calculate the ACF of the series
+            or the signal. Possible values are ['pearson', 'spearman', 'kendall'].
+
+        Returns
+        -------
+        bool
+            Whether the period hint is valid.
         """
         if detrend_func is None:
             detrend_func = "linear"
         if correlation_func is None:
             correlation_func = "pearson"
-
-        # Apply a low pass filter with an adapted cutoff frequency
-        length = len(y)
-        f_cuttoff = 1 / (length / (length / hint + 1) - 1)
-        filter = butter(N=5, Wn=f_cuttoff, output="sos")
-        y_filtered = sosfiltfilt(filter, y)
-
-        # Validate the hint
         hint_range = np.arange(hint // 2, 1 + hint + hint // 2, dtype=int)
-        acf_arr = acf(y_filtered, nlags=length, correlation_func=correlation_func)
+        acf_arr = acf(y, nlags=len(y), correlation_func=correlation_func)
         polynomial = np.polynomial.Polynomial.fit(
             hint_range, detrend(acf_arr[hint_range], type=detrend_func), deg=2
         ).convert()
