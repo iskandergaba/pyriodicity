@@ -150,13 +150,26 @@ class CFDAutoperiod:
                 )
                 valid_hints.append(h)
 
+        # Calculate only the needed part of the ACF array for each hint
+        hint_ranges = [
+            np.arange(h // 2, 1 + h + h // 2, dtype=int) for h in valid_hints
+        ]
+        acf_arrays = [
+            acf(
+                self.y,
+                lag_start=r[0],
+                lag_stop=r[-1],
+                correlation_func=correlation_func,
+            )
+            for r in hint_ranges
+        ]
+
         # Return the closest ACF peak to each valid period hint
-        acf_arr = acf(
-            self.y, lag_start=0, lag_stop=length, correlation_func=correlation_func
-        )
-        local_argmax = argrelmax(acf_arr)[0]
         return np.array(
-            list({min(local_argmax, key=lambda x: abs(x - h)) for h in valid_hints})
+            [
+                r[0] + min(argrelmax(arr)[0], key=lambda x: abs(x - h))
+                for h, r, arr in zip(valid_hints, hint_ranges, acf_arrays)
+            ]
         )
 
     @staticmethod
