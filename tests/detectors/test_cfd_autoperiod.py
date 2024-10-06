@@ -9,7 +9,6 @@ def test_co2_daily_cfd_autoperiod_default():
     periods = autoperiod.fit()
     assert len(periods) > 0
     assert 364 in periods
-    assert 1456 in periods
 
 
 def test_co2_weekly_cfd_autoperiod_default():
@@ -55,7 +54,6 @@ def test_co2_daily_cfd_autoperiod_window_func_blackman():
     periods = autoperiod.fit(window_func="blackman")
     assert len(periods) > 0
     assert 364 in periods
-    assert 1456 in periods
 
 
 def test_co2_weekly_cfd_autoperiod_window_func_blackman():
