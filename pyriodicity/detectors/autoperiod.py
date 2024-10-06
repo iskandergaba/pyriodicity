@@ -123,7 +123,9 @@ class Autoperiod:
 
         # Compute the ACF
         length = len(self.y)
-        acf_arr = acf(self.y, nlags=length, correlation_func=correlation_func)
+        acf_arr = acf(
+            self.y, lag_start=0, lag_stop=length, correlation_func=correlation_func
+        )
 
         # Validate period hints
         valid_hints = []

@@ -45,16 +45,20 @@ def detrend(
 @staticmethod
 def acf(
     x: ArrayLike,
-    nlags: int,
+    lag_start: int,
+    lag_stop: int,
     correlation_func: Optional[str] = "pearson",
 ) -> NDArray:
-    if not 0 < nlags <= len(x):
-        raise ValueError("nlags must be a postive integer less than the data length")
+    if not 0 <= lag_start < lag_stop <= len(x):
+        raise ValueError(
+            "Invalid lag values range ({}, {})".format(lag_start, lag_stop)
+        )
+    lag_values = np.arange(lag_start, lag_stop + 1, dtype=int)
     if correlation_func == "spearman":
-        return np.array([spearmanr(x, np.roll(x, l)).statistic for l in range(nlags)])
+        return np.array([spearmanr(x, np.roll(x, l)).statistic for l in lag_values])
     elif correlation_func == "kendall":
-        return np.array([kendalltau(x, np.roll(x, l)).statistic for l in range(nlags)])
-    return np.array([pearsonr(x, np.roll(x, l)).statistic for l in range(nlags)])
+        return np.array([kendalltau(x, np.roll(x, l)).statistic for l in lag_values])
+    return np.array([pearsonr(x, np.roll(x, l)).statistic for l in lag_values])
 
 
 @staticmethod

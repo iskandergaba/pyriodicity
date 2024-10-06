@@ -151,7 +151,9 @@ class CFDAutoperiod:
                 valid_hints.append(h)
 
         # Return the closest ACF peak to each valid period hint
-        acf_arr = acf(self.y, nlags=length, correlation_func=correlation_func)
+        acf_arr = acf(
+            self.y, lag_start=0, lag_stop=length, correlation_func=correlation_func
+        )
         local_argmax = argrelmax(acf_arr)[0]
         return np.array(
             list({min(local_argmax, key=lambda x: abs(x - h)) for h in valid_hints})
@@ -215,9 +217,14 @@ class CFDAutoperiod:
         if correlation_func is None:
             correlation_func = "pearson"
         hint_range = np.arange(hint // 2, 1 + hint + hint // 2, dtype=int)
-        acf_arr = acf(y, nlags=len(y), correlation_func=correlation_func)
+        acf_arr = acf(
+            y,
+            lag_start=hint_range[0],
+            lag_stop=hint_range[-1],
+            correlation_func=correlation_func,
+        )
         polynomial = np.polynomial.Polynomial.fit(
-            hint_range, detrend(acf_arr[hint_range], type=detrend_func), deg=2
+            hint_range, detrend(acf_arr, type=detrend_func), deg=2
         ).convert()
         derivative = polynomial.deriv()
         return polynomial.coef[-1] < 0 and int(derivative.roots()[0]) in hint_range

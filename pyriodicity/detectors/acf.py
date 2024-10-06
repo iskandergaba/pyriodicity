@@ -105,7 +105,12 @@ class ACFPeriodicityDetector:
         self.y = self.y if window_func is None else apply_window(self.y, window_func)
 
         # Compute the ACF
-        acf_arr = acf(self.y, len(self.y) // 2, correlation_func)
+        acf_arr = acf(
+            self.y,
+            lag_start=0,
+            lag_stop=len(self.y) // 2,
+            correlation_func=correlation_func,
+        )
 
         # Find the local argmax of the first half of the ACF array
         local_argmax = argrelmax(acf_arr)[0]
