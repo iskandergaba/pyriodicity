@@ -171,7 +171,7 @@ class CFDAutoperiod:
     @staticmethod
     def _cluster_period_hints(period_hints: ArrayLike, n: int) -> NDArray:
         """
-        Find the centroids of the period hint density clusters
+        Find the centroids of the period hint density clusters.
 
         Parameters
         ----------
@@ -201,7 +201,7 @@ class CFDAutoperiod:
         correlation_func: str,
     ) -> bool:
         """
-        Validate the period hint
+        Validate the period hint.
 
         Parameters
         ----------
