@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Union
+from typing import Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -113,11 +113,7 @@ class CFDAutoperiod:
 
         """
         # Detrend data
-        self.y = (
-            detrend(self.y, type="linear")
-            if detrend_func is None
-            else detrend(self.y, type=detrend_func)
-        )
+        self.y = self.y if detrend_func is None else detrend(self.y, type=detrend_func)
         # Apply window on data
         self.y = self.y if window_func is None else apply_window(self.y, window_func)
 
@@ -201,7 +197,7 @@ class CFDAutoperiod:
     def _is_hint_valid(
         y: ArrayLike,
         hint: float,
-        detrend_func: Union[str, Callable[[ArrayLike], NDArray]],
+        detrend_func: Union[str],
         correlation_func: str,
     ) -> bool:
         """
