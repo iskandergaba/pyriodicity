@@ -129,8 +129,8 @@ class Autoperiod:
         length = len(self.y)
         hint_ranges = [
             np.arange(
-                np.floor((h + length / (length / h + 1)) / 2 - 1) - 1,
-                np.ceil((h + length / (length / h - 1)) / 2 + 1) + 1,
+                np.floor((h + length / (length / h + 1)) / 2 - 1),
+                np.ceil((h + length / (length / h - 1)) / 2 + 1),
                 dtype=int,
             )
             for h in valid_hints
@@ -179,8 +179,8 @@ class Autoperiod:
         """
         length = len(y)
         hint_range = np.arange(
-            np.floor((hint + length / (length / hint + 1)) / 2 - 1) - 1,
-            np.ceil((hint + length / (length / hint - 1)) / 2 + 1) + 1,
+            np.floor((hint + length / (length / hint + 1)) / 2 - 1),
+            np.ceil((hint + length / (length / hint - 1)) / 2 + 1),
             dtype=int,
         )
         acf_arr = acf(
@@ -191,9 +191,8 @@ class Autoperiod:
         )
         splits = [
             Autoperiod._split(hint_range, acf_arr, 0, len(hint_range), i)
-            for i in range(2, hint_range[-1] - hint_range[0])
+            for i in range(1, len(hint_range) - 1)
         ]
-
         line1, line2, _ = splits[np.array([error for _, _, error in splits]).argmin()]
         return line1.coef[-1] > 0 > line2.coef[-1]
 
@@ -201,7 +200,7 @@ class Autoperiod:
     def _split(x: ArrayLike, y: ArrayLike, start: int, end: int, split: int) -> tuple:
         """
         Approximate a function at [start, end] with two line segments at
-        [start, split - 1] and [split, end].
+        [start, split] and [split, end].
 
         Parameters
         ----------
@@ -230,15 +229,15 @@ class Autoperiod:
         float
             The approximation error.
         """
-        if split - start < 2 or end - split < 2:
+        if not start < split < end:
             raise ValueError(
                 "Invalid start, split, and end values ({}, {}, {})".format(
                     start, split, end
                 )
             )
         x1, y1, x2, y2 = (
-            x[start:split],
-            y[start:split],
+            x[start : split + 1],
+            y[start : split + 1],
             x[split:end],
             y[split:end],
         )
