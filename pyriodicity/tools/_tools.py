@@ -1,8 +1,7 @@
-from typing import Callable, Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import detrend as _detrend
 from scipy.signal import get_window, periodogram
 from scipy.stats import kendalltau, pearsonr, spearmanr
 
@@ -30,16 +29,6 @@ def seasonality_strength(seasonal: ArrayLike, resid: ArrayLike) -> float:
 @staticmethod
 def apply_window(x: ArrayLike, window_func: Union[str, float, tuple]) -> NDArray:
     return x * get_window(window=window_func, Nx=len(x))
-
-
-@staticmethod
-def detrend(
-    x: ArrayLike,
-    method: Union[str, Callable[[ArrayLike], NDArray]],
-) -> NDArray:
-    if isinstance(method, str):
-        return _detrend(x, type=method)
-    return method(x)
 
 
 @staticmethod
