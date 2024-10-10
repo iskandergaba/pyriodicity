@@ -12,7 +12,8 @@
 ## About Pyriodicity
 Pyriodicity provides intuitive and easy-to-use Python implementation for periodicity (seasonality) detection in univariate time series. Pyriodicity supports the following detection methods:
 - [Autocorrelation Function (ACF)](https://otexts.com/fpp3/acf.html)
-- [Autoperiod]( https://doi.org/10.1137/1.9781611972757.40)
+- [Autoperiod](https://doi.org/10.1137/1.9781611972757.40)
+- [CFD-Autoperiod](https://doi.org/10.1007/978-3-030-39098-3_4)
 - [Fast Fourier Transform (FFT)](https://otexts.com/fpp3/useful-predictors.html#fourier-series)
 
 ## Installation
@@ -23,35 +24,28 @@ pip install pyriodicity
 ```
 
 ## Example
-Start by loading a the `co2` timeseries emissions sample data from [`statsmodels`](https://www.statsmodels.org)
+Start by loading a the `co2` emissions sample time series data from [`statsmodels`](https://www.statsmodels.org)
 ```python
-from statsmodels.datasets import co2
-data = co2.load().data
+>>> from statsmodels.datasets import co2
+>>> data = co2.load().data
 ```
 
 You can then resample the data to whatever frequency you want. In this example, we downsample the data to a monthly frequency
 ```python
-data = data.resample("ME").mean().ffill()
+>>> data = data.resample("ME").mean().ffill()
 ```
 
 Use `Autoperiod` to find the list of periods based in this data (if any).
 ```python
-from pyriodicity import Autoperiod
-autoperiod = Autoperiod(data)
-periods = autoperiod.fit()
+>>> from pyriodicity import Autoperiod
+>>> autoperiod = Autoperiod(data)
+>>> autoperiod.fit()
+array([12])
 ```
 
-There are multiple parameters you can play with should you wish to. For example, you can specify a lower percentile value for a more lenient detection
-```python
-autoperiod.fit(percentile=90)
-```
+The detected periodicity length is 12 which suggests a strong yearly seasonality given that the data has a monthly frequency.
 
-Or increase the number of random data permutations for a better power threshold estimation
-```python
-autoperiod.fit(k=300)
-```
-
-Alternatively, you can use other periodicity detection methods such as `ACFPeriodicityDetector` and `FFTPeriodicityDetector` and compare results and performances.
+You can also use `CFDAutoperiod` variant of `Autoperiod` or any other supported periodicity detection method such as `ACFPeriodicityDetector` and `FFTPeriodicityDetector` and compare results and performances.
 
 ## Development Environment Setup
 This project is built and published using [Poetry](https://python-poetry.org). To setup a development environment for this project you can follow these steps:
@@ -85,3 +79,4 @@ poetry export --with test --output requirements-dev.txt
 ## References
 - [1] Hyndman, R.J., & Athanasopoulos, G. (2021) Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia. [OTexts.com/fpp3](https://otexts.com/fpp3). Accessed on 09-15-2024.
 - [2] Vlachos, M., Yu, P., & Castelli, V. (2005). On periodicity detection and Structural Periodic similarity. Proceedings of the 2005 SIAM International Conference on Data Mining. [doi.org/10.1137/1.9781611972757.40](https://doi.org/10.1137/1.9781611972757.40).
+- [3] Puech, T., Boussard, M., D'Amato, A., & Millerand, G. (2020). A fully automated periodicity detection in time series. In Advanced Analytics and Learning on Temporal Data: 4th ECML PKDD Workshop, AALTD 2019, Würzburg, Germany, September 20, 2019, Revised Selected Papers 4 (pp. 43-54). Springer International Publishing. [doi.org/10.1007/978-3-030-39098-3_4](https://doi.org/10.1007/978-3-030-39098-3_4).
