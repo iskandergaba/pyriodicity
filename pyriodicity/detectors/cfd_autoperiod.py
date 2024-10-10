@@ -191,7 +191,7 @@ class CFDAutoperiod:
             for i in range(len(hints))
         ]
         clusters = np.split(hints, np.argwhere(hints > eps).flatten())
-        return np.array([c.mean() for c in clusters])
+        return np.array([c.mean() for c in clusters if len(c) > 0])
 
     @staticmethod
     def _is_hint_valid(
@@ -209,10 +209,10 @@ class CFDAutoperiod:
             Data to be investigated. Must be squeezable to 1-d.
         hint : float
             The period hint to be validated.
-        detrend_func : str, default = 'linear'
+        detrend_func : str
             The kind of detrending to be applied on the signal. It can either be
             'linear' or 'constant'.
-        correlation_func : str, default = 'pearson'
+        correlation_func : str
             The correlation function to be used to calculate the ACF of the series
             or the signal. Possible values are ['pearson', 'spearman', 'kendall'].
 
@@ -221,10 +221,6 @@ class CFDAutoperiod:
         bool
             Whether the period hint is valid.
         """
-        if detrend_func is None:
-            detrend_func = "linear"
-        if correlation_func is None:
-            correlation_func = "pearson"
         hint_range = np.arange(hint // 2, 1 + hint + hint // 2, dtype=int)
         acf_arr = acf(
             y,
