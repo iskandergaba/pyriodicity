@@ -27,6 +27,27 @@ def test_co2_monthly_cfd_autoperiod_default():
     assert 12 in periods
 
 
+def test_co2_daily_cfd_autoperiod_detrend_func_none():
+    data = co2.load().data.resample("D").mean().ffill()
+    autoperiod = CFDAutoperiod(data)
+    periods = autoperiod.fit(detrend_func=None)
+    assert len(periods) == 0
+
+
+def test_co2_weekly_cfd_autoperiod_detrend_func_none():
+    data = co2.load().data.resample("W").mean().ffill()
+    autoperiod = CFDAutoperiod(data)
+    periods = autoperiod.fit(detrend_func=None)
+    assert len(periods) == 0
+
+
+def test_co2_monthly_cfd_autoperiod_detrend_func_none():
+    data = co2.load().data.resample("ME").mean().ffill()
+    autoperiod = CFDAutoperiod(data)
+    periods = autoperiod.fit(detrend_func=None)
+    assert len(periods) == 0
+
+
 def test_co2_daily_cfd_autoperiod_detrend_func_constant():
     data = co2.load().data.resample("D").mean().ffill()
     autoperiod = CFDAutoperiod(data)
