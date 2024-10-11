@@ -10,4 +10,5 @@ API Reference
 
    ~ACFPeriodicityDetector
    ~Autoperiod
+   ~CFDAutoperiod
    ~FFTPeriodicityDetector
