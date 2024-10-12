@@ -22,7 +22,8 @@ class FFTPeriodicityDetector:
     ----------
     .. [1] Hyndman, R.J., & Athanasopoulos, G. (2021)
        Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia.
-       https://OTexts.com/fpp3/useful-predictors.html#fourier-series. Accessed on 09-15-2024.
+       https://OTexts.com/fpp3/useful-predictors.html#fourier-series.
+       Accessed on 09-15-2024.
 
     Examples
     --------
@@ -45,7 +46,7 @@ class FFTPeriodicityDetector:
         16,  17,  21])
 
     ``FFTPeriodicityDetector`` tends to be quite sensitive to noise and find
-    many false period lengths. Depending on your data, you can choose to 
+    many false period lengths. Depending on your data, you can choose to
     apply a window function to get different results. You can also limit the
     number returned period length values to the 3 most signficant ones.
 
@@ -118,7 +119,7 @@ class FFTPeriodicityDetector:
         periods = periods[filter]
         amps = amps[filter]
 
-        # Sort period length values in the descending order of their corresponding amplitudes
+        # Sort period length values in the descending order of their amplitudes
         periods = periods[np.argsort(-amps)]
 
         # Return unique period length values

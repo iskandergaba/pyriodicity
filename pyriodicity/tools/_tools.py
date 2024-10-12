@@ -32,10 +32,12 @@ def acf(
         )
     lag_values = np.arange(lag_start, lag_stop + 1, dtype=int)
     if correlation_func == "spearman":
-        return np.array([spearmanr(x, np.roll(x, l)).statistic for l in lag_values])
+        return np.array([spearmanr(x, np.roll(x, val)).statistic for val in lag_values])
     elif correlation_func == "kendall":
-        return np.array([kendalltau(x, np.roll(x, l)).statistic for l in lag_values])
-    return np.array([pearsonr(x, np.roll(x, l)).statistic for l in lag_values])
+        return np.array(
+            [kendalltau(x, np.roll(x, val)).statistic for val in lag_values]
+        )
+    return np.array([pearsonr(x, np.roll(x, val)).statistic for val in lag_values])
 
 
 @staticmethod
