@@ -11,7 +11,7 @@ class FFTPeriodicityDetector:
     """
     Fast Fourier Transform (FFT) based periodicity detector.
 
-    Find the periods in a given signal or series using FFT.
+    Find the periods in a given signal or series using FFT [1]_.
 
     Parameters
     ----------
@@ -21,29 +21,40 @@ class FFTPeriodicityDetector:
     References
     ----------
     .. [1] Hyndman, R.J., & Athanasopoulos, G. (2021)
-    Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia.
-    OTexts.com/fpp3/useful-predictors.html#fourier-series. Accessed on 09-15-2024.
+       Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia.
+       https://OTexts.com/fpp3/useful-predictors.html#fourier-series.
+       Accessed on 09-15-2024.
 
     Examples
     --------
-    Start by loading a timeseries dataset.
+    Start by loading Mauna Loa Weekly Atmospheric CO2 Data from Statsmodels
+    and downsampling its data to a monthly frequency.
 
     >>> from statsmodels.datasets import co2
     >>> data = co2.load().data
-
-    You can resample the data to whatever frequency you want.
-
     >>> data = data.resample("ME").mean().ffill()
 
-    Use FFTPeriodicityDetector to find the list of periods using FFT, ordered
+    Use ``FFTPeriodicityDetector`` to find the list of periods using FFT, ordered
     by corresponding frequency amplitudes in a descending order.
 
+    >>> from pyriodicity import FFTPeriodicityDetector
     >>> fft_detector = FFTPeriodicityDetector(data)
-    >>> periods = fft_detector.fit()
+    >>> fft_detector.fit()
+    array([ 12,   6, 175,  44, 132,  88,  11,  13, 105,  58,  66,  75,  14,
+        25,  18,  48,  10,  31,   4,   9,   7,  19,  23,   8,  38,  35,
+        40,  28,  20,   3,   5,  15,  29,  22,   2,  24,  53,  33,  26,
+        16,  17,  21])
 
-    You can optionally specify a window function for pre-processing.
+    ``FFTPeriodicityDetector`` tends to be quite sensitive to noise and find
+    many false period lengths. Depending on your data, you can choose to
+    apply a window function to get different results. You can also limit the
+    number returned period length values to the 3 most signficant ones.
 
-    >>> periods = fft_detector.fit(window_func="blackman")
+    >>> fft_detector.fit(window_func="blackman", max_period_count=3)
+    array([12, 13, 11])
+
+    As you can see, results are concentrated around the period length value 12,
+    indicating a yearly periodicity.
     """
 
     def __init__(self, endog: ArrayLike):
@@ -71,6 +82,11 @@ class FFTPeriodicityDetector:
             function for more information on the accepted formats of this
             parameter.
 
+        Returns
+        -------
+        NDArray
+            List of detected periods.
+
         See Also
         --------
         numpy.fft
@@ -79,11 +95,6 @@ class FFTPeriodicityDetector:
             Remove linear trend along axis from data.
         scipy.signal.get_window
             Return a window of a given length and type.
-
-        Returns
-        -------
-        NDArray
-            List of detected periods.
         """
         # Detrend data
         self.y = self.y if detrend_func is None else detrend(self.y, type=detrend_func)
@@ -108,7 +119,7 @@ class FFTPeriodicityDetector:
         periods = periods[filter]
         amps = amps[filter]
 
-        # Sort period length values in the descending order of their corresponding amplitudes
+        # Sort period length values in the descending order of their amplitudes
         periods = periods[np.argsort(-amps)]
 
         # Return unique period length values

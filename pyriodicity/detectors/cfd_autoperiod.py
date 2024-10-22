@@ -139,7 +139,7 @@ class CFDAutoperiod:
         y_filtered = np.array(self.y)
         for h in hints:
             if self._is_hint_valid(y_filtered, h, detrend_func, correlation_func):
-                # Apply a low pass filter with an adapted cutoff frequency for the next hint
+                # Apply a low pass filter with an adapted cutoff frequency
                 f_cuttoff = 1 / (length / (length / h + 1) - 1)
                 y_filtered = sosfiltfilt(
                     butter(N=5, Wn=f_cuttoff, output="sos"), y_filtered
