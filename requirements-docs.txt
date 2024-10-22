@@ -256,9 +256,9 @@ numpydoc==1.8.0 ; python_version >= "3.10" and python_version < "4.0" \
 packaging==24.1 ; python_version >= "3.10" and python_version < "4.0" \
     --hash=sha256:026ed72c8ed3fcce5bf8950572258698927fd1dbda10a5e981cdf0ac37f4f002 \
     --hash=sha256:5b8f2217dbdbd2f7f384c41c628544e6d52f2d0f53c6d0c3ea61aa5d1d7ff124
-pydata-sphinx-theme==0.15.4 ; python_version >= "3.10" and python_version < "4.0" \
-    --hash=sha256:2136ad0e9500d0949f96167e63f3e298620040aea8f9c74621959eda5d4cf8e6 \
-    --hash=sha256:7762ec0ac59df3acecf49fd2f889e1b4565dbce8b88b2e29ee06fdd90645a06d
+pydata-sphinx-theme==0.16.0 ; python_version >= "3.10" and python_version < "4.0" \
+    --hash=sha256:18c810ee4e67e05281e371e156c1fb5bb0fa1f2747240461b225272f7d8d57d8 \
+    --hash=sha256:721dd26e05fa8b992d66ef545536e6cbe0110afb9865820a08894af1ad6f7707
 pygments==2.18.0 ; python_version >= "3.10" and python_version < "4.0" \
     --hash=sha256:786ff802f32e91311bff3889f6e9a86e81505fe99f2735bb6d60ae0c5004f199 \
     --hash=sha256:b8e6aca0523f3ab76fee51799c488e38782ac06eafcf95e7ba832985c8e7b13a
