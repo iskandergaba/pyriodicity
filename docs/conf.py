@@ -51,3 +51,6 @@ html_theme_options = {
         },
     ],
 }
+
+flyout_display = "attached"
+version_selector = True
