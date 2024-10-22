@@ -13,10 +13,10 @@ keywords = ["signal", "time", "series", "forecast", "analysis", "period", "perio
 
 [tool.poetry.dependencies]
 python = "^3.10"
-scipy = "^1.14.0"
+scipy = "^1.14.1"
 
 [tool.poetry.group.test.dependencies]
-pytest = "^7.4.3"
+pytest = "^8.3.3"
 pytest-cov = "^5.0.0"
 statsmodels = "^0.14.4"
 
