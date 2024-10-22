@@ -76,7 +76,7 @@ poetry export --output requirements.txt
 poetry export --with test --output requirements-dev.txt
 
 # The same as above if you wish to export documentation dependencies
-poetry export --with docs --output requirements-doc.txt
+poetry export --with docs --output requirements-docs.txt
 ```
 
 ## References
