@@ -38,6 +38,7 @@ numpydoc_show_class_members = False
 html_title = project
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
+html_sidebars = {"guide": [], "environment": []}
 html_theme_options = {
     "icon_links": [
         {
