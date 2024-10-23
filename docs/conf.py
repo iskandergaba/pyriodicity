@@ -1,6 +1,6 @@
-import importlib.metadata as metadata
 import os
 import sys
+import tomllib
 
 sys.path.insert(0, os.path.abspath(".."))
 
@@ -15,7 +15,9 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "Pyriodicity"
 copyright = "%Y, Iskander Gaba"
 author = "Iskander Gaba"
-release = metadata.version("pyriodicity")
+with open("../pyproject.toml", "rb") as f:
+    pyproject_data = tomllib.load(f)
+    release = pyproject_data["tool"]["poetry"]["version"]
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
