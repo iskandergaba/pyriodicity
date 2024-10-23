@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.abspath(".."))
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Project information -----------------------------------------------------
+# Project information
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "Pyriodicity"
@@ -19,24 +19,32 @@ with open("../pyproject.toml", "rb") as f:
     pyproject_data = tomllib.load(f)
     release = pyproject_data["tool"]["poetry"]["version"]
 
-# -- General configuration ---------------------------------------------------
+# General configuration
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = [
-    "numpydoc",
-    "pydata_sphinx_theme",
-]
+extensions = ["numpydoc", "pydata_sphinx_theme", "sphinx.ext.intersphinx"]
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Options for autodoc
+# https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html
+
 autodoc_typehints = "none"
 
 # Options for numpydoc
 # https://numpydoc.readthedocs.io/en/latest/install.html#configuration
+
 numpydoc_show_class_members = False
 
-# -- Options for HTML output -------------------------------------------------
+# Options for intersphinx
+# https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html
+
+intersphinx_mapping = {
+    "scipy": ("https://docs.scipy.org/doc/scipy", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+}
+
+# Options for HTML output
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "pydata_sphinx_theme"
