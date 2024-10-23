@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyriodicity"
-version = "0.2.1"
+version = "0.3.0rc0"
 description = "Pyriodicity provides intuitive and easy-to-use Python implementation for periodicity (seasonality) detection in univariate time series."
 
 license = "MIT"
