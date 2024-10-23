@@ -1,3 +1,4 @@
+import importlib.metadata as metadata
 import os
 import sys
 
@@ -14,6 +15,7 @@ sys.path.insert(0, os.path.abspath(".."))
 project = "Pyriodicity"
 copyright = "%Y, Iskander Gaba"
 author = "Iskander Gaba"
+release = metadata.version("pyriodicity")
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
