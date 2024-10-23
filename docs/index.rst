@@ -53,7 +53,7 @@ References
    :titlesonly:
 
    guide
-   environment
+   dev
    api
 
 .. |PyPI Version| image:: https://img.shields.io/pypi/v/pyriodicity.svg?label=PyPI
