@@ -5,6 +5,7 @@ description = "Pyriodicity provides intuitive and easy-to-use Python implementat
 
 license = "MIT"
 readme = ["README.md"]
+homepage = "https://pyriodicity.readthedocs.io"
 repository = "https://github.com/iskandergaba/pyriodicity"
 
 authors = ["Iskander Gaba <iskander@hey.com>"]
