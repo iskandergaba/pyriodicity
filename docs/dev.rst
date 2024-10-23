@@ -1,5 +1,5 @@
-Development Environment
------------------------
+Development
+-----------
 
 This project is built and published using `Poetry <https://python-poetry.org>`__. To setup a development environment for this project you can follow these steps:
 
