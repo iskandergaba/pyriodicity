@@ -49,7 +49,7 @@ intersphinx_mapping = {
 
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
-html_sidebars = {"guide": [], "environment": []}
+html_sidebars = {"guide": [], "dev": []}
 html_theme_options = {
     "icon_links": [
         {
