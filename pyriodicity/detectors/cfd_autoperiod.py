@@ -9,7 +9,7 @@ from pyriodicity.tools import acf, apply_window, power_threshold, to_1d_array
 
 class CFDAutoperiod:
     """
-    CFDAutoperiod periodicity detector.
+    CFD-Autoperiod periodicity detector.
 
     Find the periods in a given signal or series using CFDAutoperiod [1]_.
 
@@ -17,6 +17,11 @@ class CFDAutoperiod:
     ----------
     endog : array_like
         Data to be investigated. Must be squeezable to 1-d.
+
+    See Also
+    --------
+    pyriodicity.Autoperiod
+        Autoperiod periodicity detector.
 
     References
     ----------

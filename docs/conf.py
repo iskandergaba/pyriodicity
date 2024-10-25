@@ -40,8 +40,9 @@ numpydoc_show_class_members = False
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html
 
 intersphinx_mapping = {
-    "scipy": ("https://docs.scipy.org/doc/scipy", None),
     "numpy": ("https://numpy.org/doc/stable", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy", None),
+    "pyriodicity": ("https://pyriodicity.readthedocs.io/en/{}".format(release), None),
 }
 
 # Options for HTML output

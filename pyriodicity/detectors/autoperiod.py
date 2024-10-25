@@ -18,6 +18,11 @@ class Autoperiod:
     endog : array_like
         Data to be investigated. Must be squeezable to 1-d.
 
+    See Also
+    --------
+    pyriodicity.CFDAutoperiod
+        CFD-Autoperiod periodicity detector.
+
     References
     ----------
     .. [1] Vlachos, M., Yu, P., & Castelli, V. (2005).
