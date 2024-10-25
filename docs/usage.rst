@@ -1,5 +1,5 @@
-Example
--------
+Usage
+-----
 For this example, start by loading Mauna Loa Weekly Atmospheric CO2 Data from `statsmodels <https://www.statsmodels.org>`__
 and downsampling its data to a monthly frequency.
 

@@ -52,7 +52,7 @@ References
    :hidden:
    :titlesonly:
 
-   example
+   usage
    dev
    api
 
