@@ -5,7 +5,7 @@
 Pyriodicity
 -----------
 
-|PyPI - Python Version| |GitHub License| |Docs| |Codecov| |CI Build|
+|PyPI - Python Version| |GitHub License| |Codecov| |Docs| |CI Build|
 
 Pyriodicity provides an intuitive and easy-to-use Python implementation for periodicity detection in univariate signals.
 
