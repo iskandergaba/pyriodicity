@@ -26,8 +26,9 @@ class ACFPeriodicityDetector:
 
     Examples
     --------
-    Start by loading Mauna Loa Weekly Atmospheric CO2 Data from Statsmodels
-    and downsampling its data to a monthly frequency.
+    Start by loading Mauna Loa Weekly Atmospheric CO2 Data from
+    `statsmodels <https://statsmodels.org>`_ and downsampling its data to a monthly
+    frequency.
 
     >>> from statsmodels.datasets import co2
     >>> data = co2.load().data
