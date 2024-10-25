@@ -7,7 +7,7 @@ Pyriodicity
 
 |PyPI - Python Version| |GitHub License| |CI Build| |Codecov|
 
-Pyriodicity provides intuitive and easy-to-use Python implementation for periodicity detection in univariate signals.
+Pyriodicity provides an intuitive and easy-to-use Python implementation for periodicity detection in univariate signals.
 
 .. raw:: html
 
