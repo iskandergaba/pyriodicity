@@ -23,8 +23,10 @@ To install the latest version of `pyriodicity`, simply run:
 pip install pyriodicity
 ```
 
-## Example
-Start by loading Mauna Loa Weekly Atmospheric CO2 Data from [`statsmodels`](https://www.statsmodels.org) and downsampling its data to a monthly frequency.
+## Usage
+Please refer to the [package documentation](https://pyriodicity.readthedocs.io) for more information.
+
+For this example, start by loading Mauna Loa Weekly Atmospheric CO2 Data from [`statsmodels`](https://www.statsmodels.org) and downsampling its data to a monthly frequency.
 ```python
 >>> from statsmodels.datasets import co2
 >>> data = co2.load().data
