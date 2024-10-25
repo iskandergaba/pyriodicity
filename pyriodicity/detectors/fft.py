@@ -27,8 +27,9 @@ class FFTPeriodicityDetector:
 
     Examples
     --------
-    Start by loading Mauna Loa Weekly Atmospheric CO2 Data from Statsmodels
-    and downsampling its data to a monthly frequency.
+    Start by loading Mauna Loa Weekly Atmospheric CO2 Data from
+    `statsmodels <https://statsmodels.org>`_ and downsampling its data to a monthly
+    frequency.
 
     >>> from statsmodels.datasets import co2
     >>> data = co2.load().data
@@ -45,10 +46,10 @@ class FFTPeriodicityDetector:
         40,  28,  20,   3,   5,  15,  29,  22,   2,  24,  53,  33,  26,
         16,  17,  21])
 
-    ``FFTPeriodicityDetector`` tends to be quite sensitive to noise and find
-    many false period lengths. Depending on your data, you can choose to
-    apply a window function to get different results. You can also limit the
-    number returned period length values to the 3 most signficant ones.
+    ``FFTPeriodicityDetector`` tends to be quite sensitive to noise and can find
+    many false period lengths. Depending on your data, you can choose to apply
+    a window function to get different results. You can also limit the number
+    returned period length values to the 3 most signficant ones.
 
     >>> fft_detector.fit(window_func="blackman", max_period_count=3)
     array([12, 13, 11])

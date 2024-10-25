@@ -18,6 +18,11 @@ class Autoperiod:
     endog : array_like
         Data to be investigated. Must be squeezable to 1-d.
 
+    See Also
+    --------
+    pyriodicity.CFDAutoperiod
+        CFD-Autoperiod periodicity detector.
+
     References
     ----------
     .. [1] Vlachos, M., Yu, P., & Castelli, V. (2005).
@@ -27,7 +32,8 @@ class Autoperiod:
 
     Examples
     --------
-    Start by loading a timeseries datasets and resampling to an appropriate
+    Start by loading Mauna Loa Weekly Atmospheric CO2 Data from
+    `statsmodels <https://statsmodels.org>`_ and downsampling its data to a monthly
     frequency.
 
     >>> from statsmodels.datasets import co2
@@ -54,7 +60,7 @@ class Autoperiod:
     array([12])
 
     ``Autoperiod`` is generally a quite robust periodicity detection method.
-    The detection algorthim found exactly one periodicity of 12, suggesting
+    The detection algorithm found exactly one periodicity length of 12, suggesting
     a strong yearly periodicity.
     """
 

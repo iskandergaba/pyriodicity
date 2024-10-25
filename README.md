@@ -4,13 +4,13 @@
 [![PyPI Version](https://img.shields.io/pypi/v/pyriodicity.svg?label=PyPI)](https://pypi.org/project/pyriodicity/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyriodicity?label=Python)
 ![GitHub License](https://img.shields.io/github/license/iskandergaba/pyriodicity?label=License)
-[![CI Build](https://github.com/iskandergaba/pyriodicity/actions/workflows/ci.yml/badge.svg)](https://github.com/iskandergaba/pyriodicity/actions/workflows/ci.yml)
 [![Codecov](https://codecov.io/gh/iskandergaba/pyriodicity/graph/badge.svg?token=D5F3PKSOEK)](https://codecov.io/gh/iskandergaba/pyriodicity)
+[![Docs](https://readthedocs.org/projects/pyriodicity/badge/?version=latest)](https://pyriodicity.readthedocs.io/en/latest)
+[![CI Build](https://github.com/iskandergaba/pyriodicity/actions/workflows/ci.yml/badge.svg)](https://github.com/iskandergaba/pyriodicity/actions/workflows/ci.yml)
 </div>
 
-
 ## About Pyriodicity
-Pyriodicity provides intuitive and easy-to-use Python implementation for periodicity (seasonality) detection in univariate time series. Pyriodicity supports the following detection methods:
+Pyriodicity provides an intuitive and easy-to-use Python implementation for periodicity detection in univariate signals. Pyriodicity supports the following detection methods:
 - [Autocorrelation Function (ACF)](https://otexts.com/fpp3/acf.html)
 - [Autoperiod](https://doi.org/10.1137/1.9781611972757.40)
 - [CFD-Autoperiod](https://doi.org/10.1007/978-3-030-39098-3_4)
@@ -24,14 +24,10 @@ pip install pyriodicity
 ```
 
 ## Example
-Start by loading a the `co2` emissions sample time series data from [`statsmodels`](https://www.statsmodels.org)
+Start by loading Mauna Loa Weekly Atmospheric CO2 Data from [`statsmodels`](https://www.statsmodels.org) and downsampling its data to a monthly frequency.
 ```python
 >>> from statsmodels.datasets import co2
 >>> data = co2.load().data
-```
-
-You can then resample the data to whatever frequency you want. In this example, we downsample the data to a monthly frequency
-```python
 >>> data = data.resample("ME").mean().ffill()
 ```
 
@@ -45,39 +41,7 @@ array([12])
 
 The detected periodicity length is 12 which suggests a strong yearly seasonality given that the data has a monthly frequency.
 
-You can also use `CFDAutoperiod` variant of `Autoperiod` or any other supported periodicity detection method such as `ACFPeriodicityDetector` and `FFTPeriodicityDetector` and compare results and performances.
-
-## Development Environment Setup
-This project is built and published using [Poetry](https://python-poetry.org). To setup a development environment for this project you can follow these steps:
-
-1. Install one of the compatible [Python](https://www.python.org) versions indicated above.
-2. Install [Poetry](https://python-poetry.org/docs/#installing-with-pipx).
-3. Navigate to the root folder and install dependencies in a virtual environment:
-```shell
-poetry install
-```
-4. If everything worked properly, you should have an environment under the name `pyriodicity-py3.*` activated. You can verify this by running:
-```shell
-poetry env list
-```
-5. You can run tests using the command:
-```shell
-poetry run pytest
-```
-6. To export the detailed dependency list, consider running the following:
-```shell
-# Add poetry-plugin-export plugin to poetry
-poetry self add poetry-plugin-export
-
-# Export the package dependencies to requirements.txt
-poetry export --output requirements.txt
-
-# If you wish to include testing dependencies as well, run the following command
-poetry export --with test --output requirements-dev.txt
-
-# The same as above if you wish to export documentation dependencies
-poetry export --with docs --output requirements-docs.txt
-```
+All the supported estimation algorithms can be used in the same manner as in the example above with different optional parameters. Check the [API Reference](https://pyriodicity.readthedocs.io/en/stable/api.html) for more details.
 
 ## References
 - [1] Hyndman, R.J., & Athanasopoulos, G. (2021) Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia. [OTexts.com/fpp3](https://otexts.com/fpp3). Accessed on 09-15-2024.

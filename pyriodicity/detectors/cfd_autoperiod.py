@@ -9,14 +9,19 @@ from pyriodicity.tools import acf, apply_window, power_threshold, to_1d_array
 
 class CFDAutoperiod:
     """
-    CFDAutoperiod periodicity detector.
+    CFD-Autoperiod periodicity detector.
 
-    Find the periods in a given signal or series using CFDAutoperiod [1]_.
+    Find the periods in a given signal or series using CFD-Autoperiod [1]_.
 
     Parameters
     ----------
     endog : array_like
         Data to be investigated. Must be squeezable to 1-d.
+
+    See Also
+    --------
+    pyriodicity.Autoperiod
+        Autoperiod periodicity detector.
 
     References
     ----------
@@ -28,7 +33,8 @@ class CFDAutoperiod:
 
     Examples
     --------
-    Start by loading a timeseries datasets and resampling to an appropriate
+    Start by loading Mauna Loa Weekly Atmospheric CO2 Data from
+    `statsmodels <https://statsmodels.org>`_ and downsampling its data to a monthly
     frequency.
 
     >>> from statsmodels.datasets import co2
@@ -54,9 +60,9 @@ class CFDAutoperiod:
     >>> cfd_autoperiod.fit(k=300)
     array([12])
 
-    ``CFDAutoperiod`` is considered a more robust variant of ``Autoperiod``.
-    The detection algorithm found exactly one periodicity of 12, suggesting
-    a strong yearly periodicity.
+    ``CFDAutoperiod`` is considered a more robust variant of ``Autoperiod``
+    against noise. The detection algorithm found exactly one periodicity
+    length of 12, suggesting a strong yearly periodicity.
     """
 
     def __init__(self, endog: ArrayLike):
