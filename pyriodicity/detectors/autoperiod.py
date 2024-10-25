@@ -18,6 +18,11 @@ class Autoperiod:
     endog : array_like
         Data to be investigated. Must be squeezable to 1-d.
 
+    See Also
+    --------
+    pyriodicity.CFDAutoperiod
+        CFD-Autoperiod periodicity detector.
+
     References
     ----------
     .. [1] Vlachos, M., Yu, P., & Castelli, V. (2005).
@@ -27,8 +32,8 @@ class Autoperiod:
 
     Examples
     --------
-    Start by loading a timeseries datasets and resampling to an appropriate
-    frequency.
+    Start by loading Mauna Loa Weekly Atmospheric CO2 Data from Statsmodels
+    and downsampling its data to a monthly frequency.
 
     >>> from statsmodels.datasets import co2
     >>> data = co2.load().data

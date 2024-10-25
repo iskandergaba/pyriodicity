@@ -1,6 +1,5 @@
-==============
 API Reference
-==============
+-------------
 
 .. currentmodule:: pyriodicity
 
