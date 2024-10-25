@@ -59,7 +59,7 @@ class Autoperiod:
     array([12])
 
     ``Autoperiod`` is generally a quite robust periodicity detection method.
-    The detection algorthim found exactly one periodicity of 12, suggesting
+    The detection algorithm found exactly one periodicity length of 12, suggesting
     a strong yearly periodicity.
     """
 
