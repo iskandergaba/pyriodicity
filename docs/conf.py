@@ -42,7 +42,6 @@ numpydoc_show_class_members = False
 intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable", None),
     "scipy": ("https://docs.scipy.org/doc/scipy", None),
-    "pyriodicity": ("https://pyriodicity.readthedocs.io/en/{}".format(release), None),
 }
 
 # Options for HTML output
