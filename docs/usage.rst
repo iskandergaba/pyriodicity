@@ -14,8 +14,7 @@ Use ``Autoperiod`` to find the list of periods based in this data (if any).
 .. code:: python
 
    >>> from pyriodicity import Autoperiod
-   >>> autoperiod = Autoperiod(data)
-   >>> autoperiod.fit()
+   >>> Autoperiod.detect(data)
    array([12])
 
 The detected periodicity length is 12 which suggests a strong yearly
@@ -27,13 +26,11 @@ To confirm this, we run the ``Autoperiod`` again on the same data resampled to a
 
    >>> data = co2.load().data
    >>> data = data.resample("W").mean().ffill()
-   >>> autoperiod = Autoperiod(data)
-   >>> autoperiod.fit()
+   >>> Autoperiod.detect(data)
    array([52])
    >>> data = co2.load().data
    >>> data = data.resample("D").mean().ffill()
-   >>> autoperiod = Autoperiod(data)
-   >>> autoperiod.fit()
+   >>> Autoperiod.detect(data)
    array([364])
 
 As expected, the detected period lengths for weekly and daily frequencies are 52 and 364, respectively,

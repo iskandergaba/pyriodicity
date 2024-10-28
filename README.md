@@ -36,8 +36,7 @@ For this example, start by loading Mauna Loa Weekly Atmospheric CO2 Data from [`
 Use `Autoperiod` to find the list of periods based in this data (if any).
 ```python
 >>> from pyriodicity import Autoperiod
->>> autoperiod = Autoperiod(data)
->>> autoperiod.fit()
+>>> Autoperiod.detect(data)
 array([12])
 ```
 

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyriodicity"
-version = "0.3.0"
+version = "0.4.0rc0"
 description = "Pyriodicity provides an intuitive and easy-to-use Python implementation for periodicity detection in univariate signals."
 
 license = "MIT"
@@ -10,7 +10,6 @@ repository = "https://github.com/iskandergaba/pyriodicity"
 
 authors = ["Iskander Gaba <iskander@hey.com>"]
 keywords = ["signal", "time", "series", "forecast", "analysis", "period", "periodicity", "seasonality", "trend", "cycle", "decomposition"]
-
 
 [tool.poetry.dependencies]
 python = "^3.10"

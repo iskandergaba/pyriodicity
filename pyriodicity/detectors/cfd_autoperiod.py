@@ -13,11 +13,6 @@ class CFDAutoperiod:
 
     Find the periods in a given signal or series using CFD-Autoperiod [1]_.
 
-    Parameters
-    ----------
-    endog : array_like
-        Data to be investigated. Must be squeezable to 1-d.
-
     See Also
     --------
     pyriodicity.Autoperiod
@@ -44,20 +39,19 @@ class CFDAutoperiod:
     Use ``CFDAutoperiod`` to find the list of periods in the data.
 
     >>> from pyriodicity import CFDAutoperiod
-    >>> cfd_autoperiod = CFDAutoperiod(data)
-    >>> cfd_autoperiod.fit()
+    >>> CFDAutoperiod.detect(data)
     array([12])
 
     You can specify a lower percentile value should you wish for
     a more lenient detection
 
-    >>> cfd_autoperiod.fit(percentile=90)
+    >>> CFDAutoperiod.detect(data, percentile=90)
     array([12])
 
     You can also increase the number of random data permutations
     for a more robust power threshold estimation
 
-    >>> cfd_autoperiod.fit(k=300)
+    >>> CFDAutoperiod.detect(data, k=300)
     array([12])
 
     ``CFDAutoperiod`` is considered a more robust variant of ``Autoperiod``
@@ -65,11 +59,9 @@ class CFDAutoperiod:
     length of 12, suggesting a strong yearly periodicity.
     """
 
-    def __init__(self, endog: ArrayLike):
-        self.y = to_1d_array(endog)
-
-    def fit(
-        self,
+    @staticmethod
+    def detect(
+        endog: ArrayLike,
         k: int = 100,
         percentile: int = 99,
         detrend_func: Optional[str] = "linear",
@@ -81,6 +73,8 @@ class CFDAutoperiod:
 
         Parameters
         ----------
+        endog : array_like
+            Data to be investigated. Must be squeezable to 1-d.
         k : int, optional, default = 100
             The number of times the data is randomly permuted while estimating the
             power threshold.
@@ -92,7 +86,7 @@ class CFDAutoperiod:
             'linear' or 'constant'.
         window_func : float, str, tuple optional, default = None
             Window function to be applied to the time series. Check
-            'window' parameter documentation for ``scipy.signal.get_window``
+            ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
         correlation_func : str, default = 'pearson'
@@ -118,16 +112,18 @@ class CFDAutoperiod:
             Calculate a Spearman correlation coefficient with associated p-value.
 
         """
+        y = to_1d_array(endog)
+
         # Detrend data
-        self.y = self.y if detrend_func is None else detrend(self.y, type=detrend_func)
+        y = y if detrend_func is None else detrend(y, type=detrend_func)
         # Apply window on data
-        self.y = self.y if window_func is None else apply_window(self.y, window_func)
+        y = y if window_func is None else apply_window(y, window_func)
 
         # Compute the power threshold
-        p_threshold = power_threshold(self.y, detrend_func, k, percentile)
+        p_threshold = power_threshold(y, detrend_func, k, percentile)
 
         # Find period hints
-        freq, power = periodogram(self.y, detrend=detrend_func)
+        freq, power = periodogram(y, detrend=detrend_func)
         hints = np.array(
             [
                 1 / f
@@ -137,14 +133,16 @@ class CFDAutoperiod:
         )
 
         # Replace period hints with their density clustering centroids
-        hints = self._cluster_period_hints(hints, len(self.y))
+        hints = CFDAutoperiod._cluster_period_hints(hints, len(y))
 
         # Validate period hints
         valid_hints = []
-        length = len(self.y)
-        y_filtered = np.array(self.y)
+        length = len(y)
+        y_filtered = np.array(y)
         for h in hints:
-            if self._is_hint_valid(y_filtered, h, detrend_func, correlation_func):
+            if CFDAutoperiod._is_hint_valid(
+                y_filtered, h, detrend_func, correlation_func
+            ):
                 # Apply a low pass filter with an adapted cutoff frequency
                 f_cuttoff = 1 / (length / (length / h + 1) - 1)
                 y_filtered = sosfiltfilt(
@@ -158,7 +156,7 @@ class CFDAutoperiod:
         ]
         acf_arrays = [
             acf(
-                self.y,
+                y,
                 lag_start=r[0],
                 lag_stop=r[-1],
                 correlation_func=correlation_func,
