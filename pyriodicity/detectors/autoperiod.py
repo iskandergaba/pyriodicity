@@ -13,11 +13,6 @@ class Autoperiod:
 
     Find the periods in a given signal or series using Autoperiod [1]_.
 
-    Parameters
-    ----------
-    endog : array_like
-        Data to be investigated. Must be squeezable to 1-d.
-
     See Also
     --------
     pyriodicity.CFDAutoperiod
@@ -43,20 +38,19 @@ class Autoperiod:
     Use ``Autoperiod`` to find the list of periods in the data.
 
     >>> from pyriodicity import Autoperiod
-    >>> autoperiod = Autoperiod(data)
-    >>> autoperiod.fit()
+    >>> Autoperiod.detect(data)
     array([12])
 
     You can specify a lower percentile value should you wish for
     a more lenient detection
 
-    >>> autoperiod.fit(percentile=90)
+    >>> Autoperiod.detect(data, percentile=90)
     array([12])
 
     You can also increase the number of random data permutations
     for a more robust power threshold estimation
 
-    >>> autoperiod.fit(k=300)
+    >>> Autoperiod.detect(data, k=300)
     array([12])
 
     ``Autoperiod`` is generally a quite robust periodicity detection method.
@@ -64,11 +58,9 @@ class Autoperiod:
     a strong yearly periodicity.
     """
 
-    def __init__(self, endog: ArrayLike):
-        self.y = to_1d_array(endog)
-
-    def fit(
-        self,
+    @staticmethod
+    def detect(
+        endog: ArrayLike,
         k: int = 100,
         percentile: int = 95,
         detrend_func: Optional[str] = "linear",
@@ -80,6 +72,8 @@ class Autoperiod:
 
         Parameters
         ----------
+        endog : array_like
+            Data to be investigated. Must be squeezable to 1-d.
         k : int, optional, default = 100
             The number of times the data is randomly permuted while estimating the
             power threshold.
@@ -91,7 +85,7 @@ class Autoperiod:
             'linear' or 'constant'.
         window_func : float, str, tuple optional, default = None
             Window function to be applied to the time series. Check
-            'window' parameter documentation for scipy.signal.get_window
+            ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
         correlation_func : str, default = 'pearson'
@@ -117,16 +111,18 @@ class Autoperiod:
             Calculate a Spearman correlation coefficient with associated p-value.
 
         """
+        y = to_1d_array(endog)
+
         # Detrend data
-        self.y = self.y if detrend_func is None else detrend(self.y, type=detrend_func)
+        y = y if detrend_func is None else detrend(y, type=detrend_func)
         # Apply window on data
-        self.y = self.y if window_func is None else apply_window(self.y, window_func)
+        y = y if window_func is None else apply_window(y, window_func)
 
         # Compute the power threshold
-        p_threshold = power_threshold(self.y, detrend_func, k, percentile)
+        p_threshold = power_threshold(y, detrend_func, k, percentile)
 
         # Find period hints
-        freq, power = periodogram(self.y, window=None, detrend=False)
+        freq, power = periodogram(y, window=None, detrend=False)
         hints = np.array(
             [
                 1 / f
@@ -137,11 +133,11 @@ class Autoperiod:
 
         # Validate period hints
         valid_hints = [
-            h for h in hints if self._is_hint_valid(self.y, h, correlation_func)
+            h for h in hints if Autoperiod._is_hint_valid(y, h, correlation_func)
         ]
 
         # Return the closest ACF peak to each valid period hint
-        length = len(self.y)
+        length = len(y)
         hint_ranges = [
             np.arange(
                 np.floor((h + length / (length / h + 1)) / 2 - 1),
@@ -152,7 +148,7 @@ class Autoperiod:
         ]
         acf_arrays = [
             acf(
-                self.y,
+                y,
                 lag_start=r[0],
                 lag_stop=r[-1],
                 correlation_func=correlation_func,
