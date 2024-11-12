@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional, Union
 
 import numpy as np
@@ -62,8 +63,7 @@ class RobustPeriod:
     @staticmethod
     def detect(
         endog: ArrayLike,
-        k: int = 100,
-        percentile: int = 99,
+        lamb: Union[str, float] = "ravn-uhlig",
         detrend_func: Optional[str] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
         correlation_func: Optional[str] = "pearson",
@@ -84,7 +84,7 @@ class RobustPeriod:
         detrend_func : str, default = 'linear'
             The kind of detrending to be applied on the signal. It can either be
             'linear' or 'constant'.
-        window_func : float, str, tuple optional, default = None
+        window_func : float, str, tuple, optional, default = None
             Window function to be applied to the time series. Check
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
@@ -120,7 +120,7 @@ class RobustPeriod:
         # y = y if window_func is None else apply_window(y, window_func)
 
         # Preprocess the data
-        y = RobustPeriod._preprocess(y)
+        y = RobustPeriod._preprocess(y, lamb)
 
         # TODO Decouple multiple periodicities
 
@@ -129,7 +129,7 @@ class RobustPeriod:
     @staticmethod
     def _preprocess(
         x: ArrayLike,
-        lamb: float,
+        lamb: Union[str, float],
     ) -> bool:
         """
         Validate the period hint.
@@ -153,18 +153,16 @@ class RobustPeriod:
             Whether the period hint is valid.
         """
 
-        # TODO automate lambda choice
-        y = RobustPeriod._hpfilter(x, lamb=lamb)
+        # Apply Hodrick-Prescott filter
+        y, _ = RobustPeriod._hpfilter(x, lamb=lamb)
 
         # Remove outliers using Huber function
         mean = np.mean(y)
         mad = np.mean(np.abs(y - mean))
-
-        # TODO more comments on the choice of c
-        return RobustPeriod._huber((y - mean) / mad)
+        return RobustPeriod._huber((y - mean) / mad, 2)
 
     @staticmethod
-    def _hpfilter(y: ArrayLike, lamb: float = 1600):
+    def _hpfilter(x: ArrayLike, lamb: Union[str, float]):
         """
         Apply the Hodrick-Prescott filter to a series.
 
@@ -172,7 +170,7 @@ class RobustPeriod:
         ----------
         x : array_like
             The time series to be filtered.
-        lamb : float, optional
+        lamb : float, str, optional
             The smoothing parameter. Default is 1600.
 
         Returns
@@ -182,9 +180,27 @@ class RobustPeriod:
         trend : ndarray
             The trend component of the time series.
         """
-        # TODO automate the lambda parameter choice
 
-        y = np.asarray(y)
+        # Compute lamb if required
+        if isinstance(lamb, str):
+            if not hasattr(x, "index"):
+                raise AttributeError("Data has no attribute 'index'.")
+            if not isinstance(x.index[0], (np.datetime64, datetime.date)):
+                raise TypeError(
+                    "Index values are not of 'numpy.datetime64'"
+                    "or 'datetime.date' types."
+                )
+            yearly_nobs = np.rint(
+                np.timedelta64(365, "D") / np.diff(x.index.values).mean()
+            )
+            if lamb == "hodrick-prescott":
+                lamb = 100 * yearly_nobs**2
+            elif lamb == "ravn-uhlig":
+                lamb = 6.25 * yearly_nobs**4
+            else:
+                raise ValueError("Invalid lamb parameter value: '{}'".format(lamb))
+
+        y = np.asarray(x)
         nobs = len(y)
 
         # Identity matrix
@@ -201,5 +217,6 @@ class RobustPeriod:
         return cycle, trend
 
     @staticmethod
-    def _huber(x: ArrayLike, c: float):
+    def _huber(x: ArrayLike, c: float) -> ArrayLike:
+        # TODO Research the choice of c
         return np.sign(x) * np.min(np.abs(x), c)
