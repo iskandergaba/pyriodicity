@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional, Union
+from typing import Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -64,9 +64,7 @@ class RobustPeriod:
     def detect(
         endog: ArrayLike,
         lamb: Union[str, float] = "ravn-uhlig",
-        detrend_func: Optional[str] = "linear",
-        window_func: Optional[Union[str, float, tuple]] = None,
-        correlation_func: Optional[str] = "pearson",
+        c: float = 2,
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -75,23 +73,10 @@ class RobustPeriod:
         ----------
         endog : array_like
             Data to be investigated. Must be squeezable to 1-d.
-        k : int, optional, default = 100
-            The number of times the data is randomly permuted while estimating the
-            power threshold.
-        percentile : int, optional, default = 99
-            Percentage for the percentile parameter used in computing the power
-            threshold. Value must be between 0 and 100 inclusive.
-        detrend_func : str, default = 'linear'
-            The kind of detrending to be applied on the signal. It can either be
-            'linear' or 'constant'.
-        window_func : float, str, tuple, optional, default = None
-            Window function to be applied to the time series. Check
-            ``window`` parameter documentation for ``scipy.signal.get_window``
-            function for more information on the accepted formats of this
-            parameter.
-        correlation_func : str, default = 'pearson'
-            The correlation function to be used to calculate the ACF of the time
-            series. Possible values are ['pearson', 'spearman', 'kendall'].
+        lamb : float, str, default = 'ravn-uhlig'
+            TODO explanation
+        c : float, default = 2
+            TODO explanation
 
         Returns
         -------
@@ -100,57 +85,36 @@ class RobustPeriod:
 
         See Also
         --------
-        scipy.signal.detrend
-            Remove linear trend along axis from data.
-        scipy.signal.get_window
-            Return a window of a given length and type.
-        scipy.stats.kendalltau
-            Calculate Kendall's tau, a correlation measure for ordinal data.
-        scipy.stats.pearsonr
-            Pearson correlation coefficient and p-value for testing non-correlation.
-        scipy.stats.spearmanr
-            Calculate a Spearman correlation coefficient with associated p-value.
+        TODO explanation
 
         """
         y = to_1d_array(endog)
 
-        # Detrend data
-        # y = y if detrend_func is None else detrend(y, type=detrend_func)
-        # Apply window on data
-        # y = y if window_func is None else apply_window(y, window_func)
-
         # Preprocess the data
-        y = RobustPeriod._preprocess(y, lamb)
+        y = RobustPeriod._preprocess(y, lamb, c)
 
         # TODO Decouple multiple periodicities
 
         # TODO Robust single periodicity detection
 
     @staticmethod
-    def _preprocess(
-        x: ArrayLike,
-        lamb: Union[str, float],
-    ) -> bool:
+    def _preprocess(x: ArrayLike, lamb: Union[str, float], c: float) -> NDArray:
         """
         Validate the period hint.
 
         Parameters
         ----------
-        y : array_like
-            Data to be investigated. Must be squeezable to 1-d.
-        hint : float
-            The period hint to be validated.
-        detrend_func : str
-            The kind of detrending to be applied on the signal. It can either be
-            'linear' or 'constant'.
-        correlation_func : str
-            The correlation function to be used to calculate the ACF of the series
-            or the signal. Possible values are ['pearson', 'spearman', 'kendall'].
+        x : array_like
+            Data to be preprocessed. Must be squeezable to 1-d.
+        lamb : float, str, default = 'ravn-uhlig'
+            TODO explanation
+        c : float, default = 2
+            TODO explanation
 
         Returns
         -------
-        bool
-            Whether the period hint is valid.
+        NDArray
+            Preprocessed series data.
         """
 
         # Apply Hodrick-Prescott filter
@@ -159,7 +123,7 @@ class RobustPeriod:
         # Remove outliers using Huber function
         mean = np.mean(y)
         mad = np.mean(np.abs(y - mean))
-        return RobustPeriod._huber((y - mean) / mad, 2)
+        return RobustPeriod._huber((y - mean) / mad, c)
 
     @staticmethod
     def _hpfilter(x: ArrayLike, lamb: Union[str, float]):
