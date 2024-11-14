@@ -43,7 +43,7 @@ class RobustPeriod:
     def detect(
         x: ArrayLike,
         lamb: Union[str, float] = "ravn-uhlig",
-        c: float = 2,
+        c: float = 1.5,
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -59,8 +59,10 @@ class RobustPeriod:
             and Ravn and Uhlig [2]_ automatic lambda parameter selection methods,
             respectively. In the latter case, ``x`` must contain ``index`` attribute
             representing data point timestamps.
-        c : float, default = 2
-            TODO explanation
+        c : float, default = 1.5
+            The constant threshold that determines the robustness of the Huber function.
+            A smaller value makes the Huber function more sensitive to outliers. Huber
+            recommends using a value between 1 and 2 [3]_.
 
         Returns
         -------
@@ -77,6 +79,8 @@ class RobustPeriod:
            On adjusting the Hodrick-Prescott filter for the frequency of observations.
            Review of economics and statistics, 84(2), 371-376.
            https://doi.org/10.1162/003465302317411604
+        .. [3] Huber, P. J. (1981). Robust statistics Wiley 308p.
+           https://doi.org/10.1002/9780470434697
         """
 
         # Preprocess the data
@@ -102,8 +106,10 @@ class RobustPeriod:
             and Ravn and Uhlig automatic lambda parameter selection methods,
             respectively. In the latter case, ``x`` must contain ``index`` attribute
             representing data point timestamps.
-        c : float, default = 2
-            TODO explanation
+        c : float
+            The constant threshold that determines the robustness of the Huber function.
+            A smaller value makes the Huber function more sensitive to outliers. Huber
+            recommends using a value between 1 and 2.
 
         Returns
         -------
