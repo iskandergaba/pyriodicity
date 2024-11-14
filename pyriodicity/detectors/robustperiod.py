@@ -79,7 +79,7 @@ class RobustPeriod:
            On adjusting the Hodrick-Prescott filter for the frequency of observations.
            Review of economics and statistics, 84(2), 371-376.
            https://doi.org/10.1162/003465302317411604
-        .. [3] Huber, P. J. (1981). Robust statistics Wiley 308p.
+        .. [3] Huber, P. J., & Ronchetti, E. (2009). Robust statistics. Wiley.
            https://doi.org/10.1002/9780470434697
         """
 
