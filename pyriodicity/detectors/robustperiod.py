@@ -15,11 +15,6 @@ class RobustPeriod:
 
     Find the periods in a given signal or series using RobustPeriod [1]_.
 
-    See Also
-    --------
-    pyriodicity.Autoperiod
-        Autoperiod periodicity detector.
-
     References
     ----------
     .. [1] Wen, Q., He, K., Sun, L., Zhang, Y., Ke, M., & Xu, H. (2021, June).
@@ -42,27 +37,11 @@ class RobustPeriod:
     >>> from pyriodicity import RobustPeriod
     >>> RobustPeriod.detect(data)
     array([12])
-
-    You can specify a lower percentile value should you wish for
-    a more lenient detection
-
-    >>> RobustPeriod.detect(data, percentile=90)
-    array([12])
-
-    You can also increase the number of random data permutations
-    for a more robust power threshold estimation
-
-    >>> RobustPeriod.detect(data, k=300)
-    array([12])
-
-    ``RobustPeriod`` is considered a more robust variant of ``Autoperiod``
-    against noise. The detection algorithm found exactly one periodicity
-    length of 12, suggesting a strong yearly periodicity.
     """
 
     @staticmethod
     def detect(
-        endog: ArrayLike,
+        x: ArrayLike,
         lamb: Union[str, float] = "ravn-uhlig",
         c: float = 2,
     ) -> NDArray:
@@ -71,10 +50,14 @@ class RobustPeriod:
 
         Parameters
         ----------
-        endog : array_like
+        x : array_like
             Data to be investigated. Must be squeezable to 1-d.
         lamb : float, str, default = 'ravn-uhlig'
-            TODO explanation
+            The Hodrick-Prescott filter smoothing parameter. Possible values are
+            either a float value or one of the following string values that represent
+            an automatic lambda parameter selection method: 'hodrick-prescott' [1]_ or
+            'ravn-uhlig' [2]_. In the latter case, ``x`` must contain ``index``
+            attribute representing data point timestamps.
         c : float, default = 2
             TODO explanation
 
@@ -87,11 +70,20 @@ class RobustPeriod:
         --------
         TODO explanation
 
+        References
+        ----------
+        .. [1] Hodrick, R. J., & Prescott, E. C. (1997).
+           Postwar US business cycles: an empirical investigation.
+           Journal of Money, credit, and Banking, 1-16.
+           https://doi.org/10.2307/2953682
+        .. [2] Ravn, M. O., & Uhlig, H. (2002).
+           On adjusting the Hodrick-Prescott filter for the frequency of observations.
+           Review of economics and statistics, 84(2), 371-376.
+           https://doi.org/10.1162/003465302317411604
         """
-        y = to_1d_array(endog)
 
         # Preprocess the data
-        y = RobustPeriod._preprocess(y, lamb, c)
+        y = RobustPeriod._preprocess(x, lamb, c)
 
         # TODO Decouple multiple periodicities
 
@@ -106,8 +98,12 @@ class RobustPeriod:
         ----------
         x : array_like
             Data to be preprocessed. Must be squeezable to 1-d.
-        lamb : float, str, default = 'ravn-uhlig'
-            TODO explanation
+        lamb : float, str
+            The Hodrick-Prescott filter smoothing parameter. Possible values are
+            either a float value or one of the following string values that represent
+            an automatic lambda parameter selection method: 'hodrick-prescott' or
+            'ravn-uhlig'. In the latter case, ``x`` must contain ``index``
+            attribute representing data point timestamps.
         c : float, default = 2
             TODO explanation
 
@@ -117,8 +113,15 @@ class RobustPeriod:
             Preprocessed series data.
         """
 
+        # Compute the lambda parameter if needed
+        if isinstance(lamb, str):
+            lamb = RobustPeriod._compute_lambda(x, lamb)
+
+        # Convert to one-dimensional array
+        y = to_1d_array(x)
+
         # Apply Hodrick-Prescott filter
-        y, _ = RobustPeriod._hpfilter(x, lamb=lamb)
+        y, _ = RobustPeriod._hpfilter(y, lamb)
 
         # Remove outliers using Huber function
         mean = np.mean(y)
@@ -126,7 +129,7 @@ class RobustPeriod:
         return RobustPeriod._huber((y - mean) / mad, c)
 
     @staticmethod
-    def _hpfilter(x: ArrayLike, lamb: Union[str, float]):
+    def _hpfilter(x: ArrayLike, lamb: float):
         """
         Apply the Hodrick-Prescott filter to a series.
 
@@ -134,8 +137,8 @@ class RobustPeriod:
         ----------
         x : array_like
             The time series to be filtered.
-        lamb : float, str, optional
-            The smoothing parameter. Default is 1600.
+        lamb : float
+            The Hodrick-Prescott filter smoothing parameter.
 
         Returns
         -------
@@ -144,25 +147,6 @@ class RobustPeriod:
         trend : ndarray
             The trend component of the time series.
         """
-
-        # Compute lamb if required
-        if isinstance(lamb, str):
-            if not hasattr(x, "index"):
-                raise AttributeError("Data has no attribute 'index'.")
-            if not isinstance(x.index[0], (np.datetime64, datetime.date)):
-                raise TypeError(
-                    "Index values are not of 'numpy.datetime64'"
-                    "or 'datetime.date' types."
-                )
-            yearly_nobs = np.rint(
-                np.timedelta64(365, "D") / np.diff(x.index.values).mean()
-            )
-            if lamb == "hodrick-prescott":
-                lamb = 100 * yearly_nobs**2
-            elif lamb == "ravn-uhlig":
-                lamb = 6.25 * yearly_nobs**4
-            else:
-                raise ValueError("Invalid lamb parameter value: '{}'".format(lamb))
 
         y = np.asarray(x)
         nobs = len(y)
@@ -179,6 +163,34 @@ class RobustPeriod:
         trend = spsolve(identity + lamb * K.T.dot(K), y)
         cycle = y - trend
         return cycle, trend
+
+    @staticmethod
+    def _compute_lambda(x: ArrayLike, lamb_approach: str) -> float:
+        if isinstance(lamb_approach, str):
+            if not hasattr(x, "index"):
+                raise AttributeError("Data has no attribute 'index'.")
+            if not isinstance(x.index[0], (np.datetime64, datetime.date)):
+                raise TypeError(
+                    "Index values are not of 'numpy.datetime64'"
+                    "or 'datetime.date' types."
+                )
+            yearly_nobs = np.rint(
+                np.timedelta64(365, "D") / np.diff(x.index.values).mean()
+            )
+            if lamb_approach == "hodrick-prescott":
+                lamb_approach = 100 * yearly_nobs**2
+            elif lamb_approach == "ravn-uhlig":
+                lamb_approach = 6.25 * yearly_nobs**4
+            else:
+                raise ValueError(
+                    "Invalid lamb parameter value: '{}'".format(lamb_approach)
+                )
+        else:
+            raise TypeError(
+                "Invalid 'lambda_approach' parameter type: '{}'".format(
+                    type(lamb_approach)
+                )
+            )
 
     @staticmethod
     def _huber(x: ArrayLike, c: float) -> ArrayLike:
