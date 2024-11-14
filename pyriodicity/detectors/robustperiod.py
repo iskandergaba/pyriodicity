@@ -66,10 +66,6 @@ class RobustPeriod:
         NDArray
             List of detected periods.
 
-        See Also
-        --------
-        TODO explanation
-
         References
         ----------
         .. [1] Hodrick, R. J., & Prescott, E. C. (1997).
