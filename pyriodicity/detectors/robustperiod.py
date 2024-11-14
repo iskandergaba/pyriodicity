@@ -54,10 +54,11 @@ class RobustPeriod:
             Data to be investigated. Must be squeezable to 1-d.
         lamb : float, str, default = 'ravn-uhlig'
             The Hodrick-Prescott filter smoothing parameter. Possible values are
-            either a float value or one of the following string values that represent
-            an automatic lambda parameter selection method: 'hodrick-prescott' [1]_ or
-            'ravn-uhlig' [2]_. In the latter case, ``x`` must contain ``index``
-            attribute representing data point timestamps.
+            either a float value or one of the following string values:
+            ['hodrick-prescott', 'ravn-uhlig'] that represent Hodrick and Prescott [1]_
+            and Ravn and Uhlig [2]_ automatic lambda parameter selection methods,
+            respectively. In the latter case, ``x`` must contain ``index`` attribute
+            representing data point timestamps.
         c : float, default = 2
             TODO explanation
 
@@ -96,10 +97,11 @@ class RobustPeriod:
             Data to be preprocessed. Must be squeezable to 1-d.
         lamb : float, str
             The Hodrick-Prescott filter smoothing parameter. Possible values are
-            either a float value or one of the following string values that represent
-            an automatic lambda parameter selection method: 'hodrick-prescott' or
-            'ravn-uhlig'. In the latter case, ``x`` must contain ``index``
-            attribute representing data point timestamps.
+            either a float value or one of the following string values:
+            ['hodrick-prescott', 'ravn-uhlig'] that represent Hodrick and Prescott
+            and Ravn and Uhlig automatic lambda parameter selection methods,
+            respectively. In the latter case, ``x`` must contain ``index`` attribute
+            representing data point timestamps.
         c : float, default = 2
             TODO explanation
 
