@@ -254,8 +254,9 @@ class RobustPeriod:
         x : ArrayLike
             Input array-like object containing numerical values.
         c : float
-            Threshold parameter that determines the point where the function
-            transitions from quadratic to linear.
+            The constant threshold that determines the robustness of the Huber function.
+            A smaller value makes the Huber function more sensitive to outliers. Huber
+            recommends using a value between 1 and 2.
 
         Returns
         -------
