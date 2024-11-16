@@ -71,7 +71,7 @@ class RobustPeriod:
     @staticmethod
     def detect(
         x: ArrayLike,
-        lamb: Union[float, str, LambdaSelection] = LambdaSelection.RAVN_UHLIG,
+        lamb: Union[float, str] = "ravn-uhlig",
         c: float = 1.5,
     ) -> NDArray:
         """
@@ -81,14 +81,13 @@ class RobustPeriod:
         ----------
         x : array_like
             Data to be investigated. Must be squeezable to 1-d.
-        lamb : float, str, RobustPeriod.LambdaSelection,
-            default = RobustPeriod.LambdaSelection.RAVN_UHLIG
+        lamb : float, str, default = 'ravn-uhlig'
             The Hodrick-Prescott filter smoothing parameter. Possible values are either
-            a float, a `RobustPeriod.LambdaSelection` value, or one of the following
-            string values: ['hodrick-prescott', 'ravn-uhlig']. These represent the
-            automatic lambda parameter selection methods by Hodrick and Prescott [1]_
-            and Ravn and Uhlig [2]_, respectively. If lamb is not float value, then
-            ``x`` must be a data array with a datetime-like index.
+            a `float`, or one of the following `str` values:
+            ['hodrick-prescott', 'ravn-uhlig']. These represent the automatic lambda
+            parameter selection methods by Hodrick and Prescott [1]_ and Ravn and Uhlig
+            [2]_, respectively. If lamb is not float value, then ``x`` must be a data
+            array with a datetime-like index.
         c : float, default = 1.5
             The constant threshold that determines the robustness of the Huber function.
             A smaller value makes the Huber function more sensitive to outliers. Huber
