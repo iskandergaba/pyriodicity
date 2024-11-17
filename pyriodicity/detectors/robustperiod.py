@@ -253,4 +253,4 @@ class RobustPeriod:
         NDArray
             An array-like object with the Huber function applied element-wise.
         """
-        return np.sign(x) * np.min(np.abs(x), c)
+        return np.sign(x) * np.minimum(np.abs(x), c)
