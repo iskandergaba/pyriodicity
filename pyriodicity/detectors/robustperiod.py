@@ -3,6 +3,7 @@ from enum import Enum, unique
 from typing import Union
 
 import numpy as np
+import pywt
 from numpy.typing import ArrayLike, NDArray
 from scipy.sparse import dia_matrix, eye
 from scipy.sparse.linalg import spsolve
@@ -100,6 +101,7 @@ class RobustPeriod:
         x: ArrayLike,
         lamb: Union[float, str] = "ravn-uhlig",
         c: float = 1.5,
+        db_n: int = 10,
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -119,11 +121,20 @@ class RobustPeriod:
             The constant threshold that determines the robustness of the Huber function.
             A smaller value makes the Huber function more sensitive to outliers. Huber
             recommends using a value between 1 and 2 [3]_.
+        db_n : int, default = 10
+            The number of vanishing moments for the Daubechies wavelet [4]_ used to
+            compute the Maximal Overlap Discrete Wavelet Transform (MODWT) [5]_. Must
+            be an integer between 1 and 38, inclusive.
 
         Returns
         -------
         NDArray
             List of detected periods.
+
+        Raises
+        ------
+        AssertionError
+            If `db_n` is not between 1 and 38, inclusive.
 
         References
         ----------
@@ -137,7 +148,16 @@ class RobustPeriod:
            https://doi.org/10.1162/003465302317411604
         .. [3] Huber, P. J., & Ronchetti, E. (2009). Robust Statistics. Wiley.
            https://doi.org/10.1002/9780470434697
+        .. [4] Daubechies, I. (1992). Ten lectures on wavelets. Society for industrial
+           and applied mathematics.
+           https://doi.org/10.1137/1.9781611970104
+        .. [5] Percival, D. B. (2000). Wavelet methods for time series analysis.
+           Cambridge University Press.
+           https://doi.org/10.1017/CBO9780511841040
         """
+
+        # Validate the db_n parameter
+        assert 1 <= db_n <= 38, "Invalid db_n parameter value: '{}'".format(db_n)
 
         # Preprocess the data
         lamb = RobustPeriod.LambdaSelection(lamb) if isinstance(lamb, str) else lamb
@@ -254,3 +274,32 @@ class RobustPeriod:
             An array-like object with the Huber function applied element-wise.
         """
         return np.sign(x) * np.minimum(np.abs(x), c)
+
+    @staticmethod
+    def _modwt(x: ArrayLike, db_n: int, level: int) -> NDArray:
+        """
+        Compute the Maximal Overlap Discrete Wavelet Transform (MODWT) of a series using
+        the Daubechies wavelet.
+
+        Parameters
+        ----------
+        x : array_like
+            Input data to be transformed. Must be squeezable to 1-d.
+        db_n : int
+            The number of vanishing moments for the Daubechies wavelet. Must be an
+            integer between 1 and 38, inclusive.
+        level : int
+            The number of decomposition steps to perform.
+
+        Returns
+        -------
+        NDArray
+            The MODWT coefficients of the input data.
+        """
+
+        # Pad the input data to the nearest 2^level multiple
+        padding = (2**level - (len(x) % 2**level)) % 2**level
+        y = np.pad(x, (0, padding), "wrap")
+
+        # Compute the Maximal Overlap Discrete Wavelet Transform
+        return pywt.swt(y, "db{}".format(db_n), level, norm=True)
