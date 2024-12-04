@@ -163,8 +163,8 @@ class RobustPeriod:
         lamb = RobustPeriod.LambdaSelection(lamb) if isinstance(lamb, str) else lamb
         y = RobustPeriod._preprocess(x, lamb, c)
 
-        # TODO Decouple multiple periodicities
-        RobustPeriod._decouple_periodicities(y)
+        # Decouple multiple periodicities
+        w_coeffs = RobustPeriod._wavelet_coeffs(y)
 
         # TODO Robust single periodicity detection
 
@@ -220,16 +220,17 @@ class RobustPeriod:
         return RobustPeriod._huber((y - mean) / mad, c)
 
     @staticmethod
-    def _decouple_periodicities(x: ArrayLike, db_n: int, level: int):
+    def _wavelet_coeffs(x: ArrayLike, db_n: int, level: int):
         w_coeffs = RobustPeriod._modwt(x, db_n, level)
-        bivar = np.array(
+        w_vars = np.array(
             [
                 # Exclude the first Lj - 1 coefficients
-                RobustPeriod._biweight_midvariance(w_coeffs[j][1][j:], 9)
+                RobustPeriod._biweight_midvariance(w_coeffs[j][j:], 9)
                 for j in range(level)
             ]
         )
-        pass
+        # Order wavelet coefficients in the descending order of their variances
+        return w_coeffs[np.argsort(-w_vars)]
 
     @staticmethod
     def _hpfilter(x: ArrayLike, lamb: float):
@@ -315,7 +316,8 @@ class RobustPeriod:
         y = np.pad(x, (0, padding), "wrap")
 
         # Compute the Maximal Overlap Discrete Wavelet Transform
-        return pywt.swt(y, "db{}".format(db_n), level, norm=True)
+        coeffs = pywt.swt(y, "db{}".format(db_n), level, norm=True)
+        return np.array([cD for _, cD in coeffs])
 
     @staticmethod
     def _biweight_midvariance(x: ArrayLike, c: float) -> float:
