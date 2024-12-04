@@ -164,6 +164,7 @@ class RobustPeriod:
         y = RobustPeriod._preprocess(x, lamb, c)
 
         # TODO Decouple multiple periodicities
+        RobustPeriod._decouple_periodicities(y)
 
         # TODO Robust single periodicity detection
 
@@ -217,6 +218,18 @@ class RobustPeriod:
         mean = np.mean(y)
         mad = np.mean(np.abs(y - mean))
         return RobustPeriod._huber((y - mean) / mad, c)
+
+    @staticmethod
+    def _decouple_periodicities(x: ArrayLike, db_n: int, level: int):
+        w_coeffs = RobustPeriod._modwt(x, db_n, level)
+        bivar = np.array(
+            [
+                # Exclude the first Lj - 1 coefficients
+                RobustPeriod._biweight_midvariance(w_coeffs[j][1][j:], 9)
+                for j in range(level)
+            ]
+        )
+        pass
 
     @staticmethod
     def _hpfilter(x: ArrayLike, lamb: float):
@@ -303,3 +316,23 @@ class RobustPeriod:
 
         # Compute the Maximal Overlap Discrete Wavelet Transform
         return pywt.swt(y, "db{}".format(db_n), level, norm=True)
+
+    @staticmethod
+    def _biweight_midvariance(x: ArrayLike, c: float) -> float:
+        # Ensure the correct data type
+        x = np.asanyarray(x).astype(np.float64)
+
+        # Compute u
+        med = np.median(x)
+        mad = np.mean(np.abs(x - np.mean(x)))
+        u = (x - med) / (c * mad)
+
+        # Indicator function
+        indicator = np.abs(u) < 1
+
+        # Return the biweight midvariance estimation result
+        return (
+            len(x)
+            * np.sum((x[indicator] - med) ** 2 * (1 - u[indicator] ** 2) ** 4)
+            / np.sum((1 - u[indicator] ** 2) * (1 - 5 * u[indicator] ** 2)) ** 2
+        )
