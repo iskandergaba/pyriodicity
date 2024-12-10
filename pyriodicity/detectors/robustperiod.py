@@ -164,9 +164,10 @@ class RobustPeriod:
         y = RobustPeriod._preprocess(x, lamb, c)
 
         # Decouple multiple periodicities
-        w_coeffs = RobustPeriod._wavelet_coeffs(y)
+        w_coeff_list = RobustPeriod._wavelet_coeffs(y)
 
-        # TODO Robust single periodicity detection
+        # Robust single periodicity detection
+        return [RobustPeriod._detect(w_coeffs) for w_coeffs in w_coeff_list]
 
     @staticmethod
     def _preprocess(
@@ -231,6 +232,10 @@ class RobustPeriod:
         )
         # Order wavelet coefficients in the descending order of their variances
         return w_coeffs[np.argsort(-w_vars)]
+
+    @staticmethod
+    def _detect(wavelet_coeffs: ArrayLike) -> int:
+        pass
 
     @staticmethod
     def _hpfilter(x: ArrayLike, lamb: float):
@@ -321,6 +326,23 @@ class RobustPeriod:
 
     @staticmethod
     def _biweight_midvariance(x: ArrayLike, c: float) -> float:
+        """
+        Compute the biweight midvariance of a given array.
+
+        Parameters
+        ----------
+        x : array-like
+            The input array for which the biweight midvariance is to be computed.
+        c : float
+            The tuning constant that determines the robustness and efficiency of
+            the estimator.
+
+        Returns
+        -------
+        float
+            The biweight midvariance of the input array.
+        """
+
         # Ensure the correct data type
         x = np.asanyarray(x).astype(np.float64)
 
@@ -338,3 +360,36 @@ class RobustPeriod:
             * np.sum((x[indicator] - med) ** 2 * (1 - u[indicator] ** 2) ** 4)
             / np.sum((1 - u[indicator] ** 2) * (1 - 5 * u[indicator] ** 2)) ** 2
         )
+
+    @staticmethod
+    def _huber_acf(periodogram: ArrayLike) -> NDArray:
+        """
+        Compute the modified autocorrelation function (ACF) for a given periodogram
+        using the Huber loss function.
+
+        Parameters
+        ----------
+        periodogram : array-like
+            The input periodogram for which the ACF is to be computed.
+
+        Returns
+        -------
+        NDArray
+            The modified autocorrelation function of the input periodogram.
+        """
+
+        n_prime = len(periodogram)
+        n = n_prime // 2
+
+        # Compute P_bar
+        part_1 = periodogram[range(n)]
+        part_2 = (
+            periodogram[range(0, n_prime, 2)] - periodogram[range(1, n_prime, 2)]
+        ).sum() ** 2 / n_prime
+        part_3 = periodogram[range(n + 1, n_prime)]
+        p_bar = np.hstack([part_1, part_2, part_3])
+
+        # Compute P
+        p = np.real(np.fft.ifft(p_bar))
+
+        return p[:n] / ((n - np.arange(0, n)) * p[0])
