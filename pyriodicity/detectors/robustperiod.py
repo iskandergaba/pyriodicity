@@ -195,6 +195,62 @@ class RobustPeriod:
             Preprocessed data.
         """
 
+        def hpfilter(x: ArrayLike, lamb: float):
+            """
+            Apply the Hodrick-Prescott filter to a series.
+
+            Parameters
+            ----------
+            x : array_like
+                The series data to be filtered.
+            lamb : float
+                The smoothing parameter for the Hodrick-Prescott filter.
+
+            Returns
+            -------
+            cycle : NDArray
+                The cyclical component of the time series.
+            trend : NDArray
+                The trend component of the time series.
+            """
+
+            y = np.asarray(x)
+            nobs = len(y)
+
+            # Identity matrix
+            identity = eye(nobs, nobs)
+
+            # Second-order difference matrix
+            offsets = np.array([0, 1, 2])
+            data = np.repeat([[1.0], [-2.0], [1.0]], nobs, axis=1)
+            K = dia_matrix((data, offsets), shape=(nobs - 2, nobs))
+
+            # Solve the linear system
+            trend = spsolve(identity + lamb * K.T.dot(K), y)
+            cycle = y - trend
+            return cycle, trend
+
+        def huber(x: ArrayLike, c: float) -> ArrayLike:
+            """
+            Compute the Huber function for an array-like input.
+
+            Parameters
+            ----------
+            x : array_like
+                Input array-like object containing numerical values.
+            c : float
+                The constant threshold that determines the robustness of the Huber
+                function.
+                A smaller value makes the Huber function more sensitive to outliers.
+                Huber recommends using a value between 1 and 2.
+
+            Returns
+            -------
+            NDArray
+                An array-like object with the Huber function applied element-wise.
+            """
+            return np.sign(x) * np.minimum(np.abs(x), c)
+
         # Compute the lambda parameter if a lambda selection method is provided
         if isinstance(lamb, RobustPeriod.LambdaSelection):
             if not hasattr(x, "index"):
@@ -213,92 +269,19 @@ class RobustPeriod:
         y = to_1d_array(x)
 
         # Apply Hodrick-Prescott filter
-        y, _ = RobustPeriod._hpfilter(y, lamb)
+        y, _ = hpfilter(y, lamb)
 
         # Remove outliers using Huber function
         mean = np.mean(y)
         mad = np.mean(np.abs(y - mean))
-        return RobustPeriod._huber((y - mean) / mad, c)
+        return huber((y - mean) / mad, c)
 
     @staticmethod
     def _wavelet_coeffs(x: ArrayLike, db_n: int, level: int):
-        w_coeffs = RobustPeriod._modwt(x, db_n, level)
-        w_vars = np.array(
-            [
-                # Exclude the first Lj - 1 coefficients
-                RobustPeriod._biweight_midvariance(w_coeffs[j][j:], 9)
-                for j in range(level)
-            ]
-        )
-        # Order wavelet coefficients in the descending order of their variances
-        return w_coeffs[np.argsort(-w_vars)]
-
-    @staticmethod
-    def _detect(wavelet_coeffs: ArrayLike) -> int:
-        pass
-
-    @staticmethod
-    def _hpfilter(x: ArrayLike, lamb: float):
         """
-        Apply the Hodrick-Prescott filter to a series.
-
-        Parameters
-        ----------
-        x : array_like
-            The series data to be filtered.
-        lamb : float
-            The smoothing parameter for the Hodrick-Prescott filter.
-
-        Returns
-        -------
-        cycle : NDArray
-            The cyclical component of the time series.
-        trend : NDArray
-            The trend component of the time series.
-        """
-
-        y = np.asarray(x)
-        nobs = len(y)
-
-        # Identity matrix
-        identity = eye(nobs, nobs)
-
-        # Second-order difference matrix
-        offsets = np.array([0, 1, 2])
-        data = np.repeat([[1.0], [-2.0], [1.0]], nobs, axis=1)
-        K = dia_matrix((data, offsets), shape=(nobs - 2, nobs))
-
-        # Solve the linear system
-        trend = spsolve(identity + lamb * K.T.dot(K), y)
-        cycle = y - trend
-        return cycle, trend
-
-    @staticmethod
-    def _huber(x: ArrayLike, c: float) -> ArrayLike:
-        """
-        Compute the Huber function for an array-like input.
-
-        Parameters
-        ----------
-        x : array_like
-            Input array-like object containing numerical values.
-        c : float
-            The constant threshold that determines the robustness of the Huber function.
-            A smaller value makes the Huber function more sensitive to outliers. Huber
-            recommends using a value between 1 and 2.
-
-        Returns
-        -------
-        NDArray
-            An array-like object with the Huber function applied element-wise.
-        """
-        return np.sign(x) * np.minimum(np.abs(x), c)
-
-    @staticmethod
-    def _modwt(x: ArrayLike, db_n: int, level: int) -> NDArray:
-        """
-        Compute the Maximal Overlap Discrete Wavelet Transform (MODWT) of a series using
-        the Daubechies wavelet.
+        Compute the wavelet coefficients and their variances for a given series using
+        the Maximal Overlap Discrete Wavelet Transform (MODWT) and the Daubechies
+        wavelet.
 
         Parameters
         ----------
@@ -313,83 +296,126 @@ class RobustPeriod:
         Returns
         -------
         NDArray
-            The MODWT coefficients of the input data.
+            The wavelet coefficients ordered in the descending order of their variances.
         """
 
-        # Pad the input data to the nearest 2^level multiple
-        padding = (2**level - (len(x) % 2**level)) % 2**level
-        y = np.pad(x, (0, padding), "wrap")
+        def modwt(x: ArrayLike, db_n: int, level: int) -> NDArray:
+            """
+            Compute the Maximal Overlap Discrete Wavelet Transform (MODWT) of a series
+            using the Daubechies wavelet.
 
-        # Compute the Maximal Overlap Discrete Wavelet Transform
-        coeffs = pywt.swt(y, "db{}".format(db_n), level, norm=True)
-        return np.array([cD for _, cD in coeffs])
+            Parameters
+            ----------
+            x : array_like
+                Input data to be transformed. Must be squeezable to 1-d.
+            db_n : int
+                The number of vanishing moments for the Daubechies wavelet. Must be an
+                integer between 1 and 38, inclusive.
+            level : int
+                The number of decomposition steps to perform.
 
-    @staticmethod
-    def _biweight_midvariance(x: ArrayLike, c: float) -> float:
-        """
-        Compute the biweight midvariance of a given array.
+            Returns
+            -------
+            NDArray
+                The MODWT coefficients of the input data.
+            """
 
-        Parameters
-        ----------
-        x : array-like
-            The input array for which the biweight midvariance is to be computed.
-        c : float
-            The tuning constant that determines the robustness and efficiency of
-            the estimator.
+            # Pad the input data to the nearest 2^level multiple
+            padding = (2**level - (len(x) % 2**level)) % 2**level
+            y = np.pad(x, (0, padding), "wrap")
 
-        Returns
-        -------
-        float
-            The biweight midvariance of the input array.
-        """
+            # Compute the Maximal Overlap Discrete Wavelet Transform
+            coeffs = pywt.swt(y, "db{}".format(db_n), level, norm=True)
+            return np.array([cD for _, cD in coeffs])
 
-        # Ensure the correct data type
-        x = np.asanyarray(x).astype(np.float64)
+        def biweight_midvariance(x: ArrayLike, c: float) -> float:
+            """
+            Compute the biweight midvariance of a given array.
 
-        # Compute u
-        med = np.median(x)
-        mad = np.mean(np.abs(x - np.mean(x)))
-        u = (x - med) / (c * mad)
+            Parameters
+            ----------
+            x : array-like
+                The input array for which the biweight midvariance is to be computed.
+            c : float
+                The tuning constant that determines the robustness and efficiency of
+                the estimator.
 
-        # Indicator function
-        indicator = np.abs(u) < 1
+            Returns
+            -------
+            float
+                The biweight midvariance of the input array.
+            """
 
-        # Return the biweight midvariance estimation result
-        return (
-            len(x)
-            * np.sum((x[indicator] - med) ** 2 * (1 - u[indicator] ** 2) ** 4)
-            / np.sum((1 - u[indicator] ** 2) * (1 - 5 * u[indicator] ** 2)) ** 2
+            # Ensure the correct data type
+            x = np.asanyarray(x).astype(np.float64)
+
+            # Compute u
+            med = np.median(x)
+            mad = np.mean(np.abs(x - np.mean(x)))
+            u = (x - med) / (c * mad)
+
+            # Indicator function
+            indicator = np.abs(u) < 1
+
+            # Return the biweight midvariance estimation result
+            return (
+                len(x)
+                * np.sum((x[indicator] - med) ** 2 * (1 - u[indicator] ** 2) ** 4)
+                / np.sum((1 - u[indicator] ** 2) * (1 - 5 * u[indicator] ** 2)) ** 2
+            )
+
+        # Compute wavelet coefficients using MODWT
+        w_coeffs = modwt(x, db_n, level)
+
+        # Compute wavelet variances
+        w_vars = np.array(
+            [
+                # Exclude the first Lj - 1 coefficients
+                biweight_midvariance(w_coeffs[j][j:], 9)
+                for j in range(level)
+            ]
         )
 
+        # Order wavelet coefficients in the descending order of their variances
+        return w_coeffs[np.argsort(-w_vars)]
+
     @staticmethod
-    def _huber_acf(periodogram: ArrayLike) -> NDArray:
+    def _detect(wavelet_coeffs: ArrayLike) -> int:
         """
-        Compute the modified autocorrelation function (ACF) for a given periodogram
-        using the Huber loss function.
-
-        Parameters
-        ----------
-        periodogram : array-like
-            The input periodogram for which the ACF is to be computed.
-
-        Returns
-        -------
-        NDArray
-            The modified autocorrelation function of the input periodogram.
+        TODO docstring
         """
 
-        n_prime = len(periodogram)
-        n = n_prime // 2
+        def huber_acf(periodogram: ArrayLike) -> NDArray:
+            """
+            Compute the modified autocorrelation function (ACF) for a given periodogram
+            using the Huber loss function.
 
-        # Compute P_bar
-        part_1 = periodogram[range(n)]
-        part_2 = (
-            periodogram[range(0, n_prime, 2)] - periodogram[range(1, n_prime, 2)]
-        ).sum() ** 2 / n_prime
-        part_3 = periodogram[range(n + 1, n_prime)]
-        p_bar = np.hstack([part_1, part_2, part_3])
+            Parameters
+            ----------
+            periodogram : array-like
+                The input periodogram for which the ACF is to be computed.
 
-        # Compute P
-        p = np.real(np.fft.ifft(p_bar))
+            Returns
+            -------
+            NDArray
+                The modified autocorrelation function of the input periodogram.
+            """
 
-        return p[:n] / ((n - np.arange(0, n)) * p[0])
+            n_prime = len(periodogram)
+            n = n_prime // 2
+
+            # Compute P_bar
+            part_1 = periodogram[range(n)]
+            part_2 = (
+                periodogram[range(0, n_prime, 2)] - periodogram[range(1, n_prime, 2)]
+            ).sum() ** 2 / n_prime
+            part_3 = periodogram[range(n + 1, n_prime)]
+            p_bar = np.hstack([part_1, part_2, part_3])
+
+            # Compute P
+            p = np.real(np.fft.ifft(p_bar))
+
+            return p[:n] / ((n - np.arange(0, n)) * p[0])
+
+        # TODO implementation
+        pass
