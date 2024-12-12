@@ -7,6 +7,7 @@ import pywt
 from numpy.typing import ArrayLike, NDArray
 from scipy.sparse import dia_matrix, eye
 from scipy.sparse.linalg import spsolve
+from scipy.special import binom
 
 from pyriodicity.tools import to_1d_array
 
@@ -384,6 +385,39 @@ class RobustPeriod:
         """
         TODO docstring
         """
+
+        def fisher_g_test(g0: float, n: int) -> float:
+            """
+            Perform Fisher's exact test for a given g-statistic and sample size.
+
+            Parameters
+            ----------
+            g0 : float
+                The g-statistic value. Must be between 0 and 1 (exclusive).
+            n : int
+                The sample size.
+
+            Returns
+            -------
+            float
+                The p-value resulting from Fisher's exact test.
+
+            Raises
+            ------
+            AssertionError
+                If g0 is not within the range (0, 1].
+            """
+            # Validate the g0 parameter
+            assert 0 < g0 <= 1, "Invalid g0 parameter value: '{}'".format(g0)
+
+            return 1 - np.sum(
+                np.array(
+                    [
+                        (-1) ** (k - 1) * binom(n, k) * (1 - k * g0) ** (n - 1)
+                        for k in range(1, int(1 // g0) + 1)
+                    ]
+                )
+            )
 
         def huber_acf(periodogram: ArrayLike) -> NDArray:
             """
