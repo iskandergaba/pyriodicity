@@ -327,7 +327,7 @@ class RobustPeriod:
 
             # Compute the Maximal Overlap Discrete Wavelet Transform
             coeffs = pywt.swt(y, "db{}".format(db_n), level, norm=True)
-            return np.array([cD for _, cD in coeffs])
+            return np.array([cD[: len(x)] for _, cD in coeffs])
 
         def biweight_midvariance(x: ArrayLike, c: float) -> float:
             """
