@@ -400,20 +400,20 @@ class RobustPeriod:
             n = len(x)
             t = np.arange(n)
 
-            def get_fft_comp(x_k, k):
+            def get_fft_comp(x, k):
                 phi = np.array(
                     [np.cos(2 * np.pi * k * t / n), np.sin(2 * np.pi * k * t / n)]
                 ).T
 
                 # Huber Robust M-Periodogram objective function
                 def objective(beta):
-                    return np.linalg.norm(huber(delta, phi @ beta - x_k.T))
+                    return np.linalg.norm(huber(delta, phi @ beta - x.T))
 
                 result = minimize(objective, np.zeros(phi.shape[1]))
                 return n * np.linalg.norm(result.x) / 4
 
             # TODO Use ADMM framework
-            return np.array([get_fft_comp(x_k, delta) for x_k in x])
+            return np.array([get_fft_comp(x, k) for k in range(n)])
 
         def fisher_g_test(g0: float, n: int) -> float:
             """
@@ -494,9 +494,8 @@ class RobustPeriod:
             n = len(periodogram) // 2
             k = np.argmax(periodogram)
             peaks, _ = find_peaks(acf_rescaled)
-            print(peaks[:5])
             distances = np.diff(peaks)
-            period = np.median(distances).astype(int) if len(distances) > 0 else 0
+            period = np.median(distances) if len(distances) > 0 else 0
             r_k = (
                 0.5 * ((n / (k + 1)) + (n / k)) - 1,
                 0.5 * ((n / k) + (n / (k - 1))) + 1,
@@ -519,7 +518,6 @@ class RobustPeriod:
         if max_period_count is None:
             max_period_count = len(periodograms)
 
-        print(max_period_count)
         for pg in periodograms:
             if max_period_count <= len(periods):
                 break
