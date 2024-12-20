@@ -1,13 +1,15 @@
 import datetime
 from enum import Enum, unique
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 import pywt
 from numpy.typing import ArrayLike, NDArray
+from scipy.optimize import minimize
+from scipy.signal import find_peaks
 from scipy.sparse import dia_matrix, eye
 from scipy.sparse.linalg import spsolve
-from scipy.special import binom
+from scipy.special import binom, huber
 
 from pyriodicity.tools import to_1d_array
 
@@ -103,6 +105,9 @@ class RobustPeriod:
         lamb: Union[float, str] = "ravn-uhlig",
         c: float = 1.5,
         db_n: int = 10,
+        modwt_level: int = 10,
+        delta: float = 1.345,
+        max_period_count: Optional[int] = None,
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -165,10 +170,10 @@ class RobustPeriod:
         y = RobustPeriod._preprocess(x, lamb, c)
 
         # Decouple multiple periodicities
-        w_coeff_list = RobustPeriod._wavelet_coeffs(y)
+        w_coeff_list = RobustPeriod._wavelet_coeffs(y, db_n, modwt_level)
 
         # Robust single periodicity detection
-        return [RobustPeriod._detect(w_coeffs) for w_coeffs in w_coeff_list]
+        return RobustPeriod._detect(w_coeff_list, delta, max_period_count)
 
     @staticmethod
     def _preprocess(
@@ -231,7 +236,7 @@ class RobustPeriod:
             cycle = y - trend
             return cycle, trend
 
-        def huber(x: ArrayLike, c: float) -> ArrayLike:
+        def huber_function(x: ArrayLike, c: float) -> ArrayLike:
             """
             Compute the Huber function for an array-like input.
 
@@ -275,7 +280,7 @@ class RobustPeriod:
         # Remove outliers using Huber function
         mean = np.mean(y)
         mad = np.mean(np.abs(y - mean))
-        return huber((y - mean) / mad, c)
+        return huber_function((y - mean) / mad, c)
 
     @staticmethod
     def _wavelet_coeffs(x: ArrayLike, db_n: int, level: int):
@@ -381,10 +386,34 @@ class RobustPeriod:
         return w_coeffs[np.argsort(-w_vars)]
 
     @staticmethod
-    def _detect(wavelet_coeffs: ArrayLike) -> int:
+    def _detect(
+        w_coeff_list: ArrayLike, delta: float, max_period_count: Optional[int]
+    ) -> int:
         """
         TODO docstring
         """
+
+        def huber_m_periodogram(x: ArrayLike, delta: float) -> NDArray:
+            """
+            TODO docstring
+            """
+            n = len(x)
+            t = np.arange(n)
+
+            def get_fft_comp(x_k, k):
+                phi = np.array(
+                    [np.cos(2 * np.pi * k * t / n), np.sin(2 * np.pi * k * t / n)]
+                ).T
+
+                # Huber Robust M-Periodogram objective function
+                def objective(beta):
+                    return np.linalg.norm(huber(delta, phi @ beta - x_k.T))
+
+                result = minimize(objective, np.zeros(phi.shape[1]))
+                return n * np.linalg.norm(result.x) / 4
+
+            # TODO Use ADMM framework
+            return np.array([get_fft_comp(x_k, delta) for x_k in x])
 
         def fisher_g_test(g0: float, n: int) -> float:
             """
@@ -419,37 +448,82 @@ class RobustPeriod:
                 )
             )
 
-        def huber_acf(periodogram: ArrayLike) -> NDArray:
+        def get_period(periodogram: ArrayLike) -> int:
             """
-            Compute the modified autocorrelation function (ACF) for a given periodogram
-            using the Huber loss function.
-
-            Parameters
-            ----------
-            periodogram : array-like
-                The input periodogram for which the ACF is to be computed.
-
-            Returns
-            -------
-            NDArray
-                The modified autocorrelation function of the input periodogram.
+            TODO docstring
             """
 
-            n_prime = len(periodogram)
-            n = n_prime // 2
+            def huber_acf(periodogram: ArrayLike) -> NDArray:
+                """
+                Compute the modified autocorrelation function (ACF) for a given
+                periodogram using the Huber loss function.
 
-            # Compute P_bar
-            part_1 = periodogram[range(n)]
-            part_2 = (
-                periodogram[range(0, n_prime, 2)] - periodogram[range(1, n_prime, 2)]
-            ).sum() ** 2 / n_prime
-            part_3 = periodogram[range(n + 1, n_prime)]
-            p_bar = np.hstack([part_1, part_2, part_3])
+                Parameters
+                ----------
+                periodogram : array-like
+                    The input periodogram for which the ACF is to be computed.
 
-            # Compute P
-            p = np.real(np.fft.ifft(p_bar))
+                Returns
+                -------
+                NDArray
+                    The modified autocorrelation function of the input periodogram.
+                """
 
-            return p[:n] / ((n - np.arange(0, n)) * p[0])
+                n_prime = len(periodogram)
+                n = n_prime // 2
 
-        # TODO implementation
-        pass
+                # Compute P_bar
+                part_1 = periodogram[range(n)]
+                part_2 = (
+                    periodogram[range(0, n_prime, 2)]
+                    - periodogram[range(1, n_prime, 2)]
+                ).sum() ** 2 / n_prime
+                part_3 = periodogram[range(n + 1, n_prime)]
+                p_bar = np.hstack([part_1, part_2, part_3])
+
+                # Compute P
+                p = np.real(np.fft.ifft(p_bar))
+
+                return p[:n] / ((n - np.arange(0, n)) * p[0])
+
+            # Compute the Huber ACF
+            acf = huber_acf(periodogram)
+            acf_rescaled = (acf - acf.min()) / (acf.max() - acf.min())
+
+            # Compute the period
+            n = len(periodogram) // 2
+            k = np.argmax(periodogram)
+            peaks, _ = find_peaks(acf_rescaled)
+            print(peaks[:5])
+            distances = np.diff(peaks)
+            period = np.median(distances).astype(int) if len(distances) > 0 else 0
+            r_k = (
+                0.5 * ((n / (k + 1)) + (n / k)) - 1,
+                0.5 * ((n / k) + (n / (k - 1))) + 1,
+            )
+            return period if r_k[0] <= period <= r_k[1] else None
+
+        # Compute periodograms with periodic components
+        periodograms = [
+            huber_m_periodogram(np.pad(w_coeffs, (0, len(w_coeffs))), delta)
+            for w_coeffs in w_coeff_list
+        ]
+        periodograms = [
+            pg
+            for pg in periodograms
+            if fisher_g_test(np.max(pg) / np.sum(pg), len(pg)) < 0.05
+        ]
+
+        # Compute the periods
+        periods = []
+        if max_period_count is None:
+            max_period_count = len(periodograms)
+
+        print(max_period_count)
+        for pg in periodograms:
+            if max_period_count <= len(periods):
+                break
+            p = get_period(pg)
+            if p is not None:
+                periods.append(p)
+        return np.array(periods)
