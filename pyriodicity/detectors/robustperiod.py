@@ -439,7 +439,7 @@ class RobustPeriod:
             # Validate the g0 parameter
             assert 0 < g0 <= 1, "Invalid g0 parameter value: '{}'".format(g0)
 
-            return 1 - np.sum(
+            return np.sum(
                 np.array(
                     [
                         (-1) ** (k - 1) * binom(n, k) * (1 - k * g0) ** (n - 1)
@@ -487,13 +487,16 @@ class RobustPeriod:
                 return p[:n] / ((n - np.arange(0, n)) * p[0])
 
             # Compute the Huber ACF
+            n = len(periodogram) // 2
+            periodogram = periodogram[:n]
+            k = np.argmax(periodogram)
+
+            # Compute and rescale the ACF
             acf = huber_acf(periodogram)
             acf_rescaled = (acf - acf.min()) / (acf.max() - acf.min())
 
             # Compute the period
-            n = len(periodogram) // 2
-            k = np.argmax(periodogram)
-            peaks, _ = find_peaks(acf_rescaled)
+            peaks, _ = find_peaks(acf_rescaled, height=0.5)
             distances = np.diff(peaks)
             period = np.median(distances) if len(distances) > 0 else 0
             r_k = (
