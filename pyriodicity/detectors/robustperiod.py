@@ -1,5 +1,8 @@
 import datetime
+from concurrent.futures import ProcessPoolExecutor
 from enum import Enum, unique
+from functools import partial
+from os import cpu_count
 from typing import Optional, Union
 
 import numpy as np
@@ -43,6 +46,54 @@ class RobustPeriod:
     >>> RobustPeriod.detect(data)
     array([12])
     """
+
+    class _HuberPeriodogram:
+        @classmethod
+        def compute(
+            cls,
+            x: ArrayLike,
+            delta: float,
+            max_worker_count: int,
+        ) -> NDArray:
+            """
+            Compute the Huber M-Periodogram using ADMM with parallel execution.
+
+            Parameters
+            ----------
+            x : array_like
+                Input data to be transformed. Must be squeezable to 1-d.
+            delta : float
+                The tuning constant for the Huber loss function.
+
+            Returns
+            -------
+            NDArray
+                The Huber M-Periodogram of the input data.
+            """
+
+            with ProcessPoolExecutor(max_worker_count) as executor:
+                periodogram = list(
+                    executor.map(
+                        partial(cls._compute_element, x, delta=delta), range(len(x))
+                    )
+                )
+
+            return np.array(periodogram)
+
+        @classmethod
+        def _compute_element(cls, x: ArrayLike, k: int, delta: float) -> float:
+            n = len(x)
+            t = np.arange(n)
+            phi = np.array(
+                [np.cos(2 * np.pi * k * t / n), np.sin(2 * np.pi * k * t / n)]
+            ).T
+
+            # Huber Robust M-Periodogram objective function
+            def objective(beta):
+                return np.linalg.norm(huber(delta, phi @ beta - x.T))
+
+            result = minimize(objective, np.zeros(phi.shape[1]))
+            return n * np.linalg.norm(result.x) / 4
 
     @unique
     class LambdaSelection(Enum):
@@ -108,6 +159,7 @@ class RobustPeriod:
         modwt_level: int = 10,
         delta: float = 1.345,
         max_period_count: Optional[int] = None,
+        max_worker_count: int = cpu_count(),
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -173,7 +225,9 @@ class RobustPeriod:
         w_coeff_list = RobustPeriod._wavelet_coeffs(y, db_n, modwt_level)
 
         # Robust single periodicity detection
-        return RobustPeriod._detect(w_coeff_list, delta, max_period_count)
+        return RobustPeriod._detect(
+            w_coeff_list, delta, max_period_count, max_worker_count
+        )
 
     @staticmethod
     def _preprocess(
@@ -387,33 +441,14 @@ class RobustPeriod:
 
     @staticmethod
     def _detect(
-        w_coeff_list: ArrayLike, delta: float, max_period_count: Optional[int]
+        w_coeff_list: ArrayLike,
+        delta: float,
+        max_period_count: Optional[int],
+        max_worker_count: int,
     ) -> int:
         """
         TODO docstring
         """
-
-        def huber_m_periodogram(x: ArrayLike, delta: float) -> NDArray:
-            """
-            TODO docstring
-            """
-            n = len(x)
-            t = np.arange(n)
-
-            def get_fft_comp(x, k):
-                phi = np.array(
-                    [np.cos(2 * np.pi * k * t / n), np.sin(2 * np.pi * k * t / n)]
-                ).T
-
-                # Huber Robust M-Periodogram objective function
-                def objective(beta):
-                    return np.linalg.norm(huber(delta, phi @ beta - x.T))
-
-                result = minimize(objective, np.zeros(phi.shape[1]))
-                return n * np.linalg.norm(result.x) / 4
-
-            # TODO Use ADMM framework
-            return np.array([get_fft_comp(x, k) for k in range(n)])
 
         def fisher_g_test(g0: float, n: int) -> float:
             """
@@ -505,11 +540,15 @@ class RobustPeriod:
             )
             return period if r_k[0] <= period <= r_k[1] else None
 
-        # Compute periodograms with periodic components
+        # Compute the periodograms
         periodograms = [
-            huber_m_periodogram(np.pad(w_coeffs, (0, len(w_coeffs))), delta)
+            RobustPeriod._HuberPeriodogram.compute(
+                np.pad(w_coeffs, (0, len(w_coeffs))), delta, max_worker_count
+            )
             for w_coeffs in w_coeff_list
         ]
+
+        # Filter out periodograms not containing periodic components
         periodograms = [
             pg
             for pg in periodograms
