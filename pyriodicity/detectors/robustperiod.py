@@ -508,12 +508,16 @@ class RobustPeriod:
                 n = n_prime // 2
 
                 # Compute P_bar
-                part_1 = periodogram[range(n)]
+                part_1 = periodogram[:n]
                 part_2 = (
-                    periodogram[range(0, n_prime, 2)]
-                    - periodogram[range(1, n_prime, 2)]
-                ).sum() ** 2 / n_prime
-                part_3 = periodogram[range(n + 1, n_prime)]
+                    np.sum(
+                        periodogram[range(0, n_prime, 2)]
+                        - periodogram[range(1, n_prime, 2)]
+                    )
+                    ** 2
+                    / n_prime
+                )
+                part_3 = np.flip(part_1[1:])
                 p_bar = np.hstack([part_1, part_2, part_3])
 
                 # Compute P
