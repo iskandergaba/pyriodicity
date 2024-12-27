@@ -544,22 +544,23 @@ class RobustPeriod:
 
                 return p[:n] / ((n - np.arange(0, n)) * p[0])
 
-            # Compute the Huber ACF
-            n = len(periodogram) // 2
-            periodogram = periodogram[:n]
-            k = np.argmax(periodogram)
-
-            # Compute and rescale the ACF
+            # Compute and rescale the Huber ACF
+            n_prime = len(periodogram)
             acf = huber_acf(periodogram)
             acf_rescaled = (acf - acf.min()) / (acf.max() - acf.min())
+
+            # The periodicity must be less than n // 2, i.e. less than n_prime // 4
+            k = np.argmax(periodogram)
+            if k < 4:
+                return None
 
             # Compute the period
             peaks, _ = find_peaks(acf_rescaled, height=0.5)
             distances = np.diff(peaks)
-            period = np.median(distances) if len(distances) > 0 else 0
+            period = np.median(distances).astype(int) if len(distances) > 0 else 0
             r_k = (
-                0.5 * ((n / (k + 1)) + (n / k)) - 1,
-                0.5 * ((n / k) + (n / (k - 1))) + 1,
+                0.5 * ((n_prime / (k + 1)) + (n_prime / k)) - 1,
+                0.5 * ((n_prime / k) + (n_prime / (k - 1))) + 1,
             )
             return period if r_k[0] <= period <= r_k[1] else None
 
@@ -587,6 +588,6 @@ class RobustPeriod:
             if max_period_count <= len(periods):
                 break
             p = get_period(pg)
-            if p is not None:
+            if p is not None and p not in periods:
                 periods.append(p)
         return np.array(periods)
