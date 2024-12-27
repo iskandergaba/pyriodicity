@@ -93,7 +93,7 @@ class RobustPeriod:
                 return np.linalg.norm(huber(delta, phi @ beta - x.T))
 
             result = minimize(objective, np.zeros(phi.shape[1]))
-            return n * np.linalg.norm(result.x) / 4
+            return n * np.linalg.norm(result.x) ** 2 / 4
 
     @unique
     class LambdaSelection(Enum):
