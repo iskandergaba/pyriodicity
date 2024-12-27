@@ -483,9 +483,28 @@ class RobustPeriod:
                 )
             )
 
-        def get_period(periodogram: ArrayLike) -> int:
+        def get_period(
+            periodogram: ArrayLike,
+        ) -> int:
             """
-            TODO docstring
+            Determine the period of a given periodogram.
+
+            Parameters
+            ----------
+            periodogram : array-like
+                The input periodogram for which the period is to be determined.
+
+            Returns
+            -------
+            int
+                The detected period length of the input periodogram. Returns None if
+                the period cannot be determined.
+
+            Notes
+            -----
+            This function computes the modified autocorrelation function (ACF) using the
+            Huber loss function and identifies the period by finding peaks in the
+            rescaled ACF.
             """
 
             def huber_acf(periodogram: ArrayLike) -> NDArray:
