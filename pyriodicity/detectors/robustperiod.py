@@ -155,11 +155,11 @@ class RobustPeriod:
         x: ArrayLike,
         lamb: Union[float, str] = "ravn-uhlig",
         c: float = 1.5,
-        db_n: int = 10,
+        db_n: int = 8,
         modwt_level: int = 10,
         delta: float = 1.345,
-        max_period_count: Optional[int] = None,
         max_worker_count: int = cpu_count(),
+        max_period_count: Optional[int] = None,
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -183,6 +183,18 @@ class RobustPeriod:
             The number of vanishing moments for the Daubechies wavelet [4]_ used to
             compute the Maximal Overlap Discrete Wavelet Transform (MODWT) [5]_. Must
             be an integer between 1 and 38, inclusive.
+        modwt_level : int, default = 10
+            The level of the Maximal Overlap Discrete Wavelet Transform (MODWT). Must be
+            a positive integer.
+        delta : float, default = 1.345
+            The tuning constant for the Huber loss function. A smaller value makes the
+            function more sensitive to outliers.
+        max_worker_count : int, default = os.cpu_count()
+            The maximum number of worker threads to use for parallel processing.
+            Defaults to the number of CPUs in the system.
+        max_period_count : int, optional
+            The maximum number of periods to detect. If None, all detected periods are
+            returned.
 
         Returns
         -------
@@ -443,11 +455,29 @@ class RobustPeriod:
     def _detect(
         w_coeff_list: ArrayLike,
         delta: float,
-        max_period_count: Optional[int],
         max_worker_count: int,
-    ) -> int:
+        max_period_count: Optional[int],
+    ) -> NDArray:
         """
-        TODO docstring
+        Detect periods in the given wavelet coefficient list.
+
+        Parameters
+        ----------
+        w_coeff_list : array_like
+            List of wavelet coefficients to be analyzed.
+        delta : float
+            The tuning constant for the Huber loss function. A smaller value makes the
+            function more sensitive to outliers.
+        max_worker_count : int
+            The maximum number of worker processes to use for parallel processing.
+        max_period_count : int, optional
+            The maximum number of periods to detect. If None, all detected periods are
+            returned.
+
+        Returns
+        -------
+        NDArray
+            List of detected periods.
         """
 
         def fisher_g_test(g0: float, n: int) -> float:
@@ -483,9 +513,7 @@ class RobustPeriod:
                 )
             )
 
-        def get_period(
-            periodogram: ArrayLike,
-        ) -> int:
+        def get_period(periodogram: ArrayLike) -> int:
             """
             Determine the period of a given periodogram.
 
