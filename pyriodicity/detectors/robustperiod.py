@@ -238,7 +238,7 @@ class RobustPeriod:
 
         # Robust single periodicity detection
         return RobustPeriod._detect(
-            w_coeff_list, delta, max_period_count, max_worker_count
+            w_coeff_list, delta, max_worker_count, max_period_count
         )
 
     @staticmethod
