@@ -179,7 +179,7 @@ class RobustPeriod:
             The constant threshold that determines the robustness of the Huber function.
             A smaller value makes the Huber function more sensitive to outliers. Huber
             recommends using a value between 1 and 2 [3]_.
-        db_n : int, default = 10
+        db_n : int, default = 8
             The number of vanishing moments for the Daubechies wavelet [4]_ used to
             compute the Maximal Overlap Discrete Wavelet Transform (MODWT) [5]_. Must
             be an integer between 1 and 38, inclusive.
