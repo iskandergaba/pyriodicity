@@ -504,13 +504,9 @@ class RobustPeriod:
             # Validate the g0 parameter
             assert 0 < g0 <= 1, "Invalid g0 parameter value: '{}'".format(g0)
 
+            k = np.arange(1, int(1 // g0) + 1)
             return np.sum(
-                np.array(
-                    [
-                        (-1) ** (k - 1) * binom(n, k) * (1 - k * g0) ** (n - 1)
-                        for k in range(1, int(1 // g0) + 1)
-                    ]
-                )
+                np.nan_to_num(binom(n, k)) * np.nan_to_num((1 - k * g0) ** (n - 1))
             )
 
         def get_period(periodogram: ArrayLike) -> int:
