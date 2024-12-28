@@ -1,6 +1,41 @@
 from pyriodicity import ACFPeriodicityDetector
 
 
+def test_sinewave_10_acf_find_all_periods(sinewave_10):
+    data = sinewave_10
+    periods = ACFPeriodicityDetector.detect(data)
+    assert len(periods) > 0
+    assert 10 in periods
+
+
+def test_sinewave_50_acf_find_all_periods(sinewave_50):
+    data = sinewave_50
+    periods = ACFPeriodicityDetector.detect(data)
+    assert len(periods) > 0
+    assert 50 in periods
+
+
+def test_sinewave_100_acf_find_all_periods(sinewave_100):
+    data = sinewave_100
+    periods = ACFPeriodicityDetector.detect(data)
+    assert len(periods) > 0
+    assert 100 in periods
+
+
+def test_sinewave_10_acf_find_strongest_period(sinewave_10):
+    data = sinewave_10
+    periods = ACFPeriodicityDetector.detect(data, max_period_count=1)
+    assert len(periods) == 1
+    assert 10 in periods
+
+
+def test_sinewave_50_acf_find_strongest_period(sinewave_50):
+    data = sinewave_50
+    periods = ACFPeriodicityDetector.detect(data, max_period_count=1)
+    assert len(periods) == 1
+    assert 50 in periods
+
+
 def test_co2_daily_acf_default(co2_daily):
     data = co2_daily
     periods = ACFPeriodicityDetector.detect(data)

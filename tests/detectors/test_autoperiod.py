@@ -1,6 +1,48 @@
 from pyriodicity import Autoperiod
 
 
+def test_sinewave_10_autoperiod_find_all_periods(sinewave_10):
+    data = sinewave_10
+    periods = Autoperiod.detect(data)
+    assert len(periods) > 0
+    assert 10 in periods
+
+
+def test_sinewave_50_autoperiod_find_all_periods(sinewave_50):
+    data = sinewave_50
+    periods = Autoperiod.detect(data)
+    assert len(periods) > 0
+    assert 50 in periods
+
+
+def test_sinewave_100_autoperiod_find_all_periods(sinewave_100):
+    data = sinewave_100
+    periods = Autoperiod.detect(data)
+    assert len(periods) > 0
+    assert 100 in periods
+
+
+def test_trianglewave_10_autoperiod_find_all_periods(trianglewave_10):
+    data = trianglewave_10
+    periods = Autoperiod.detect(data)
+    assert len(periods) > 0
+    assert 10 in periods
+
+
+def test_trianglewave_50_autoperiod_find_all_periods(trianglewave_50):
+    data = trianglewave_50
+    periods = Autoperiod.detect(data)
+    assert len(periods) > 0
+    assert 50 in periods
+
+
+def test_trianglewave_100_autoperiod_find_all_periods(trianglewave_100):
+    data = trianglewave_100
+    periods = Autoperiod.detect(data)
+    assert len(periods) > 0
+    assert 100 in periods
+
+
 def test_co2_daily_autoperiod_default(co2_daily):
     data = co2_daily
     periods = Autoperiod.detect(data)
