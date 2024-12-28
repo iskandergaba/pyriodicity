@@ -25,3 +25,17 @@ def test_co2_monthly_robustperiod_max_period_count_one(co2_monthly):
     data = co2_monthly
     periods = RobustPeriod.detect(data, max_period_count=1)
     assert len(periods) == 1
+
+
+def test_co2_weekly_robustperiod_lamb_hodrick_prescott(co2_weekly):
+    data = co2_weekly
+    periods = RobustPeriod.detect(data, lamb="hodrick-prescott")
+    assert len(periods) > 0
+    assert 2 in periods
+
+
+def test_co2_monthly_robustperiod_lamb_hodrick_prescott(co2_monthly):
+    data = co2_monthly
+    periods = RobustPeriod.detect(data, lamb="hodrick-prescott")
+    assert len(periods) > 0
+    assert 12 in periods
