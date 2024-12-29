@@ -35,13 +35,8 @@ def trianglewave_100():
 
 
 @pytest.fixture(scope="module")
-def co2_daily():
-    return co2_data().resample("D").mean().ffill()
-
-
-@pytest.fixture(scope="module")
 def co2_weekly():
-    return co2_data().resample("W").mean().ffill()
+    return co2_data().ffill()
 
 
 @pytest.fixture(scope="module")

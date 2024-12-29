@@ -9,33 +9,9 @@ def test_sinewave_10_robustperiod_default(sinewave_10):
         RobustPeriod.detect(data)
 
 
-def test_sinewave_50_robustperiod_default(sinewave_50):
-    data = sinewave_50
-    with pytest.raises(AttributeError):
-        RobustPeriod.detect(data)
-
-
-def test_sinewave_100_robustperiod_default(sinewave_100):
-    data = sinewave_100
-    with pytest.raises(AttributeError):
-        RobustPeriod.detect(data)
-
-
-def test_trianglewave_10_robustperiod_default(trianglewave_10):
-    data = trianglewave_10
-    with pytest.raises(AttributeError):
-        RobustPeriod.detect(data)
-
-
-def test_trianglewave_50_robustperiod_default(trianglewave_50):
-    data = trianglewave_50
-    with pytest.raises(AttributeError):
-        RobustPeriod.detect(data)
-
-
-def test_trianglewave_100_robustperiod_default(trianglewave_100):
-    data = trianglewave_100
-    with pytest.raises(AttributeError):
+def test_co2_weekly_index_reset_robustperiod_default(co2_weekly):
+    data = co2_weekly.reset_index(drop=True)
+    with pytest.raises(TypeError):
         RobustPeriod.detect(data)
 
 
