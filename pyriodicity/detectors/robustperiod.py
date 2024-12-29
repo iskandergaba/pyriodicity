@@ -158,7 +158,7 @@ class RobustPeriod:
         db_n: int = 8,
         modwt_level: int = 10,
         delta: float = 1.345,
-        max_worker_count: int = cpu_count(),
+        max_worker_count: Optional[int] = None,
         max_period_count: Optional[int] = None,
     ) -> NDArray:
         """
@@ -226,8 +226,14 @@ class RobustPeriod:
            https://doi.org/10.1017/CBO9780511841040
         """
 
-        # Validate the db_n parameter
+        # Validate db_n parameter
         assert 1 <= db_n <= 38, "Invalid db_n parameter value: '{}'".format(db_n)
+
+        # Validate max_worker_count parameter
+        max_worker_count = cpu_count() if max_worker_count is None else max_worker_count
+
+        # Validate max_period_count parameter
+        max_period_count = modwt_level if max_period_count is None else max_period_count
 
         # Preprocess the data
         lamb = RobustPeriod.LambdaSelection(lamb) if isinstance(lamb, str) else lamb
@@ -456,7 +462,7 @@ class RobustPeriod:
         w_coeff_list: ArrayLike,
         delta: float,
         max_worker_count: int,
-        max_period_count: Optional[int],
+        max_period_count: int,
     ) -> NDArray:
         """
         Detect periods in the given wavelet coefficient list.
@@ -605,9 +611,6 @@ class RobustPeriod:
 
         # Compute the periods
         periods = []
-        if max_period_count is None:
-            max_period_count = len(periodograms)
-
         for pg in periodograms:
             if max_period_count <= len(periods):
                 break
