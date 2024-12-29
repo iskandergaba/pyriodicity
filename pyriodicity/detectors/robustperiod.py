@@ -28,7 +28,7 @@ class RobustPeriod:
     .. [1] Wen, Q., He, K., Sun, L., Zhang, Y., Ke, M., & Xu, H. (2021, June).
        RobustPeriod: Robust time-frequency mining for multiple periodicity detection.
        In Proceedings of the 2021 international conference on management of data
-       (pp. 2328-2337). https://doi.org/10.48550/arXiv.2002.09535
+       (pp. 2328-2337). https://doi.org/10.1145/3448016.3452779
 
     Examples
     --------

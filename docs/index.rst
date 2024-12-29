@@ -48,6 +48,10 @@ References
    AALTD 2019, Würzburg, Germany, September 20, 2019, Revised Selected
    Papers 4 (pp. 43-54). Springer International Publishing.
    `doi.org/10.1007/978-3-030-39098-3_4 <https://doi.org/10.1007/978-3-030-39098-3_4>`__.
+-  [4] Wen, Q., He, K., Sun, L., Zhang, Y., Ke, M., & Xu, H. (2021, June).
+   RobustPeriod: Robust time-frequency mining for multiple periodicity detection.
+   In Proceedings of the 2021 international conference on management of data (pp. 2328-2337).
+   `https://doi.org/10.1145/3448016.3452779 <https://doi.org/10.1145/3448016.3452779>`__.
 
 .. toctree::
    :hidden:
