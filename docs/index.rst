@@ -20,6 +20,7 @@ Supported Algorithms
 - `Autoperiod <https://doi.org/10.1137/1.9781611972757.40>`__
 - `CFD-Autoperiod <https://doi.org/10.1007/978-3-030-39098-3_4>`__
 - `Fast Fourier Transform (FFT) <https://otexts.com/fpp3/useful-predictors.html#fourier-series>`__
+- `RobustPeriod <https://doi.org/10.1145/3448016.3452779>`__
 
 Installation
 ~~~~~~~~~~~~

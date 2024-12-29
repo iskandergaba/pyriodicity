@@ -189,8 +189,8 @@ class RobustPeriod:
         delta : float, default = 1.345
             The tuning constant for the Huber loss function. A smaller value makes the
             function more sensitive to outliers.
-        max_worker_count : int, default = os.cpu_count()
-            The maximum number of worker threads to use for parallel processing.
+        max_worker_count : int, optional
+            The maximum number of worker processes to use for parallel processing.
             Defaults to the number of CPUs in the system.
         max_period_count : int, optional
             The maximum number of periods to detect. If None, all detected periods are
