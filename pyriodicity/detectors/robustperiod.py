@@ -170,11 +170,10 @@ class RobustPeriod:
             Data to be investigated. Must be squeezable to 1-d.
         lamb : float, str, default = 'ravn-uhlig'
             The Hodrick-Prescott filter smoothing parameter. Possible values are either
-            a `float`, or one of the following `str` values:
-            ['hodrick-prescott', 'ravn-uhlig']. These represent the automatic lambda
-            parameter selection methods by Hodrick and Prescott [1]_ and Ravn and Uhlig
-            [2]_, respectively. If lamb is not float value, then ``x`` must be a data
-            array with a datetime-like index.
+            a `float`, 'hodrick-prescott', or 'ravn-uhlig'. These represent the lambda
+            parameter selection heuristics by Hodrick and Prescott [1]_ and Ravn and
+            Uhlig [2]_, respectively. If lamb is not float value, then ``x`` must be a
+            data array with a datetime-like index.
         c : float, default = 1.5
             The constant threshold that determines the robustness of the Huber function.
             A smaller value makes the Huber function more sensitive to outliers. Huber
@@ -188,13 +187,13 @@ class RobustPeriod:
             a positive integer.
         delta : float, default = 1.345
             The tuning constant for the Huber loss function. A smaller value makes the
-            function more sensitive to outliers.
+            function more sensitive to outliers [3]_.
         max_worker_count : int, optional
-            The maximum number of worker processes to use for parallel processing.
-            Defaults to the number of CPUs in the system.
+            The maximum number of worker processes to use. Defaults to the number of
+            CPUs in the system.
         max_period_count : int, optional
-            The maximum number of periods to detect. If None, all detected periods are
-            returned.
+            The maximum number of periods to detect. If not specified, all detected
+            periods are returned.
 
         Returns
         -------
@@ -315,12 +314,11 @@ class RobustPeriod:
             Parameters
             ----------
             x : array_like
-                Input array-like object containing numerical values.
+                Data to be preprocessed. Must be squeezable to 1-d.
             c : float
                 The constant threshold that determines the robustness of the Huber
-                function.
-                A smaller value makes the Huber function more sensitive to outliers.
-                Huber recommends using a value between 1 and 2.
+                function. A smaller value makes the Huber function more sensitive to
+                outliers. Huber recommends using a value between 1 and 2.
 
             Returns
             -------
@@ -357,9 +355,8 @@ class RobustPeriod:
     @staticmethod
     def _wavelet_coeffs(x: ArrayLike, db_n: int, level: int):
         """
-        Compute the wavelet coefficients and their variances for a given series using
-        the Maximal Overlap Discrete Wavelet Transform (MODWT) and the Daubechies
-        wavelet.
+        Compute the wavelet coefficients for a given series using the Maximal Overlap
+        Discrete Wavelet Transform (MODWT) and the Daubechies wavelet.
 
         Parameters
         ----------
@@ -476,7 +473,7 @@ class RobustPeriod:
             function more sensitive to outliers.
         max_worker_count : int
             The maximum number of worker processes to use for parallel processing.
-        max_period_count : int, optional
+        max_period_count : int
             The maximum number of periods to detect. If None, all detected periods are
             returned.
 
