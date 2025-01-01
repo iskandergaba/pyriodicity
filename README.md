@@ -15,6 +15,7 @@ Pyriodicity provides an intuitive and easy-to-use Python implementation for peri
 - [Autoperiod](https://doi.org/10.1137/1.9781611972757.40)
 - [CFD-Autoperiod](https://doi.org/10.1007/978-3-030-39098-3_4)
 - [Fast Fourier Transform (FFT)](https://otexts.com/fpp3/useful-predictors.html#fourier-series)
+- [RobustPeriod](https://doi.org/10.1145/3448016.3452779)
 
 ## Installation
 To install the latest version of `pyriodicity`, simply run:
