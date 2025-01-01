@@ -61,7 +61,7 @@ class CFDAutoperiod:
 
     @staticmethod
     def detect(
-        endog: ArrayLike,
+        data: ArrayLike,
         k: int = 100,
         percentile: int = 99,
         detrend_func: Optional[str] = "linear",
@@ -73,7 +73,7 @@ class CFDAutoperiod:
 
         Parameters
         ----------
-        endog : array_like
+        data : array_like
             Data to be investigated. Must be squeezable to 1-d.
         k : int, optional, default = 100
             The number of times the data is randomly permuted while estimating the
@@ -112,18 +112,80 @@ class CFDAutoperiod:
             Calculate a Spearman correlation coefficient with associated p-value.
 
         """
-        y = to_1d_array(endog)
+
+        def cluster_period_hints(hints: ArrayLike, n: int) -> NDArray:
+            """
+            Find the centroids of the period hint density clusters.
+
+            Parameters
+            ----------
+            period_hints : array_like
+                List of period hints.
+            n : int
+                Length of the data.
+
+            Returns
+            -------
+            NDArray
+                List of period hint density cluster centroids.
+            """
+            hints = np.sort(hints)
+            eps = [
+                hints[i] if i == 0 else 1 + n / (n / hints[i - 1] - 1)
+                for i in range(len(hints))
+            ]
+            clusters = np.split(hints, np.argwhere(hints > eps).flatten())
+            return np.array([c.mean() for c in clusters if len(c) > 0])
+
+        def is_hint_valid(
+            x: ArrayLike, hint: float, detrend_func: str, correlation_func: str
+        ) -> bool:
+            """
+            Validate the period hint.
+
+            Parameters
+            ----------
+            x : array_like
+                Data to be investigated. Must be squeezable to 1-d.
+            hint : float
+                The period hint to be validated.
+            detrend_func : str
+                The kind of detrending to be applied on the signal. It can either be
+                'linear' or 'constant'.
+            correlation_func : str
+                The correlation function to be used to calculate the ACF of the series
+                or the signal. Possible values are ['pearson', 'spearman', 'kendall'].
+
+            Returns
+            -------
+            bool
+                Whether the period hint is valid.
+            """
+            hint_range = np.arange(hint // 2, 1 + hint + hint // 2, dtype=int)
+            acf_arr = acf(
+                x,
+                lag_start=hint_range[0],
+                lag_stop=hint_range[-1],
+                correlation_func=correlation_func,
+            )
+            polynomial = np.polynomial.Polynomial.fit(
+                hint_range, detrend(acf_arr, type=detrend_func), deg=2
+            ).convert()
+            derivative = polynomial.deriv()
+            return polynomial.coef[-1] < 0 and int(derivative.roots()[0]) in hint_range
+
+        x = to_1d_array(data)
 
         # Detrend data
-        y = y if detrend_func is None else detrend(y, type=detrend_func)
+        x = x if detrend_func is None else detrend(x, type=detrend_func)
         # Apply window on data
-        y = y if window_func is None else apply_window(y, window_func)
+        x = x if window_func is None else apply_window(x, window_func)
 
         # Compute the power threshold
-        p_threshold = power_threshold(y, detrend_func, k, percentile)
+        p_threshold = power_threshold(x, detrend_func, k, percentile)
 
         # Find period hints
-        freq, power = periodogram(y, detrend=detrend_func)
+        freq, power = periodogram(x, detrend=detrend_func)
         hints = np.array(
             [
                 1 / f
@@ -133,16 +195,14 @@ class CFDAutoperiod:
         )
 
         # Replace period hints with their density clustering centroids
-        hints = CFDAutoperiod._cluster_period_hints(hints, len(y))
+        hints = cluster_period_hints(hints, len(x))
 
         # Validate period hints
         valid_hints = []
-        length = len(y)
-        y_filtered = np.array(y)
+        length = len(x)
+        y_filtered = np.array(x)
         for h in hints:
-            if CFDAutoperiod._is_hint_valid(
-                y_filtered, h, detrend_func, correlation_func
-            ):
+            if is_hint_valid(y_filtered, h, detrend_func, correlation_func):
                 # Apply a low pass filter with an adapted cutoff frequency
                 f_cuttoff = 1 / (length / (length / h + 1) - 1)
                 y_filtered = sosfiltfilt(
@@ -156,7 +216,7 @@ class CFDAutoperiod:
         ]
         acf_arrays = [
             acf(
-                y,
+                x,
                 lag_start=r[0],
                 lag_stop=r[-1],
                 correlation_func=correlation_func,
@@ -171,69 +231,3 @@ class CFDAutoperiod:
                 for h, r, arr in zip(valid_hints, hint_ranges, acf_arrays)
             ]
         )
-
-    @staticmethod
-    def _cluster_period_hints(period_hints: ArrayLike, n: int) -> NDArray:
-        """
-        Find the centroids of the period hint density clusters.
-
-        Parameters
-        ----------
-        period_hints : array_like
-            List of period hints.
-        n : int
-            Length of the data.
-
-        Returns
-        -------
-        NDArray
-            List of period hint density cluster centroids.
-        """
-        hints = np.sort(period_hints)
-        eps = [
-            hints[i] if i == 0 else 1 + n / (n / hints[i - 1] - 1)
-            for i in range(len(hints))
-        ]
-        clusters = np.split(hints, np.argwhere(hints > eps).flatten())
-        return np.array([c.mean() for c in clusters if len(c) > 0])
-
-    @staticmethod
-    def _is_hint_valid(
-        y: ArrayLike,
-        hint: float,
-        detrend_func: Union[str],
-        correlation_func: str,
-    ) -> bool:
-        """
-        Validate the period hint.
-
-        Parameters
-        ----------
-        y : array_like
-            Data to be investigated. Must be squeezable to 1-d.
-        hint : float
-            The period hint to be validated.
-        detrend_func : str
-            The kind of detrending to be applied on the signal. It can either be
-            'linear' or 'constant'.
-        correlation_func : str
-            The correlation function to be used to calculate the ACF of the series
-            or the signal. Possible values are ['pearson', 'spearman', 'kendall'].
-
-        Returns
-        -------
-        bool
-            Whether the period hint is valid.
-        """
-        hint_range = np.arange(hint // 2, 1 + hint + hint // 2, dtype=int)
-        acf_arr = acf(
-            y,
-            lag_start=hint_range[0],
-            lag_stop=hint_range[-1],
-            correlation_func=correlation_func,
-        )
-        polynomial = np.polynomial.Polynomial.fit(
-            hint_range, detrend(acf_arr, type=detrend_func), deg=2
-        ).convert()
-        derivative = polynomial.deriv()
-        return polynomial.coef[-1] < 0 and int(derivative.roots()[0]) in hint_range

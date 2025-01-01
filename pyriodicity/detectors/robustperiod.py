@@ -3,7 +3,7 @@ from concurrent.futures import ProcessPoolExecutor
 from enum import Enum, unique
 from functools import partial
 from os import cpu_count
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import pywt
@@ -152,7 +152,7 @@ class RobustPeriod:
 
     @staticmethod
     def detect(
-        x: ArrayLike,
+        data: ArrayLike,
         lamb: Union[float, str] = "ravn-uhlig",
         c: float = 1.5,
         db_n: int = 8,
@@ -166,7 +166,7 @@ class RobustPeriod:
 
         Parameters
         ----------
-        x : array_like
+        data : array_like
             Data to be investigated. Must be squeezable to 1-d.
         lamb : float, str, default = 'ravn-uhlig'
             The Hodrick-Prescott filter smoothing parameter. Possible values are either
@@ -236,10 +236,10 @@ class RobustPeriod:
 
         # Preprocess the data
         lamb = RobustPeriod.LambdaSelection(lamb) if isinstance(lamb, str) else lamb
-        y = RobustPeriod._preprocess(x, lamb, c)
+        x = RobustPeriod._preprocess(data, lamb, c)
 
         # Decouple multiple periodicities
-        w_coeff_list = RobustPeriod._wavelet_coeffs(y, db_n, modwt_level)
+        w_coeff_list = RobustPeriod._wavelet_coeffs(x, db_n, modwt_level)
 
         # Robust single periodicity detection
         return RobustPeriod._detect(
@@ -272,7 +272,7 @@ class RobustPeriod:
             Preprocessed data.
         """
 
-        def hpfilter(x: ArrayLike, lamb: float):
+        def hpfilter(x: ArrayLike, lamb: float) -> Tuple[NDArray, NDArray]:
             """
             Apply the Hodrick-Prescott filter to a series.
 

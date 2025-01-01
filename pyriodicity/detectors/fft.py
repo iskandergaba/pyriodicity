@@ -54,7 +54,7 @@ class FFTPeriodicityDetector:
 
     @staticmethod
     def detect(
-        endog: ArrayLike,
+        data: ArrayLike,
         max_period_count: Optional[int] = None,
         detrend_func: Optional[str] = "linear",
         window_func: Optional[Union[float, str, tuple]] = None,
@@ -64,7 +64,7 @@ class FFTPeriodicityDetector:
 
         Parameters
         ----------
-        endog : array_like
+        data : array_like
             Data to be investigated. Must be squeezable to 1-d.
         max_period_count : int, optional, default = None
             Maximum number of periods to look for.
@@ -91,24 +91,24 @@ class FFTPeriodicityDetector:
         scipy.signal.get_window
             Return a window of a given length and type.
         """
-        y = to_1d_array(endog)
+        x = to_1d_array(data)
 
         # Detrend data
-        y = y if detrend_func is None else detrend(y, type=detrend_func)
+        x = x if detrend_func is None else detrend(x, type=detrend_func)
 
         # Apply the window function on the data
-        y = y if window_func is None else apply_window(y, window_func=window_func)
+        x = x if window_func is None else apply_window(x, window_func=window_func)
 
         # Compute DFT and ignore the zero frequency
-        freqs = np.fft.rfftfreq(len(y), d=1)[1:]
-        ft = np.fft.rfft(y)[1:]
+        freqs = np.fft.rfftfreq(len(x), d=1)[1:]
+        ft = np.fft.rfft(x)[1:]
 
         # Compute period lengths and their respective amplitudes
         periods = np.round(1 / freqs).astype(int)
         amps = abs(ft)
 
         # A period cannot be greater than half the length of the series
-        filter = periods < len(y) // 2
+        filter = periods < len(x) // 2
         periods = periods[filter]
         amps = amps[filter]
 

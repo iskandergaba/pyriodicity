@@ -8,10 +8,10 @@ from scipy.stats import kendalltau, pearsonr, spearmanr
 
 @staticmethod
 def to_1d_array(x: ArrayLike) -> NDArray:
-    y = np.ascontiguousarray(np.squeeze(np.asarray(x)), dtype=np.double)
-    if y.ndim != 1:
-        raise ValueError("y must be a 1d array")
-    return y
+    x = np.ascontiguousarray(np.squeeze(np.asarray(x)), dtype=np.double)
+    if x.ndim != 1:
+        raise ValueError("x must be a 1d array")
+    return x
 
 
 @staticmethod

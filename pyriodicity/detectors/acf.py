@@ -53,7 +53,7 @@ class ACFPeriodicityDetector:
 
     @staticmethod
     def detect(
-        endog: ArrayLike,
+        data: ArrayLike,
         max_period_count: Optional[int] = None,
         detrend_func: Optional[str] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
@@ -64,7 +64,7 @@ class ACFPeriodicityDetector:
 
         Parameters
         ----------
-        endog : array_like
+        data : array_like
             Data to be investigated. Must be squeezable to 1-d.
         max_period_count : int, optional, default = None
             Maximum number of periods to look for.
@@ -98,19 +98,19 @@ class ACFPeriodicityDetector:
         scipy.stats.spearmanr
             Calculate a Spearman correlation coefficient with associated p-value.
         """
-        y = to_1d_array(endog)
+        x = to_1d_array(data)
 
         # Detrend data
-        y = y if detrend_func is None else detrend(y, type=detrend_func)
+        x = x if detrend_func is None else detrend(x, type=detrend_func)
 
         # Apply window on data
-        y = y if window_func is None else apply_window(y, window_func)
+        x = x if window_func is None else apply_window(x, window_func)
 
         # Compute the ACF
         acf_arr = acf(
-            y,
+            x,
             lag_start=0,
-            lag_stop=len(y) // 2,
+            lag_stop=len(x) // 2,
             correlation_func=correlation_func,
         )
 
