@@ -13,11 +13,6 @@ class ACFPeriodicityDetector:
     Find the periods in a given signal or series using its ACF. A lag value
     is considered a period if it is a local maximum of the ACF [1]_.
 
-    Parameters
-    ----------
-    endog : array_like
-        Data to be investigated. Must be squeezable to 1-d.
-
     References
     ----------
     .. [1] Hyndman, R.J., & Athanasopoulos, G. (2021)
@@ -37,14 +32,13 @@ class ACFPeriodicityDetector:
     Use ACFPeriodicityDetector to find the list of seasonality periods using the ACF.
 
     >>> from pyriodicity import ACFPeriodicityDetector
-    >>> acf_detector = ACFPeriodicityDetector(data)
-    >>> acf_detector.fit()
+    >>> ACFPeriodicityDetector.detect(data)
     array([ 12,  24,  36,  48,  60,  72,  84,  96, 108, 120, 132, 143, 155,
        167, 179, 191, 203, 215, 227, 239, 251])
 
     You can use a different correlation function like Spearman
 
-    >>> acf_detector.fit(correlation_func="spearman")
+    >>> ACFPeriodicityDetector.detect(data, correlation_func="spearman")
     array([ 12,  24,  36,  48,  60,  72,  84,  96, 108, 120, 132, 143, 155,
        167, 179, 191, 203, 215, 227, 239, 251])
 
@@ -53,15 +47,13 @@ class ACFPeriodicityDetector:
     You can also get the most prominent period length value by setting
     ``max_period_count`` to 1.
 
-    >>> acf_detector.fit(max_period_count=1)
+    >>> ACFPeriodicityDetector.detect(data, max_period_count=1)
     array([12])
     """
 
-    def __init__(self, endog: ArrayLike):
-        self.y = to_1d_array(endog)
-
-    def fit(
-        self,
+    @staticmethod
+    def detect(
+        data: ArrayLike,
         max_period_count: Optional[int] = None,
         detrend_func: Optional[str] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
@@ -72,6 +64,8 @@ class ACFPeriodicityDetector:
 
         Parameters
         ----------
+        data : array_like
+            Data to be investigated. Must be squeezable to 1-d.
         max_period_count : int, optional, default = None
             Maximum number of periods to look for.
         detrend_func : str, default = 'linear'
@@ -79,7 +73,7 @@ class ACFPeriodicityDetector:
             'linear' or 'constant'.
         window_func : float, str, tuple optional, default = None
             Window function to be applied to the time series. Check
-            'window' parameter documentation for scipy.signal.get_window
+            ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
         correlation_func : str, default = 'pearson'
@@ -104,17 +98,19 @@ class ACFPeriodicityDetector:
         scipy.stats.spearmanr
             Calculate a Spearman correlation coefficient with associated p-value.
         """
+        x = to_1d_array(data)
+
         # Detrend data
-        self.y = self.y if detrend_func is None else detrend(self.y, type=detrend_func)
+        x = x if detrend_func is None else detrend(x, type=detrend_func)
 
         # Apply window on data
-        self.y = self.y if window_func is None else apply_window(self.y, window_func)
+        x = x if window_func is None else apply_window(x, window_func)
 
         # Compute the ACF
         acf_arr = acf(
-            self.y,
+            x,
             lag_start=0,
-            lag_stop=len(self.y) // 2,
+            lag_stop=len(x) // 2,
             correlation_func=correlation_func,
         )
 

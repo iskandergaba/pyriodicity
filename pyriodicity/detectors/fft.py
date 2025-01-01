@@ -13,11 +13,6 @@ class FFTPeriodicityDetector:
 
     Find the periods in a given signal or series using FFT [1]_.
 
-    Parameters
-    ----------
-    endog : array_like
-        Data to be investigated. Must be squeezable to 1-d.
-
     References
     ----------
     .. [1] Hyndman, R.J., & Athanasopoulos, G. (2021)
@@ -39,8 +34,7 @@ class FFTPeriodicityDetector:
     by corresponding frequency amplitudes in a descending order.
 
     >>> from pyriodicity import FFTPeriodicityDetector
-    >>> fft_detector = FFTPeriodicityDetector(data)
-    >>> fft_detector.fit()
+    >>> FFTPeriodicityDetector.detect(data)
     array([ 12,   6, 175,  44, 132,  88,  11,  13, 105,  58,  66,  75,  14,
         25,  18,  48,  10,  31,   4,   9,   7,  19,  23,   8,  38,  35,
         40,  28,  20,   3,   5,  15,  29,  22,   2,  24,  53,  33,  26,
@@ -51,18 +45,16 @@ class FFTPeriodicityDetector:
     a window function to get different results. You can also limit the number
     returned period length values to the 3 most signficant ones.
 
-    >>> fft_detector.fit(window_func="blackman", max_period_count=3)
+    >>> FFTPeriodicityDetector.detect(window_func="blackman", max_period_count=3)
     array([12, 13, 11])
 
     As you can see, results are concentrated around the period length value 12,
     indicating a yearly periodicity.
     """
 
-    def __init__(self, endog: ArrayLike):
-        self.y = to_1d_array(endog)
-
-    def fit(
-        self,
+    @staticmethod
+    def detect(
+        data: ArrayLike,
         max_period_count: Optional[int] = None,
         detrend_func: Optional[str] = "linear",
         window_func: Optional[Union[float, str, tuple]] = None,
@@ -72,6 +64,8 @@ class FFTPeriodicityDetector:
 
         Parameters
         ----------
+        data : array_like
+            Data to be investigated. Must be squeezable to 1-d.
         max_period_count : int, optional, default = None
             Maximum number of periods to look for.
         detrend_func : str, default = 'linear'
@@ -79,7 +73,7 @@ class FFTPeriodicityDetector:
             'linear' or 'constant'.
         window_func : float, str, tuple optional, default = None
             Window function to be applied to the time series. Check
-            'window' parameter documentation for scipy.signal.get_window
+            ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
 
@@ -97,26 +91,24 @@ class FFTPeriodicityDetector:
         scipy.signal.get_window
             Return a window of a given length and type.
         """
+        x = to_1d_array(data)
+
         # Detrend data
-        self.y = self.y if detrend_func is None else detrend(self.y, type=detrend_func)
+        x = x if detrend_func is None else detrend(x, type=detrend_func)
 
         # Apply the window function on the data
-        self.y = (
-            self.y
-            if window_func is None
-            else apply_window(self.y, window_func=window_func)
-        )
+        x = x if window_func is None else apply_window(x, window_func=window_func)
 
         # Compute DFT and ignore the zero frequency
-        freqs = np.fft.rfftfreq(len(self.y), d=1)[1:]
-        ft = np.fft.rfft(self.y)[1:]
+        freqs = np.fft.rfftfreq(len(x), d=1)[1:]
+        ft = np.fft.rfft(x)[1:]
 
         # Compute period lengths and their respective amplitudes
         periods = np.round(1 / freqs).astype(int)
         amps = abs(ft)
 
         # A period cannot be greater than half the length of the series
-        filter = periods < len(self.y) // 2
+        filter = periods < len(x) // 2
         periods = periods[filter]
         amps = amps[filter]
 

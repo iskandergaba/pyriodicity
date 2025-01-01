@@ -13,11 +13,6 @@ class Autoperiod:
 
     Find the periods in a given signal or series using Autoperiod [1]_.
 
-    Parameters
-    ----------
-    endog : array_like
-        Data to be investigated. Must be squeezable to 1-d.
-
     See Also
     --------
     pyriodicity.CFDAutoperiod
@@ -43,20 +38,19 @@ class Autoperiod:
     Use ``Autoperiod`` to find the list of periods in the data.
 
     >>> from pyriodicity import Autoperiod
-    >>> autoperiod = Autoperiod(data)
-    >>> autoperiod.fit()
+    >>> Autoperiod.detect(data)
     array([12])
 
     You can specify a lower percentile value should you wish for
     a more lenient detection
 
-    >>> autoperiod.fit(percentile=90)
+    >>> Autoperiod.detect(data, percentile=90)
     array([12])
 
     You can also increase the number of random data permutations
     for a more robust power threshold estimation
 
-    >>> autoperiod.fit(k=300)
+    >>> Autoperiod.detect(data, k=300)
     array([12])
 
     ``Autoperiod`` is generally a quite robust periodicity detection method.
@@ -64,11 +58,9 @@ class Autoperiod:
     a strong yearly periodicity.
     """
 
-    def __init__(self, endog: ArrayLike):
-        self.y = to_1d_array(endog)
-
-    def fit(
-        self,
+    @staticmethod
+    def detect(
+        data: ArrayLike,
         k: int = 100,
         percentile: int = 95,
         detrend_func: Optional[str] = "linear",
@@ -80,6 +72,8 @@ class Autoperiod:
 
         Parameters
         ----------
+        data : array_like
+            Data to be investigated. Must be squeezable to 1-d.
         k : int, optional, default = 100
             The number of times the data is randomly permuted while estimating the
             power threshold.
@@ -91,7 +85,7 @@ class Autoperiod:
             'linear' or 'constant'.
         window_func : float, str, tuple optional, default = None
             Window function to be applied to the time series. Check
-            'window' parameter documentation for scipy.signal.get_window
+            ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
         correlation_func : str, default = 'pearson'
@@ -117,16 +111,113 @@ class Autoperiod:
             Calculate a Spearman correlation coefficient with associated p-value.
 
         """
+
+        def is_hint_valid(x: ArrayLike, hint: float, correlation_func: str) -> bool:
+            """
+            Validate the period hint.
+
+            Parameters
+            ----------
+            x : array_like
+                Data to be investigated. Must be squeezable to 1-d.
+            hint : float
+                The period hint to be validated.
+            correlation_func : str, default = 'pearson'
+                The correlation function to be used to calculate the ACF of the series
+                or the signal. Possible values are ['pearson', 'spearman', 'kendall'].
+
+            Returns
+            -------
+            bool
+                Whether the period hint is valid.
+            """
+
+            def split(
+                x: ArrayLike, y: ArrayLike, start: int, end: int, split: int
+            ) -> tuple:
+                """
+                Approximate a function at [start, end] with two line segments at
+                [start, split] and [split, end].
+
+                Parameters
+                ----------
+                x : array_like
+                    The x-coordinates of the data points.
+                y : array_like
+                    The y-coordinates of the data points.
+                start : int
+                    The start index of the data points to be approximated.
+                end : int
+                    The end index of the data points to be approximated.
+                split : int
+                    The split index of the data points to be approximated.
+
+                See Also
+                --------
+                scipy.stats.linregress
+                    Calculate a linear least-squares regression for two sets of
+                    measurements.
+
+                Returns
+                -------
+                numpy.polynomial.Polynomial
+                    The first line segment.
+                numpy.polynomial.Polynomial
+                    The second line segment.
+                float
+                    The approximation error.
+                """
+                if not start < split < end:
+                    raise ValueError(
+                        "Invalid start, split, and end values ({}, {}, {})".format(
+                            start, split, end
+                        )
+                    )
+                x1, y1, x2, y2 = (
+                    x[start : split + 1],
+                    y[start : split + 1],
+                    x[split:end],
+                    y[split:end],
+                )
+                line1, stats1 = np.polynomial.Polynomial.fit(x1, y1, deg=1, full=True)
+                line2, stats2 = np.polynomial.Polynomial.fit(x2, y2, deg=1, full=True)
+                resid1 = 0 if len(stats1[0]) == 0 else stats1[0][0]
+                resid2 = 0 if len(stats2[0]) == 0 else stats2[0][0]
+                return line1.convert(), line2.convert(), resid1 + resid2
+
+            length = len(x)
+            hint_range = np.arange(
+                np.floor((hint + length / (length / hint + 1)) / 2 - 1),
+                np.ceil((hint + length / (length / hint - 1)) / 2 + 1),
+                dtype=int,
+            )
+            acf_arr = acf(
+                x,
+                lag_start=hint_range[0],
+                lag_stop=hint_range[-1],
+                correlation_func=correlation_func,
+            )
+            splits = [
+                split(hint_range, acf_arr, 0, len(hint_range), i)
+                for i in range(1, len(hint_range) - 1)
+            ]
+            line1, line2, _ = splits[
+                np.array([error for _, _, error in splits]).argmin()
+            ]
+            return line1.coef[-1] > 0 > line2.coef[-1]
+
+        x = to_1d_array(data)
+
         # Detrend data
-        self.y = self.y if detrend_func is None else detrend(self.y, type=detrend_func)
+        x = x if detrend_func is None else detrend(x, type=detrend_func)
         # Apply window on data
-        self.y = self.y if window_func is None else apply_window(self.y, window_func)
+        x = x if window_func is None else apply_window(x, window_func)
 
         # Compute the power threshold
-        p_threshold = power_threshold(self.y, detrend_func, k, percentile)
+        p_threshold = power_threshold(x, detrend_func, k, percentile)
 
         # Find period hints
-        freq, power = periodogram(self.y, window=None, detrend=False)
+        freq, power = periodogram(x, window=None, detrend=False)
         hints = np.array(
             [
                 1 / f
@@ -136,12 +227,10 @@ class Autoperiod:
         )
 
         # Validate period hints
-        valid_hints = [
-            h for h in hints if self._is_hint_valid(self.y, h, correlation_func)
-        ]
+        valid_hints = [h for h in hints if is_hint_valid(x, h, correlation_func)]
 
         # Return the closest ACF peak to each valid period hint
-        length = len(self.y)
+        length = len(x)
         hint_ranges = [
             np.arange(
                 np.floor((h + length / (length / h + 1)) / 2 - 1),
@@ -152,7 +241,7 @@ class Autoperiod:
         ]
         acf_arrays = [
             acf(
-                self.y,
+                x,
                 lag_start=r[0],
                 lag_stop=r[-1],
                 correlation_func=correlation_func,
@@ -167,97 +256,3 @@ class Autoperiod:
                 }
             )
         )
-
-    @staticmethod
-    def _is_hint_valid(
-        y: ArrayLike,
-        hint: float,
-        correlation_func: str,
-    ) -> bool:
-        """
-        Validate the period hint.
-
-        Parameters
-        ----------
-        y : array_like
-            Data to be investigated. Must be squeezable to 1-d.
-        hint : float
-            The period hint to be validated.
-        correlation_func : str, default = 'pearson'
-            The correlation function to be used to calculate the ACF of the series
-            or the signal. Possible values are ['pearson', 'spearman', 'kendall'].
-
-        Returns
-        -------
-        bool
-            Whether the period hint is valid.
-        """
-        length = len(y)
-        hint_range = np.arange(
-            np.floor((hint + length / (length / hint + 1)) / 2 - 1),
-            np.ceil((hint + length / (length / hint - 1)) / 2 + 1),
-            dtype=int,
-        )
-        acf_arr = acf(
-            y,
-            lag_start=hint_range[0],
-            lag_stop=hint_range[-1],
-            correlation_func=correlation_func,
-        )
-        splits = [
-            Autoperiod._split(hint_range, acf_arr, 0, len(hint_range), i)
-            for i in range(1, len(hint_range) - 1)
-        ]
-        line1, line2, _ = splits[np.array([error for _, _, error in splits]).argmin()]
-        return line1.coef[-1] > 0 > line2.coef[-1]
-
-    @staticmethod
-    def _split(x: ArrayLike, y: ArrayLike, start: int, end: int, split: int) -> tuple:
-        """
-        Approximate a function at [start, end] with two line segments at
-        [start, split] and [split, end].
-
-        Parameters
-        ----------
-        x : array_like
-            The x-coordinates of the data points.
-        y : array_like
-            The y-coordinates of the data points.
-        start : int
-            The start index of the data points to be approximated.
-        end : int
-            The end index of the data points to be approximated.
-        split : int
-            The split index of the data points to be approximated.
-
-        See Also
-        --------
-        scipy.stats.linregress
-            Calculate a linear least-squares regression for two sets of measurements.
-
-        Returns
-        -------
-        numpy.polynomial.Polynomial
-            The first line segment.
-        numpy.polynomial.Polynomial
-            The second line segment.
-        float
-            The approximation error.
-        """
-        if not start < split < end:
-            raise ValueError(
-                "Invalid start, split, and end values ({}, {}, {})".format(
-                    start, split, end
-                )
-            )
-        x1, y1, x2, y2 = (
-            x[start : split + 1],
-            y[start : split + 1],
-            x[split:end],
-            y[split:end],
-        )
-        line1, stats1 = np.polynomial.Polynomial.fit(x1, y1, deg=1, full=True)
-        line2, stats2 = np.polynomial.Polynomial.fit(x2, y2, deg=1, full=True)
-        resid1 = 0 if len(stats1[0]) == 0 else stats1[0][0]
-        resid2 = 0 if len(stats2[0]) == 0 else stats2[0][0]
-        return line1.convert(), line2.convert(), resid1 + resid2
