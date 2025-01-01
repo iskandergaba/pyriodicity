@@ -9,7 +9,7 @@ homepage = "https://pyriodicity.readthedocs.io"
 repository = "https://github.com/iskandergaba/pyriodicity"
 
 authors = ["Iskander Gaba <iskander@hey.com>"]
-keywords = ["signal", "time", "series", "forecast", "analysis", "period", "periodicity", "seasonality", "trend", "cycle", "decomposition"]
+keywords = ["period", "periodicity", "seasonality", "period-detection", "periodicity-analysis", "seasonality-analysis", "autoperiod", "cfd-autoperiod", "robustperiod", "signal-processing", "time-series-analysis"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
