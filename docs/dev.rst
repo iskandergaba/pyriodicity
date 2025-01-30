@@ -3,7 +3,7 @@ Development
 
 This project is built and published using `Poetry <https://python-poetry.org>`__. To setup a development environment for this project you can follow these steps:
 
-1. Install `Poetry <https://python-poetry.org/docs/#installing-with-pipx>`__.
+1. Install `Poetry <https://python-poetry.org/docs/#installing-with-the-official-installer>`__.
 2. Navigate to the root folder and setup the virtual environment:
 
 .. code:: shell
@@ -16,13 +16,23 @@ This project is built and published using `Poetry <https://python-poetry.org>`__
 
    poetry env list
 
-4. Run the unit tests using the command:
+4. Run a subshell with the virtual environment activated:
+
+.. code:: shell
+
+   # Add poetry-plugin-shell plugin  to poetry
+   poetry self add poetry-plugin-shell
+
+   # Spawn the virtual environment subshell
+   poetry shell
+
+5. Run the unit tests using the command:
 
 .. code:: shell
 
    poetry run pytest
 
-5. To export the detailed dependency list, run the following:
+6. To export the detailed dependency list, run the following:
 
 .. code:: shell
 
