@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyriodicity"
-version = "0.4.0"
+version = "0.4.1rc0"
 description = "Pyriodicity provides an intuitive and easy-to-use Python implementation for periodicity detection in univariate signals."
 
 license = "MIT"
