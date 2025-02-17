@@ -13,7 +13,7 @@ keywords = ["period", "periodicity", "seasonality", "period-detection", "periodi
 
 [tool.poetry.dependencies]
 python = "^3.10"
-scipy = "^1.14.1"
+scipy = "^1.15.2"
 pywavelets = "^1.8.0"
 
 [tool.poetry.group.test.dependencies]
