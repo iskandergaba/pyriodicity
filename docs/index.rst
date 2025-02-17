@@ -25,11 +25,17 @@ Supported Algorithms
 Installation
 ~~~~~~~~~~~~
 
-To install the latest version of ``pyriodicity``, simply run:
+To install ``pyriodicity``, simply run:
 
 .. code:: shell
 
    pip install pyriodicity
+
+To install the latest development version, you can run:
+
+.. code:: shell
+
+   pip install git+https://github.com/iskandergaba/pyriodicity.git
 
 References
 ~~~~~~~~~~

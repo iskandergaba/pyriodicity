@@ -18,10 +18,14 @@ Pyriodicity provides an intuitive and easy-to-use Python implementation for peri
 - [RobustPeriod](https://doi.org/10.1145/3448016.3452779)
 
 ## Installation
-To install the latest version of `pyriodicity`, simply run:
-
+To install ``pyriodicity``, simply run:
 ```shell
 pip install pyriodicity
+```
+
+To install the latest development version, you can run:
+```shell
+pip install git+https://github.com/iskandergaba/pyriodicity.git
 ```
 
 ## Usage
