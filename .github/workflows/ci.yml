@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ${{ fromJson(vars.PYTHON_VERSIONS) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -43,6 +43,7 @@ jobs:
 
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v5
+        if: matrix.python-version == vars.PYTHON_LATEST_VERSION
         with:
           token: '${{ secrets.CODECOV_TOKEN }}'
-          disable-telem: true
+          disable_telem: true
