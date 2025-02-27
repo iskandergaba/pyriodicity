@@ -26,6 +26,9 @@ statsmodels = "^0.14.4"
 numpydoc = "^1.8.0"
 pydata-sphinx-theme = "^0.16.1"
 
+[tool.ruff.lint]
+extend-select = ["E501"]
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
