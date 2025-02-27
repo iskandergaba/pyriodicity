@@ -42,8 +42,8 @@ This project is built and published using `Poetry <https://python-poetry.org>`__
    # Export the package dependencies to requirements.txt
    poetry export --output requirements.txt
 
-   # If you wish to include testing dependencies as well, run the following command
-   poetry export --with test --output requirements-dev.txt
+   # If you wish to include development dependencies as well, run the following command
+   poetry export --with dev --output requirements-dev.txt
 
    # The same as above if you wish to export documentation dependencies
    poetry export --with docs --output requirements-docs.txt
