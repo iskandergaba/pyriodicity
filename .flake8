@@ -1,8 +1,0 @@
-[flake8]
-# Default line length in Black formatter is 88
-max-line-length = 88
-extend-ignore =
-    # No whitespace before ':' in [x : y]
-    E203,
-    # Line break before binary operator
-    W503
