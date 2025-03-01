@@ -15,16 +15,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ vars.PYTHON_LATEST_VERSION }}
+
       - name: Install Poetry
         run: |
           # Run the installer
           curl -sSL https://install.python-poetry.org | python3 -
           # Add Poetry to path
           echo "${HOME}/.poetry/bin" >> $GITHUB_PATH
+
       - name: Install dependencies
         run: poetry install
+
       - name: Run tests
         run: poetry run pytest
+
       - name: Publish package to TestPyPI
         run: |
           # Configure the TestPyPI repository
