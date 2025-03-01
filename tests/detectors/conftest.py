@@ -36,12 +36,12 @@ def trianglewave_100():
 
 @pytest.fixture(scope="module")
 def co2_weekly():
-    return co2_data().ffill()
+    return co2_data()
 
 
 @pytest.fixture(scope="module")
 def co2_monthly():
-    return co2_data().resample("ME").mean().ffill()
+    return co2_data().resample("ME").mean()
 
 
 def sinewave(n, period, amp):
@@ -57,4 +57,4 @@ def trianglewave(n, period, amp):
 
 
 def co2_data():
-    return co2.load().data
+    return co2.load().data.ffill()
