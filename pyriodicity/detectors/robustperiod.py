@@ -96,7 +96,7 @@ class RobustPeriod:
             return n * np.linalg.norm(result.x) ** 2 / 4
 
     @unique
-    class LambdaSelection(Enum):
+    class _LambdaSelection(Enum):
         """
         Enum for selecting the Hodrick-Prescott filter lambda parameter calculation
         method.
@@ -143,9 +143,9 @@ class RobustPeriod:
             ValueError
                 If the lambda selection method is unknown.
             """
-            if self == RobustPeriod.LambdaSelection.HODRICK_PRESCOTT:
+            if self == RobustPeriod._LambdaSelection.HODRICK_PRESCOTT:
                 return 100 * yearly_nobs**2
-            elif self == RobustPeriod.LambdaSelection.RAVN_UHLIG:
+            elif self == RobustPeriod._LambdaSelection.RAVN_UHLIG:
                 return 6.25 * yearly_nobs**4
             else:
                 raise ValueError("Unknown lambda selection method")
@@ -235,7 +235,7 @@ class RobustPeriod:
         max_period_count = modwt_level if max_period_count is None else max_period_count
 
         # Preprocess the data
-        lamb = RobustPeriod.LambdaSelection(lamb) if isinstance(lamb, str) else lamb
+        lamb = RobustPeriod._LambdaSelection(lamb) if isinstance(lamb, str) else lamb
         x = RobustPeriod._preprocess(data, lamb, c)
 
         # Decouple multiple periodicities
@@ -248,7 +248,7 @@ class RobustPeriod:
 
     @staticmethod
     def _preprocess(
-        x: ArrayLike, lamb: Union[float, LambdaSelection], c: float
+        x: ArrayLike, lamb: Union[float, _LambdaSelection], c: float
     ) -> NDArray:
         """
         Apply the data preprocessing step of RobustPeriod.
@@ -328,7 +328,7 @@ class RobustPeriod:
             return np.sign(x) * np.minimum(np.abs(x), c)
 
         # Compute the lambda parameter if a lambda selection method is provided
-        if isinstance(lamb, RobustPeriod.LambdaSelection):
+        if isinstance(lamb, RobustPeriod._LambdaSelection):
             if not hasattr(x, "index"):
                 raise AttributeError("Data has no attribute 'index'.")
             if not isinstance(x.index[0], (np.datetime64, datetime.date)):
