@@ -225,9 +225,11 @@ class CFDAutoperiod:
         ]
 
         # Return the closest ACF peak to each valid period hint
+        peaks = [argrelmax(arr)[0] for arr in acf_arrays]
         return np.array(
             [
-                r[0] + min(argrelmax(arr)[0], key=lambda x: abs(x - h))
-                for h, r, arr in zip(valid_hints, hint_ranges, acf_arrays)
+                r[0] + min(p, key=lambda x: abs(x - h))
+                for h, r, p in zip(valid_hints, hint_ranges, peaks)
+                if len(p) > 0
             ]
         )
