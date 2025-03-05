@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -64,9 +64,9 @@ class CFDAutoperiod:
         data: ArrayLike,
         k: int = 100,
         percentile: int = 99,
-        detrend_func: Optional[str] = "linear",
+        detrend_func: Optional[Literal["constant", "linear"]] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
-        correlation_func: Optional[str] = "pearson",
+        correlation_func: Literal["pearson", "spearman", "kendall"] = "pearson",
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -81,17 +81,16 @@ class CFDAutoperiod:
         percentile : int, optional, default = 99
             Percentage for the percentile parameter used in computing the power
             threshold. Value must be between 0 and 100 inclusive.
-        detrend_func : str, default = 'linear'
-            The kind of detrending to be applied on the signal. It can either be
-            'linear' or 'constant'.
-        window_func : float, str, tuple optional, default = None
+        detrend_func : {'constant', 'linear'}, optional, default = 'linear'
+            The kind of detrending to be applied on the signal. If None, no detrending
+            is applied.
+        window_func : float, str, tuple, optional, default = None
             Window function to be applied to the time series. Check
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
-        correlation_func : str, default = 'pearson'
-            The correlation function to be used to calculate the ACF of the time
-            series. Possible values are ['pearson', 'spearman', 'kendall'].
+        correlation_func : {'pearson', 'spearman', 'kendall'}
+            The correlation function to be used to calculate the ACF of the signal.
 
         Returns
         -------
@@ -113,7 +112,7 @@ class CFDAutoperiod:
 
         """
 
-        def cluster_period_hints(hints: ArrayLike, n: int) -> NDArray:
+        def cluster_period_hints(hints: NDArray, n: int) -> NDArray:
             """
             Find the centroids of the period hint density clusters.
 
@@ -138,7 +137,10 @@ class CFDAutoperiod:
             return np.array([c.mean() for c in clusters if len(c) > 0])
 
         def is_hint_valid(
-            x: ArrayLike, hint: float, detrend_func: str, correlation_func: str
+            x: NDArray,
+            hint: float,
+            detrend_func: Literal["linear", "constant"],
+            correlation_func: Literal["pearson", "spearman", "kendall"],
         ) -> bool:
             """
             Validate the period hint.
@@ -152,9 +154,9 @@ class CFDAutoperiod:
             detrend_func : str
                 The kind of detrending to be applied on the signal. It can either be
                 'linear' or 'constant'.
-            correlation_func : str
+            correlation_func : {'pearson', 'spearman', 'kendall'}
                 The correlation function to be used to calculate the ACF of the series
-                or the signal. Possible values are ['pearson', 'spearman', 'kendall'].
+                or the signal.
 
             Returns
             -------
@@ -182,6 +184,7 @@ class CFDAutoperiod:
         x = x if window_func is None else apply_window(x, window_func)
 
         # Compute the power threshold
+        detrend_func = "linear" if detrend_func is None else detrend_func
         p_threshold = power_threshold(x, detrend_func, k, percentile)
 
         # Find period hints

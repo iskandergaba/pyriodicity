@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 from numpy.typing import ArrayLike, NDArray
 from scipy.signal import argrelmax, detrend
@@ -55,9 +55,9 @@ class ACFPeriodicityDetector:
     def detect(
         data: ArrayLike,
         max_period_count: Optional[int] = None,
-        detrend_func: Optional[str] = "linear",
+        detrend_func: Optional[Literal["constant", "linear"]] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
-        correlation_func: Optional[str] = "pearson",
+        correlation_func: Literal["pearson", "spearman", "kendall"] = "pearson",
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -68,17 +68,16 @@ class ACFPeriodicityDetector:
             Data to be investigated. Must be squeezable to 1-d.
         max_period_count : int, optional, default = None
             Maximum number of periods to look for.
-        detrend_func : str, default = 'linear'
-            The kind of detrending to be applied on the signal. It can either be
-            'linear' or 'constant'.
-        window_func : float, str, tuple optional, default = None
+        detrend_func : {'constant', 'linear'} or None, default = 'linear'
+            The kind of detrending to be applied on the signal. If None, no detrending
+            is applied.
+        window_func : float, str, tuple, optional, default = None
             Window function to be applied to the time series. Check
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
-        correlation_func : str, default = 'pearson'
-            The correlation function to be used to calculate the ACF of the time
-            series. Possible values are ['pearson', 'spearman', 'kendall'].
+        correlation_func : {'pearson', 'spearman', 'kendall'}, default = 'pearson'
+            The correlation function to be used to calculate the ACF of the signal.
 
         Returns
         -------

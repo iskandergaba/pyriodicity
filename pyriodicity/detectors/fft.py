@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -56,7 +56,7 @@ class FFTPeriodicityDetector:
     def detect(
         data: ArrayLike,
         max_period_count: Optional[int] = None,
-        detrend_func: Optional[str] = "linear",
+        detrend_func: Optional[Literal["constant", "linear"]] = "linear",
         window_func: Optional[Union[float, str, tuple]] = None,
     ) -> NDArray:
         """
@@ -68,10 +68,10 @@ class FFTPeriodicityDetector:
             Data to be investigated. Must be squeezable to 1-d.
         max_period_count : int, optional, default = None
             Maximum number of periods to look for.
-        detrend_func : str, default = 'linear'
-            The kind of detrending to be applied on the signal. It can either be
-            'linear' or 'constant'.
-        window_func : float, str, tuple optional, default = None
+        detrend_func : {'constant', 'linear'}, optional, default = 'linear'
+            The kind of detrending to be applied on the signal. If None, no detrending
+            is applied.
+        window_func : float, str, tuple, optional, default = None
             Window function to be applied to the time series. Check
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this

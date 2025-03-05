@@ -53,7 +53,7 @@ def sinewave(n, period, amp):
 def trianglewave(n, period, amp):
     x = np.arange(0, n, 1)
     freq = 1 / period
-    return amp * sawtooth(2 * np.pi * freq * x, 0.5)
+    return amp * sawtooth(2 * np.pi * freq * x)
 
 
 def co2_data():
