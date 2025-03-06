@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -63,9 +63,9 @@ class Autoperiod:
         data: ArrayLike,
         k: int = 100,
         percentile: int = 95,
-        detrend_func: Optional[str] = "linear",
+        detrend_func: Optional[Literal["constant", "linear"]] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
-        correlation_func: Optional[str] = "pearson",
+        correlation_func: Literal["pearson", "spearman", "kendall"] = "pearson",
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -80,17 +80,16 @@ class Autoperiod:
         percentile : int, optional, default = 95
             Percentage for the percentile parameter used in computing the power
             threshold. Value must be between 0 and 100 inclusive.
-        detrend_func : str, default = 'linear'
-            The kind of detrending to be applied on the signal. It can either be
-            'linear' or 'constant'.
-        window_func : float, str, tuple optional, default = None
+        detrend_func : {'constant', 'linear'}, optional, default = 'linear'
+            The kind of detrending to be applied on the signal. If None, no detrending
+            is applied.
+        window_func : float, str, tuple, optional, default = None
             Window function to be applied to the time series. Check
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
-        correlation_func : str, default = 'pearson'
-            The correlation function to be used to calculate the ACF of the time
-            series. Possible values are ['pearson', 'spearman', 'kendall'].
+        correlation_func : {'pearson', 'spearman', 'kendall'}, default = 'pearson'
+            The correlation function to be used to calculate the ACF of the signal.
 
         Returns
         -------
@@ -112,7 +111,11 @@ class Autoperiod:
 
         """
 
-        def is_hint_valid(x: ArrayLike, hint: float, correlation_func: str) -> bool:
+        def is_hint_valid(
+            x: NDArray,
+            hint: float,
+            correlation_func: Literal["pearson", "spearman", "kendall"],
+        ) -> bool:
             """
             Validate the period hint.
 
@@ -122,9 +125,9 @@ class Autoperiod:
                 Data to be investigated. Must be squeezable to 1-d.
             hint : float
                 The period hint to be validated.
-            correlation_func : str, default = 'pearson'
+            correlation_func : {'pearson', 'spearman', 'kendall'}
                 The correlation function to be used to calculate the ACF of the series
-                or the signal. Possible values are ['pearson', 'spearman', 'kendall'].
+                or the signal.
 
             Returns
             -------
@@ -133,7 +136,7 @@ class Autoperiod:
             """
 
             def split(
-                x: ArrayLike, y: ArrayLike, start: int, end: int, split: int
+                x: NDArray, y: NDArray, start: int, end: int, split: int
             ) -> tuple:
                 """
                 Approximate a function at [start, end] with two line segments at
@@ -181,8 +184,20 @@ class Autoperiod:
                 )
                 line1, stats1 = np.polynomial.Polynomial.fit(x1, y1, deg=1, full=True)
                 line2, stats2 = np.polynomial.Polynomial.fit(x2, y2, deg=1, full=True)
-                resid1 = 0 if len(stats1[0]) == 0 else stats1[0][0]
-                resid2 = 0 if len(stats2[0]) == 0 else stats2[0][0]
+                resid1 = (
+                    stats1[0][0]
+                    if isinstance(stats1, tuple)
+                    and len(stats1) > 0
+                    and isinstance(stats1[0], np.ndarray)
+                    else 0
+                )
+                resid2 = (
+                    stats2[0][0]
+                    if isinstance(stats2, tuple)
+                    and len(stats2) > 0
+                    and isinstance(stats2[0], np.ndarray)
+                    else 0
+                )
                 return line1.convert(), line2.convert(), resid1 + resid2
 
             length = len(x)
@@ -214,10 +229,11 @@ class Autoperiod:
         x = x if window_func is None else apply_window(x, window_func)
 
         # Compute the power threshold
+        detrend_func = "linear" if detrend_func is None else detrend_func
         p_threshold = power_threshold(x, detrend_func, k, percentile)
 
         # Find period hints
-        freq, power = periodogram(x, window=None, detrend=False)
+        freq, power = periodogram(x)
         hints = np.array(
             [
                 1 / f

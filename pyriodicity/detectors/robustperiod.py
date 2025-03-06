@@ -2,8 +2,8 @@ import datetime
 from concurrent.futures import ProcessPoolExecutor
 from enum import Enum, unique
 from functools import partial
-from os import cpu_count
-from typing import Optional, Tuple, Union
+from multiprocessing import cpu_count
+from typing import Literal, Optional, Tuple, Union
 
 import numpy as np
 import pywt
@@ -51,7 +51,7 @@ class RobustPeriod:
         @classmethod
         def compute(
             cls,
-            x: ArrayLike,
+            x: NDArray,
             delta: float,
             max_worker_count: int,
         ) -> NDArray:
@@ -81,7 +81,7 @@ class RobustPeriod:
             return np.array(periodogram)
 
         @classmethod
-        def _compute_element(cls, x: ArrayLike, k: int, delta: float) -> float:
+        def _compute_element(cls, x: NDArray, k: int, delta: float) -> np.floating:
             n = len(x)
             t = np.arange(n)
             phi = np.array(
@@ -153,7 +153,7 @@ class RobustPeriod:
     @staticmethod
     def detect(
         data: ArrayLike,
-        lamb: Union[float, str] = "ravn-uhlig",
+        lamb: Union[float, Literal["hodrick-prescott", "ravn-uhlig"]] = "ravn-uhlig",
         c: float = 1.5,
         db_n: int = 8,
         modwt_level: int = 10,
@@ -168,7 +168,7 @@ class RobustPeriod:
         ----------
         data : array_like
             Data to be investigated. Must be squeezable to 1-d.
-        lamb : float, str, default = 'ravn-uhlig'
+        lamb : float, {'hodrick-prescott', 'ravn-uhlig'}, default = 'ravn-uhlig'
             The Hodrick-Prescott filter smoothing parameter. Possible values are either
             a `float`, 'hodrick-prescott', or 'ravn-uhlig'. These represent the lambda
             parameter selection heuristics by Hodrick and Prescott [1]_ and Ravn and
@@ -234,9 +234,11 @@ class RobustPeriod:
         # Validate max_period_count parameter
         max_period_count = modwt_level if max_period_count is None else max_period_count
 
-        # Preprocess the data
-        lamb = RobustPeriod._LambdaSelection(lamb) if isinstance(lamb, str) else lamb
-        x = RobustPeriod._preprocess(data, lamb, c)
+        x = RobustPeriod._preprocess(
+            data,
+            RobustPeriod._LambdaSelection(lamb) if isinstance(lamb, str) else lamb,
+            c,
+        )
 
         # Decouple multiple periodicities
         w_coeff_list = RobustPeriod._wavelet_coeffs(x, db_n, modwt_level)
@@ -272,7 +274,7 @@ class RobustPeriod:
             Preprocessed data.
         """
 
-        def hpfilter(x: ArrayLike, lamb: float) -> Tuple[NDArray, NDArray]:
+        def hpfilter(x: NDArray, lamb: float) -> Tuple:
             """
             Apply the Hodrick-Prescott filter to a series.
 
@@ -291,8 +293,7 @@ class RobustPeriod:
                 The trend component of the time series.
             """
 
-            y = np.asarray(x)
-            nobs = len(y)
+            nobs = len(x)
 
             # Identity matrix
             identity = eye(nobs, nobs)
@@ -303,11 +304,11 @@ class RobustPeriod:
             K = dia_matrix((data, offsets), shape=(nobs - 2, nobs))
 
             # Solve the linear system
-            trend = spsolve(identity + lamb * K.T.dot(K), y)
-            cycle = y - trend
+            trend = spsolve(identity + lamb * K.T.dot(K), x)
+            cycle = x - trend
             return cycle, trend
 
-        def huber_function(x: ArrayLike, c: float) -> ArrayLike:
+        def huber_function(x: ArrayLike, c: float) -> NDArray:
             """
             Compute the Huber function for an array-like input.
 
@@ -329,15 +330,18 @@ class RobustPeriod:
 
         # Compute the lambda parameter if a lambda selection method is provided
         if isinstance(lamb, RobustPeriod._LambdaSelection):
-            if not hasattr(x, "index"):
+            index = getattr(x, "index", None)
+            if index is None or not hasattr(index, "values"):
                 raise AttributeError("Data has no attribute 'index'.")
-            if not isinstance(x.index[0], (np.datetime64, datetime.date)):
+
+            index_values = index.values
+            if not isinstance(index_values[0], (np.datetime64, datetime.date)):
                 raise TypeError(
                     "Index values are not of 'numpy.datetime64'"
                     "or 'datetime.date' types."
                 )
             yearly_nobs = np.rint(
-                np.timedelta64(365, "D") / np.diff(x.index.values).mean()
+                np.timedelta64(365, "D") / np.diff(index_values).mean()
             )
             lamb = lamb.compute(yearly_nobs)
 
@@ -353,7 +357,7 @@ class RobustPeriod:
         return huber_function((y - mean) / mad, c)
 
     @staticmethod
-    def _wavelet_coeffs(x: ArrayLike, db_n: int, level: int):
+    def _wavelet_coeffs(x: NDArray, db_n: int, level: int):
         """
         Compute the wavelet coefficients for a given series using the Maximal Overlap
         Discrete Wavelet Transform (MODWT) and the Daubechies wavelet.
@@ -374,7 +378,7 @@ class RobustPeriod:
             The wavelet coefficients ordered in the descending order of their variances.
         """
 
-        def modwt(x: ArrayLike, db_n: int, level: int) -> NDArray:
+        def modwt(x: NDArray, db_n: int, level: int) -> NDArray:
             """
             Compute the Maximal Overlap Discrete Wavelet Transform (MODWT) of a series
             using the Daubechies wavelet.
@@ -403,7 +407,7 @@ class RobustPeriod:
             coeffs = pywt.swt(y, "db{}".format(db_n), level, norm=True)
             return np.array([cD[: len(x)] for _, cD in coeffs])
 
-        def biweight_midvariance(x: ArrayLike, c: float) -> float:
+        def biweight_midvariance(x: NDArray, c: float) -> float:
             """
             Compute the biweight midvariance of a given array.
 
@@ -456,7 +460,7 @@ class RobustPeriod:
 
     @staticmethod
     def _detect(
-        w_coeff_list: ArrayLike,
+        w_coeff_list: NDArray,
         delta: float,
         max_worker_count: int,
         max_period_count: int,
@@ -512,7 +516,7 @@ class RobustPeriod:
                 np.nan_to_num(binom(n, k)) * np.nan_to_num((1 - k * g0) ** (n - 1))
             )
 
-        def get_period(periodogram: ArrayLike) -> int:
+        def get_period(periodogram: NDArray) -> Optional[int]:
             """
             Determine the period of a given periodogram.
 
@@ -534,7 +538,7 @@ class RobustPeriod:
             rescaled ACF.
             """
 
-            def huber_acf(periodogram: ArrayLike) -> NDArray:
+            def huber_acf(periodogram: NDArray) -> NDArray:
                 """
                 Compute the modified autocorrelation function (ACF) for a given
                 periodogram using the Huber loss function.
