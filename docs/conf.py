@@ -1,5 +1,6 @@
 import os
 import sys
+
 import tomllib
 
 sys.path.insert(0, os.path.abspath(".."))
@@ -49,6 +50,7 @@ intersphinx_mapping = {
 
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
+html_js_files = ["pypi-icon.js"]
 html_sidebars = {"usage": [], "dev": []}
 html_theme_options = {
     "icon_links": [
@@ -60,7 +62,7 @@ html_theme_options = {
         {
             "name": "PyPI",
             "url": "https://pypi.org/project/pyriodicity",
-            "icon": "fa-brands fa-python",
+            "icon": "fa-custom fa-pypi",
         },
     ],
 }
