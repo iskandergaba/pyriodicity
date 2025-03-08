@@ -40,16 +40,8 @@ This project is built and published using `uv <https  ://docs.astral.sh/uv>`__. 
 
    uv run pytest
 
-8. To export the detailed dependency list, run the following:
+8. To export the documentation dependency requirements, run the following:
 
 .. code:: shell
 
-   # Export the package dependencies to requirements.txt
-   uv export --no-default-groups > requirements.txt
-
-   # If you wish to include development dependencies as well, run the following command
-   uv export --group dev > requirements-dev.txt
-
-   # The same as above if you wish to export documentation dependencies
-   # Use the flag --no-hashes to exclude the hash values
-   uv export --group docs --no-hashes > requirements-docs.txt
+   uv export --group docs --no-hashes > docs/requirements.txt
