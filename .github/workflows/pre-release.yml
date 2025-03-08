@@ -1,6 +1,5 @@
-# This workflow will install Poetry, resolve Python dependencies, run tests,
-# build and publish release candidate package versions to TestPyPI upon pushing
-# tags of the form "*.*.*".
+# This workflow will install uv, resolve the package dependencies, run tests, build
+# and publish package versions to TestPyPI upon pushing tags of the format "*.*.*".
 
 name: Publish to TestPyPI
 on:
@@ -10,31 +9,23 @@ on:
 
 jobs:
   TestPyPI-Release:
-    name: Build Using Poetry and Publish to TestPyPI
+    name: Build and Publish to TestPyPI
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ vars.PYTHON_LATEST_VERSION }}
 
-      - name: Install Poetry
-        run: |
-          # Run the installer
-          curl -sSL https://install.python-poetry.org | python3 -
-          # Add Poetry to path
-          echo "${HOME}/.poetry/bin" >> $GITHUB_PATH
-
       - name: Install dependencies
-        run: poetry install
+        run: uv sync
 
       - name: Run tests
-        run: poetry run pytest
+        run: uv run pytest
 
       - name: Publish package to TestPyPI
         run: |
-          # Configure the TestPyPI repository
-          poetry config repositories.testpypi https://test.pypi.org/legacy/
-          poetry config pypi-token.testpypi ${{ secrets.TEST_PYPI_API_TOKEN }}
-          # Build the and publish the package
-          poetry publish --build -r testpypi
+          uv build
+          uv publish --public-url https://test.pypi.org/legacy/

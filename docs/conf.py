@@ -18,7 +18,7 @@ copyright = "%Y, Iskander Gaba"
 author = "Iskander Gaba"
 with open("../pyproject.toml", "rb") as f:
     pyproject_data = tomllib.load(f)
-    release = pyproject_data["tool"]["poetry"]["version"]
+    release = pyproject_data["project"]["version"]
 
 # General configuration
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
