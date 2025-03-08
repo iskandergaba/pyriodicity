@@ -1,34 +1,57 @@
-[tool.poetry]
+[project]
 name = "pyriodicity"
 version = "0.4.5rc0"
 description = "Pyriodicity provides an intuitive and easy-to-use Python implementation for periodicity detection in univariate signals."
-
 license = "MIT"
-readme = ["README.md"]
+readme = "README.md"
 homepage = "https://pyriodicity.readthedocs.io"
 repository = "https://github.com/iskandergaba/pyriodicity"
+authors = [
+    {name = "Iskander Gaba", email = "iskander@hey.com"},
+]
+keywords = [
+    "period",
+    "periodicity",
+    "seasonality",
+    "period-detection",
+    "periodicity-analysis",
+    "seasonality-analysis",
+    "autoperiod",
+    "cfd-autoperiod",
+    "robustperiod",
+    "signal-processing",
+    "time-series-analysis"
+]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=2.2.3",
+    "pywavelets>=1.8.0",
+    "scipy>=1.15.2",
+]
 
-authors = ["Iskander Gaba <iskander@hey.com>"]
-keywords = ["period", "periodicity", "seasonality", "period-detection", "periodicity-analysis", "seasonality-analysis", "autoperiod", "cfd-autoperiod", "robustperiod", "signal-processing", "time-series-analysis"]
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.9.10",
+    "statsmodels>=0.14.4",
+]
+docs = [
+    "numpydoc>=1.8.0",
+    "pydata-sphinx-theme>=0.16.1",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-scipy = "^1.15.2"
-pywavelets = "^1.8.0"
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.9.9"
-pytest = "^8.3.4"
-pytest-cov = "^6.0.0"
-statsmodels = "^0.14.4"
-
-[tool.poetry.group.docs.dependencies]
-numpydoc = "^1.8.0"
-pydata-sphinx-theme = "^0.16.1"
+[tool.uv]
+default-groups = ["dev", "docs"]
 
 [tool.ruff.lint]
 extend-select = ["E501"]
 
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
