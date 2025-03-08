@@ -28,4 +28,4 @@ jobs:
       - name: Publish package to TestPyPI
         run: |
           uv build
-          uv publish --public-url https://test.pypi.org/legacy/
+          uv publish --publish-url https://test.pypi.org/legacy/
