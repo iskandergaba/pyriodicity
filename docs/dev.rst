@@ -51,4 +51,5 @@ This project is built and published using `uv <https  ://docs.astral.sh/uv>`__. 
    uv export --group dev > requirements-dev.txt
 
    # The same as above if you wish to export documentation dependencies
-   uv export --group docs > requirements-docs.txt
+   # Use the flag --no-hashes to exclude the hash values
+   uv export --group docs --no-hashes > requirements-docs.txt
