@@ -1,6 +1,6 @@
 [project]
 name = "pyriodicity"
-version = "0.4.5"
+version = "0.4.6rc0"
 description = "Pyriodicity provides an intuitive and easy-to-use Python implementation for periodicity detection in univariate signals."
 license = "MIT"
 readme = "README.md"
