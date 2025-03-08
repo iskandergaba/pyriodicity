@@ -1,3 +1,7 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [project]
 name = "pyriodicity"
 version = "0.4.6rc0"
@@ -40,10 +44,6 @@ docs = [
     "numpydoc>=1.8.0",
     "pydata-sphinx-theme>=0.16.1",
 ]
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
 
 [tool.uv]
 default-groups = ["dev", "docs"]
