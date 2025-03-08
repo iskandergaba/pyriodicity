@@ -32,8 +32,8 @@ dependencies = [
 ]
 
 [project.urls]
-homepage = "https://pyriodicity.readthedocs.io"
 repository = "https://github.com/iskandergaba/pyriodicity"
+documentation = "https://pyriodicity.readthedocs.io"
 
 [dependency-groups]
 dev = [
