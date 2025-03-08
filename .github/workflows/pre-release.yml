@@ -11,6 +11,10 @@ jobs:
   TestPyPI-Release:
     name: Build and Publish to TestPyPI
     runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write
+
     steps:
       - uses: actions/checkout@v4
 
@@ -24,8 +28,9 @@ jobs:
 
       - name: Run tests
         run: uv run pytest
+      
+      - name: Build the package
+        run: uv build
 
       - name: Publish package to TestPyPI
-        run: |
-          uv build
-          uv publish --publish-url https://test.pypi.org/legacy/
+        run: uv publish --publish-url https://test.pypi.org/legacy/

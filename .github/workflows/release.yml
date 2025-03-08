@@ -10,6 +10,10 @@ jobs:
   PyPI-Release:
     name: Build and Publish to PyPI
     runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+
     steps:
       - uses: actions/checkout@v4
 
@@ -24,7 +28,8 @@ jobs:
       - name: Run tests
         run: uv run pytest
 
+      - name: Build the package
+        run: uv build
+
       - name: Publish package to PyPI
-        run: |
-          uv build
-          uv publish
+        run: uv publish
