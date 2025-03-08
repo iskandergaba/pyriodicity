@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "pyriodicity"
-version = "0.4.6rc1"
+version = "0.4.6"
 description = "Pyriodicity provides an intuitive and easy-to-use Python implementation for periodicity detection in univariate signals."
 license = "MIT"
 readme = "README.md"
