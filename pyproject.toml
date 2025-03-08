@@ -8,8 +8,6 @@ version = "0.4.6rc1"
 description = "Pyriodicity provides an intuitive and easy-to-use Python implementation for periodicity detection in univariate signals."
 license = "MIT"
 readme = "README.md"
-homepage = "https://pyriodicity.readthedocs.io"
-repository = "https://github.com/iskandergaba/pyriodicity"
 authors = [
     {name = "Iskander Gaba", email = "iskander@hey.com"},
 ]
@@ -32,6 +30,10 @@ dependencies = [
     "pywavelets>=1.8.0",
     "scipy>=1.15.2",
 ]
+
+[project.urls]
+homepage = "https://pyriodicity.readthedocs.io"
+repository = "https://github.com/iskandergaba/pyriodicity"
 
 [dependency-groups]
 dev = [
