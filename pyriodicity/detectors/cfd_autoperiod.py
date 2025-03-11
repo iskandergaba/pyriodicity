@@ -66,7 +66,6 @@ class CFDAutoperiod:
         percentile: int = 99,
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
-        correlation_func: Literal["pearson", "spearman", "kendall"] = "pearson",
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -89,8 +88,6 @@ class CFDAutoperiod:
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
-        correlation_func : {'pearson', 'spearman', 'kendall'}
-            The correlation function to be used to calculate the ACF of the signal.
 
         Returns
         -------
@@ -103,13 +100,6 @@ class CFDAutoperiod:
             Remove linear trend along axis from data.
         scipy.signal.get_window
             Return a window of a given length and type.
-        scipy.stats.kendalltau
-            Calculate Kendall's tau, a correlation measure for ordinal data.
-        scipy.stats.pearsonr
-            Pearson correlation coefficient and p-value for testing non-correlation.
-        scipy.stats.spearmanr
-            Calculate a Spearman correlation coefficient with associated p-value.
-
         """
 
         def cluster_period_hints(hints: NDArray, n: int) -> NDArray:
@@ -137,10 +127,7 @@ class CFDAutoperiod:
             return np.array([c.mean() for c in clusters if len(c) > 0])
 
         def is_hint_valid(
-            x: NDArray,
-            hint: float,
-            detrend_func: Literal["linear", "constant"],
-            correlation_func: Literal["pearson", "spearman", "kendall"],
+            x: NDArray, hint: float, detrend_func: Literal["linear", "constant"]
         ) -> bool:
             """
             Validate the period hint.
@@ -154,9 +141,6 @@ class CFDAutoperiod:
             detrend_func : str
                 The kind of detrending to be applied on the signal. It can either be
                 'linear' or 'constant'.
-            correlation_func : {'pearson', 'spearman', 'kendall'}
-                The correlation function to be used to calculate the ACF of the series
-                or the signal.
 
             Returns
             -------
@@ -164,14 +148,9 @@ class CFDAutoperiod:
                 Whether the period hint is valid.
             """
             hint_range = np.arange(hint // 2, 1 + hint + hint // 2, dtype=int)
-            acf_arr = acf(
-                x,
-                lag_start=hint_range[0],
-                lag_stop=hint_range[-1],
-                correlation_func=correlation_func,
-            )
+            acf_arr = acf(x)
             polynomial = np.polynomial.Polynomial.fit(
-                hint_range, detrend(acf_arr, type=detrend_func), deg=2
+                hint_range, detrend(acf_arr[hint_range], type=detrend_func), deg=2
             ).convert()
             derivative = polynomial.deriv()
             return polynomial.coef[-1] < 0 and int(derivative.roots()[0]) in hint_range
@@ -203,36 +182,28 @@ class CFDAutoperiod:
         # Validate period hints
         valid_hints = []
         length = len(x)
-        y_filtered = np.array(x)
+        x_filtered = np.array(x)
         for h in hints:
-            if is_hint_valid(y_filtered, h, detrend_func, correlation_func):
+            if is_hint_valid(x_filtered, h, detrend_func):
                 # Apply a low pass filter with an adapted cutoff frequency
                 f_cuttoff = 1 / (length / (length / h + 1) - 1)
-                y_filtered = sosfiltfilt(
-                    butter(N=5, Wn=f_cuttoff, output="sos"), y_filtered
+                x_filtered = sosfiltfilt(
+                    butter(N=5, Wn=f_cuttoff, output="sos"), x_filtered
                 )
                 valid_hints.append(h)
 
-        # Calculate only the needed part of the ACF array for each hint
-        hint_ranges = [
+        # Compute the valid hint ranges
+        valid_hint_ranges = [
             np.arange(h // 2, 1 + h + h // 2, dtype=int) for h in valid_hints
-        ]
-        acf_arrays = [
-            acf(
-                x,
-                lag_start=r[0],
-                lag_stop=r[-1],
-                correlation_func=correlation_func,
-            )
-            for r in hint_ranges
         ]
 
         # Return the closest ACF peak to each valid period hint
-        peaks = [argrelmax(arr)[0] for arr in acf_arrays]
+        acf_arr = acf(x)
+        peaks = [argrelmax(acf_arr[r])[0] for r in valid_hint_ranges]
         return np.array(
             [
                 r[0] + min(p, key=lambda x: abs(x - h))
-                for h, r, p in zip(valid_hints, hint_ranges, peaks)
+                for h, r, p in zip(valid_hints, valid_hint_ranges, peaks)
                 if len(p) > 0
             ]
         )

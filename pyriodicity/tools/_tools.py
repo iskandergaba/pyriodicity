@@ -3,7 +3,6 @@ from typing import Literal, Union
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.signal import get_window, periodogram
-from scipy.stats import kendalltau, pearsonr, spearmanr
 
 
 @staticmethod
@@ -21,30 +20,16 @@ def apply_window(x: ArrayLike, window_func: Union[str, float, tuple]) -> NDArray
 
 
 @staticmethod
-def acf(
-    x: ArrayLike,
-    lag_start: int,
-    lag_stop: int,
-    correlation_func: Literal["pearson", "spearman", "kendall"] = "pearson",
-) -> NDArray:
+def acf(x: ArrayLike) -> NDArray:
     x = to_1d_array(x)
-    if not 0 <= lag_start < lag_stop <= len(x):
-        raise ValueError(
-            "Invalid lag values range ({}, {})".format(lag_start, lag_stop)
-        )
-    lag_values = np.arange(lag_start, lag_stop + 1, dtype=int)
-    if correlation_func == "spearman":
-        return np.array([spearmanr(x, np.roll(x, val)).statistic for val in lag_values])
-    elif correlation_func == "kendall":
-        return np.array(
-            [kendalltau(x, np.roll(x, val)).statistic for val in lag_values]
-        )
-    return np.array([pearsonr(x, np.roll(x, val)).statistic for val in lag_values])
+    _, power_spectrum = periodogram(x)
+    acf = np.fft.irfft(power_spectrum)
+    return acf / acf[0]
 
 
 @staticmethod
 def power_threshold(
-    y: ArrayLike,
+    x: ArrayLike,
     detrend_func: Literal["constant", "linear"],
     k: int,
     p: int,
@@ -55,7 +40,7 @@ def power_threshold(
 
     Parameters
     ----------
-    y : array_like
+    x : array_like
         Data to be investigated. Must be squeezable to 1-d.
     detrend_func : {'constant', 'linear'}
         The kind of detrending to be applied on the signal. If None, no detrending
@@ -81,7 +66,7 @@ def power_threshold(
     """
     max_powers = []
     while len(max_powers) < k:
-        _, power_p = periodogram(np.random.permutation(y), detrend=detrend_func)
+        _, power_p = periodogram(np.random.permutation(x), detrend=detrend_func)
         max_powers.append(power_p.max())
     max_powers.sort()
     return np.percentile(max_powers, p)

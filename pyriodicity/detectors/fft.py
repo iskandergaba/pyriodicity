@@ -99,7 +99,7 @@ class FFTPeriodicityDetector:
         # Apply the window function on the data
         x = x if window_func is None else apply_window(x, window_func=window_func)
 
-        # Compute DFT and ignore the zero frequency
+        # Compute DFT and exclude the DC frequency
         freqs = np.fft.rfftfreq(len(x), d=1)[1:]
         ft = np.fft.rfft(x)[1:]
 
