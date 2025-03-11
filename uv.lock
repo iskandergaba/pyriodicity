@@ -494,7 +494,7 @@ wheels = [
 
 [[package]]
 name = "pyriodicity"
-version = "0.4.8"
+version = "0.4.9rc0"
 source = { editable = "." }
 dependencies = [
     { name = "numpy" },
