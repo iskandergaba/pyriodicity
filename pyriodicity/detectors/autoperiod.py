@@ -65,7 +65,7 @@ class Autoperiod:
         percentile: int = 95,
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
-        correlation_func: Literal["pearson", "spearman", "kendall"] = "pearson",
+        correlation_func: Literal["fft", "pearson", "spearman", "kendall"] = "fft",
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -88,7 +88,7 @@ class Autoperiod:
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
-        correlation_func : {'pearson', 'spearman', 'kendall'}, default = 'pearson'
+        correlation_func : {'fft', 'pearson', 'spearman', 'kendall'}, default = 'fft'
             The correlation function to be used to calculate the ACF of the signal.
 
         Returns
@@ -114,7 +114,7 @@ class Autoperiod:
         def is_hint_valid(
             x: NDArray,
             hint: float,
-            correlation_func: Literal["pearson", "spearman", "kendall"],
+            correlation_func: Literal["fft", "pearson", "spearman", "kendall"],
         ) -> bool:
             """
             Validate the period hint.
@@ -125,7 +125,7 @@ class Autoperiod:
                 Data to be investigated. Must be squeezable to 1-d.
             hint : float
                 The period hint to be validated.
-            correlation_func : {'pearson', 'spearman', 'kendall'}
+            correlation_func : {'fft', 'pearson', 'spearman', 'kendall'}
                 The correlation function to be used to calculate the ACF of the series
                 or the signal.
 

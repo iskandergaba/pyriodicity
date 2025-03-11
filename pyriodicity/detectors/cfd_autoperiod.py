@@ -66,7 +66,7 @@ class CFDAutoperiod:
         percentile: int = 99,
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
-        correlation_func: Literal["pearson", "spearman", "kendall"] = "pearson",
+        correlation_func: Literal["fft", "pearson", "spearman", "kendall"] = "fft",
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -89,7 +89,7 @@ class CFDAutoperiod:
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
-        correlation_func : {'pearson', 'spearman', 'kendall'}
+        correlation_func : {'fft', 'pearson', 'spearman', 'kendall'}
             The correlation function to be used to calculate the ACF of the signal.
 
         Returns
@@ -140,7 +140,7 @@ class CFDAutoperiod:
             x: NDArray,
             hint: float,
             detrend_func: Literal["linear", "constant"],
-            correlation_func: Literal["pearson", "spearman", "kendall"],
+            correlation_func: Literal["fft", "pearson", "spearman", "kendall"],
         ) -> bool:
             """
             Validate the period hint.
@@ -154,7 +154,7 @@ class CFDAutoperiod:
             detrend_func : str
                 The kind of detrending to be applied on the signal. It can either be
                 'linear' or 'constant'.
-            correlation_func : {'pearson', 'spearman', 'kendall'}
+            correlation_func : {'fft', 'pearson', 'spearman', 'kendall'}
                 The correlation function to be used to calculate the ACF of the series
                 or the signal.
 
