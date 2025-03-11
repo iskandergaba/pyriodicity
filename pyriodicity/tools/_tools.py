@@ -3,7 +3,6 @@ from typing import Literal, Union
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.signal import get_window, periodogram
-from scipy.stats import kendalltau, pearsonr, spearmanr
 
 
 @staticmethod
@@ -21,30 +20,11 @@ def apply_window(x: ArrayLike, window_func: Union[str, float, tuple]) -> NDArray
 
 
 @staticmethod
-def acf(
-    x: ArrayLike,
-    lag_start: int,
-    lag_stop: int,
-    correlation_func: Literal["fft", "pearson", "spearman", "kendall"] = "fft",
-) -> NDArray:
+def acf(x: ArrayLike) -> NDArray:
     x = to_1d_array(x)
-    if not 0 <= lag_start < lag_stop <= len(x):
-        raise ValueError(
-            "Invalid lag values range ({}, {})".format(lag_start, lag_stop)
-        )
-    lag_values = np.arange(lag_start, lag_stop + 1, dtype=int)
-    if correlation_func == "spearman":
-        return np.array([spearmanr(x, np.roll(x, val)).statistic for val in lag_values])
-    elif correlation_func == "kendall":
-        return np.array(
-            [kendalltau(x, np.roll(x, val)).statistic for val in lag_values]
-        )
-    elif correlation_func == "pearson":
-        return np.array([pearsonr(x, np.roll(x, val)).statistic for val in lag_values])
-    else:
-        _, power_spectrum = periodogram(x)
-        acf = np.fft.irfft(power_spectrum)
-        return acf[lag_start : lag_stop + 1] / acf[0]
+    _, power_spectrum = periodogram(x)
+    acf = np.fft.irfft(power_spectrum)
+    return acf / acf[0]
 
 
 @staticmethod

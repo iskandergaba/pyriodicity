@@ -65,7 +65,6 @@ class Autoperiod:
         percentile: int = 95,
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
-        correlation_func: Literal["fft", "pearson", "spearman", "kendall"] = "fft",
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -88,8 +87,6 @@ class Autoperiod:
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
-        correlation_func : {'fft', 'pearson', 'spearman', 'kendall'}, default = 'fft'
-            The correlation function to be used to calculate the ACF of the signal.
 
         Returns
         -------
@@ -102,32 +99,21 @@ class Autoperiod:
             Remove linear trend along axis from data.
         scipy.signal.get_window
             Return a window of a given length and type.
-        scipy.stats.kendalltau
-            Calculate Kendall's tau, a correlation measure for ordinal data.
-        scipy.stats.pearsonr
-            Pearson correlation coefficient and p-value for testing non-correlation.
-        scipy.stats.spearmanr
-            Calculate a Spearman correlation coefficient with associated p-value.
-
         """
 
         def is_hint_valid(
-            x: NDArray,
+            acf_arr: NDArray,
             hint: float,
-            correlation_func: Literal["fft", "pearson", "spearman", "kendall"],
         ) -> bool:
             """
             Validate the period hint.
 
             Parameters
             ----------
-            x : array_like
-                Data to be investigated. Must be squeezable to 1-d.
+            acf_arr : array_like
+                ACF of the data to be investigated. Must be squeezable to 1-d.
             hint : float
                 The period hint to be validated.
-            correlation_func : {'fft', 'pearson', 'spearman', 'kendall'}
-                The correlation function to be used to calculate the ACF of the series
-                or the signal.
 
             Returns
             -------
@@ -206,14 +192,9 @@ class Autoperiod:
                 np.ceil((hint + length / (length / hint - 1)) / 2 + 1),
                 dtype=int,
             )
-            acf_arr = acf(
-                x,
-                lag_start=hint_range[0],
-                lag_stop=hint_range[-1],
-                correlation_func=correlation_func,
-            )
+
             splits = [
-                split(hint_range, acf_arr, 0, len(hint_range), i)
+                split(hint_range, acf_arr[hint_range], 0, len(hint_range), i)
                 for i in range(1, len(hint_range) - 1)
             ]
             line1, line2, _ = splits[
@@ -243,11 +224,12 @@ class Autoperiod:
         )
 
         # Validate period hints
-        valid_hints = [h for h in hints if is_hint_valid(x, h, correlation_func)]
+        acf_arr = acf(x)
+        valid_hints = [h for h in hints if is_hint_valid(acf_arr, h)]
 
-        # Return the closest ACF peak to each valid period hint
+        # Compute the valid hint ranges
         length = len(x)
-        hint_ranges = [
+        valid_hint_ranges = [
             np.arange(
                 np.floor((h + length / (length / h + 1)) / 2 - 1),
                 np.ceil((h + length / (length / h - 1)) / 2 + 1),
@@ -255,20 +237,13 @@ class Autoperiod:
             )
             for h in valid_hints
         ]
-        acf_arrays = [
-            acf(
-                x,
-                lag_start=r[0],
-                lag_stop=r[-1],
-                correlation_func=correlation_func,
-            )
-            for r in hint_ranges
-        ]
+
+        # Return the closest ACF peak to each valid period hint
         return np.array(
             list(
                 {
-                    r[0] + min(argrelmax(arr)[0], key=lambda x: abs(x - h))
-                    for h, r, arr in zip(valid_hints, hint_ranges, acf_arrays)
+                    r[0] + min(argrelmax(acf_arr[r])[0], key=lambda x: abs(x - h))
+                    for h, r in zip(valid_hints, valid_hint_ranges)
                 }
             )
         )

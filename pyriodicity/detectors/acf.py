@@ -36,12 +36,6 @@ class ACFPeriodicityDetector:
     array([ 12,  24,  36,  48,  60,  72,  84,  96, 108, 120, 132, 143, 155,
        167, 179, 191, 203, 215, 227, 239, 251])
 
-    You can use a different correlation function like Spearman
-
-    >>> ACFPeriodicityDetector.detect(data, correlation_func="spearman")
-    array([ 12,  24,  36,  48,  60,  72,  84,  96, 108, 120, 132, 143, 155,
-       167, 179, 191, 203, 215, 227, 239, 251])
-
     All of the returned values are either multiples of 12 or very close to it,
     suggesting a clear yearly periodicity.
     You can also get the most prominent period length value by setting
@@ -57,7 +51,6 @@ class ACFPeriodicityDetector:
         max_period_count: Optional[int] = None,
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
         window_func: Optional[Union[str, float, tuple]] = None,
-        correlation_func: Literal["fft", "pearson", "spearman", "kendall"] = "fft",
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -76,8 +69,6 @@ class ACFPeriodicityDetector:
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
-        correlation_func : {'fft', 'pearson', 'spearman', 'kendall'}, default = 'fft'
-            The correlation function to be used to calculate the ACF of the signal.
 
         Returns
         -------
@@ -90,12 +81,6 @@ class ACFPeriodicityDetector:
             Remove linear trend along axis from data.
         scipy.signal.get_window
             Return a window of a given length and type.
-        scipy.stats.kendalltau
-            Calculate Kendall's tau, a correlation measure for ordinal data.
-        scipy.stats.pearsonr
-            Pearson correlation coefficient and p-value for testing non-correlation.
-        scipy.stats.spearmanr
-            Calculate a Spearman correlation coefficient with associated p-value.
         """
         x = to_1d_array(data)
 
@@ -106,15 +91,10 @@ class ACFPeriodicityDetector:
         x = x if window_func is None else apply_window(x, window_func)
 
         # Compute the ACF
-        acf_arr = acf(
-            x,
-            lag_start=0,
-            lag_stop=len(x) // 2,
-            correlation_func=correlation_func,
-        )
+        acf_arr = acf(x)
 
         # Find the local argmax of the first half of the ACF array
-        local_argmax = argrelmax(acf_arr)[0]
+        local_argmax = argrelmax(acf_arr[: len(x) // 2])[0]
 
         # Argsort the local maxima in the ACF array in a descending order
         periods = local_argmax[acf_arr[local_argmax].argsort()][::-1]
