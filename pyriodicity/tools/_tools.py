@@ -25,7 +25,7 @@ def acf(
     x: ArrayLike,
     lag_start: int,
     lag_stop: int,
-    correlation_func: Literal["pearson", "spearman", "kendall"] = "pearson",
+    correlation_func: Literal["fft", "pearson", "spearman", "kendall"] = "fft",
 ) -> NDArray:
     x = to_1d_array(x)
     if not 0 <= lag_start < lag_stop <= len(x):
@@ -39,12 +39,17 @@ def acf(
         return np.array(
             [kendalltau(x, np.roll(x, val)).statistic for val in lag_values]
         )
-    return np.array([pearsonr(x, np.roll(x, val)).statistic for val in lag_values])
+    elif correlation_func == "pearson":
+        return np.array([pearsonr(x, np.roll(x, val)).statistic for val in lag_values])
+    else:
+        _, power_spectrum = periodogram(x)
+        acf = np.fft.irfft(power_spectrum)
+        return acf[lag_start : lag_stop + 1] / acf[0]
 
 
 @staticmethod
 def power_threshold(
-    y: ArrayLike,
+    x: ArrayLike,
     detrend_func: Literal["constant", "linear"],
     k: int,
     p: int,
@@ -55,7 +60,7 @@ def power_threshold(
 
     Parameters
     ----------
-    y : array_like
+    x : array_like
         Data to be investigated. Must be squeezable to 1-d.
     detrend_func : {'constant', 'linear'}
         The kind of detrending to be applied on the signal. If None, no detrending
@@ -81,7 +86,7 @@ def power_threshold(
     """
     max_powers = []
     while len(max_powers) < k:
-        _, power_p = periodogram(np.random.permutation(y), detrend=detrend_func)
+        _, power_p = periodogram(np.random.permutation(x), detrend=detrend_func)
         max_powers.append(power_p.max())
     max_powers.sort()
     return np.percentile(max_powers, p)
