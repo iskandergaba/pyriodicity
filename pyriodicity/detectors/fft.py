@@ -100,7 +100,7 @@ class FFTPeriodicityDetector:
         x = x if window_func is None else apply_window(x, window_func=window_func)
 
         # Compute DFT and exclude the DC frequency
-        freqs = np.fft.rfftfreq(len(x), d=1)[1:]
+        freqs = np.fft.rfftfreq(len(x))[1:]
         ft = np.fft.rfft(x)[1:]
 
         # Compute period lengths and their respective amplitudes
@@ -108,9 +108,9 @@ class FFTPeriodicityDetector:
         amps = abs(ft)
 
         # A period cannot be greater than half the length of the series
-        filter = periods < len(x) // 2
-        periods = periods[filter]
-        amps = amps[filter]
+        period_filter = periods < len(x) // 2
+        periods = periods[period_filter]
+        amps = amps[period_filter]
 
         # Sort period length values in the descending order of their amplitudes
         periods = periods[np.argsort(-amps)]
