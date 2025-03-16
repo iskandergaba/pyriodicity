@@ -1,9 +1,9 @@
-from .detectors import (
+from .online import OnlineFFTPeriodicityDetector
+from .static import (
     ACFPeriodicityDetector,
     Autoperiod,
     CFDAutoperiod,
     FFTPeriodicityDetector,
-    OnlineFFTPeriodicityDetector,
     RobustPeriod,
 )
 

@@ -98,7 +98,7 @@ class OnlineFFTPeriodicityDetector:
         * Updates the frequency spectrum
         * Computes periods from the spectrum
 
-        Only periods shorter than ``(window_size // 2 + 1)`` are considered reliable
+        Only periods shorter than ``window_size // 2 + 1`` are considered reliable
         and returned.
         """
 
