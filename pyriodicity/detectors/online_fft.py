@@ -4,12 +4,30 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.signal import detrend
 
-from pyriodicity.tools import apply_window, to_1d_array
+from pyriodicity.tools import apply_window
 
 
 class OnlineFFTPeriodicityDetector:
     """
-    TODO
+    Find periods in streaming signal data using Sliding DFT algorithm.
+
+    Parameters
+    ----------
+    window_size : int
+        Size of the sliding window (should be a power of 2 for best performance).
+    max_period_count : int, optional
+        Maximum number of periods to return. Default is None (return all periods).
+    detrend_func : {'constant', 'linear'}, optional
+        The kind of detrending to apply. Default is 'linear'. If None,
+        no detrending is applied.
+    window_func : float or str or tuple, optional
+        Window function to apply. Default is None (rectangular window). See
+        ``scipy.signal.get_window`` for accepted formats of the ``window`` parameter.
+
+    Notes
+    -----
+    Uses Sliding DFT for efficient online computation of frequency spectrum
+    and period detection in streaming data.
     """
 
     def __init__(
@@ -19,10 +37,9 @@ class OnlineFFTPeriodicityDetector:
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
         window_func: Optional[Union[float, str, tuple]] = None,
     ):
-        # Initialize
+        self.N = window_size
         self.max_period_count = max_period_count
         self.detrend_func = detrend_func
-        self.N = window_size
 
         # Initialize the window
         self.window = (
@@ -50,18 +67,54 @@ class OnlineFFTPeriodicityDetector:
         self.periods = self.periods[self.period_filter]
 
     def detect(self, data: Union[np.floating, ArrayLike]) -> NDArray:
-        """Push a new value to the buffer.
-        TODO
         """
-        data = to_1d_array(data)
-        for sample in np.array(data).flat:
-            if self.detrend_func is not None:
-                # TODO detrend if needed
-                pass
+        Detect periods in a signal using Sliding DFT with online updates.
 
+        Process new samples through the detector's circular buffer, updating the
+        frequency spectrum and detecting periodic patterns in the signal using
+        the Sliding DFT algorithm.
+
+        Parameters
+        ----------
+        data : numpy.floating or array_like
+            New samples to process. Can be a single value or an array of values.
+            Multi-dimensional arrays will be flattened.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array of detected periods sorted by their amplitude strength in
+            descending order. Only unique periods are returned, limited by
+            max_period_count if specified. Each period represents the length
+            (in samples) of a detected periodicity.
+
+        Notes
+        -----
+        The detection process follows these steps:
+
+        * Updates the circular buffer
+        * Applies detrending if specified
+        * Applies windowing if specified
+        * Updates the frequency spectrum
+        * Computes periods from the spectrum
+
+        Only periods shorter than (window_size // 2 + 1) are considered reliable
+        and returned.
+        """
+
+        for sample in np.asarray(data).flat:
             # Swap the oldest for the newest sample at the current buffer index
             old_sample = self.buffer[self.buffer_idx]
             self.buffer[self.buffer_idx] = sample
+
+            # Detrend data
+            if self.detrend_func is not None:
+                detrended_buffer = detrend(
+                    np.insert(np.roll(self.buffer, -self.buffer_idx), 0, old_sample),
+                    type=self.detrend_func,
+                )
+                old_sample = detrended_buffer[0]
+                sample = detrended_buffer[-1]
 
             # Apply the window function on the newest and oldest samples
             sample *= self.window[self.buffer_idx]
