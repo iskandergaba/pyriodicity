@@ -3,6 +3,7 @@ from .detectors import (
     Autoperiod,
     CFDAutoperiod,
     FFTPeriodicityDetector,
+    OnlineFFTPeriodicityDetector,
     RobustPeriod,
 )
 
@@ -11,5 +12,6 @@ __all__ = [
     "Autoperiod",
     "CFDAutoperiod",
     "FFTPeriodicityDetector",
+    "OnlineFFTPeriodicityDetector",
     "RobustPeriod",
 ]
