@@ -11,4 +11,5 @@ API Reference
    ~Autoperiod
    ~CFDAutoperiod
    ~FFTPeriodicityDetector
+   ~OnlineFFTPeriodicityDetector
    ~RobustPeriod
