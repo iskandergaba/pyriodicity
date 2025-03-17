@@ -79,8 +79,11 @@ class FFTPeriodicityDetector:
 
         Returns
         -------
-        NDArray
-            List of detected periods.
+        numpy.ndarray
+            Array of detected periods sorted by their amplitude strength in
+            descending order. Only unique periods are returned, limited by
+            max_period_count if specified. Each period represents the length
+            (in samples) of a detected periodicity.
 
         See Also
         --------

@@ -1,4 +1,5 @@
-from .detectors import (
+from .online import OnlineFFTPeriodicityDetector
+from .static import (
     ACFPeriodicityDetector,
     Autoperiod,
     CFDAutoperiod,
@@ -11,5 +12,6 @@ __all__ = [
     "Autoperiod",
     "CFDAutoperiod",
     "FFTPeriodicityDetector",
+    "OnlineFFTPeriodicityDetector",
     "RobustPeriod",
 ]

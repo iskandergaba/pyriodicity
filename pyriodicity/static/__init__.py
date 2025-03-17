@@ -9,5 +9,6 @@ __all__ = [
     "Autoperiod",
     "CFDAutoperiod",
     "FFTPeriodicityDetector",
+    "OnlineFFTPeriodicityDetector",
     "RobustPeriod",
 ]
