@@ -94,12 +94,12 @@ class ACFPeriodicityDetector:
         # Compute the ACF
         acf_arr = acf(x)
 
-        # Find peaks in the first half of the ACF array
-        peaks, properties = find_peaks(acf_arr[: len(x) // 2], height=-1)
+        # Find peaks in the first half of the ACF array, excluding the first element
+        peaks, properties = find_peaks(acf_arr[1 : len(x) // 2], height=-1)
         peak_heights = properties["peak_heights"]
 
-        # Sort the peaks by height in descending order
-        periods = peaks[np.argsort(peak_heights)[::-1]]
+        # Sort peaks by height in descending order and account for the excluded element
+        periods = peaks[np.argsort(peak_heights)[::-1]] + 1
 
         # Return the requested maximum count of detected periods
         return periods[:max_period_count]
