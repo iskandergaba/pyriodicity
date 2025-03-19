@@ -48,7 +48,7 @@ docs = [
 ]
 
 [tool.uv]
-default-groups = ["dev", "docs"]
+default-groups = "all"
 
 [tool.ruff.lint]
 extend-select = ["E501"]
