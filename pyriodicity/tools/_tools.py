@@ -22,9 +22,11 @@ def apply_window(x: ArrayLike, window_func: Union[str, float, tuple]) -> NDArray
 @staticmethod
 def acf(x: ArrayLike) -> NDArray:
     x = to_1d_array(x)
-    _, power_spectrum = periodogram(x)
-    acf = np.fft.irfft(power_spectrum)
-    return acf / acf[0]
+    n = len(x)
+    fft = np.fft.rfft(x, n=n * 2)
+    psd = fft * np.conjugate(fft)
+    acf_arr = np.fft.irfft(psd)
+    return acf_arr[:n] / acf_arr[0]
 
 
 @staticmethod
