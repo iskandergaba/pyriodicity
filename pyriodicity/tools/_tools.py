@@ -23,9 +23,9 @@ def apply_window(x: ArrayLike, window_func: Union[str, float, tuple]) -> NDArray
 def acf(x: ArrayLike) -> NDArray:
     x = to_1d_array(x)
     n = len(x)
-    fft = np.fft.rfft(x, n=n * 2)
+    fft = np.fft.fft(x, n=n * 2)
     psd = fft * np.conjugate(fft)
-    acf_arr = np.fft.irfft(psd)
+    acf_arr = np.real(np.fft.ifft(psd))
     return acf_arr[:n] / acf_arr[0]
 
 
