@@ -1,7 +1,8 @@
 from typing import Literal, Optional, Union
 
+import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import argrelmax, detrend
+from scipy.signal import detrend, find_peaks
 
 from pyriodicity.tools import acf, apply_window, to_1d_array
 
@@ -93,11 +94,12 @@ class ACFPeriodicityDetector:
         # Compute the ACF
         acf_arr = acf(x)
 
-        # Find the local argmax of the first half of the ACF array
-        local_argmax = argrelmax(acf_arr[: len(x) // 2])[0]
+        # Find peaks in the first half of the ACF array
+        peaks, properties = find_peaks(acf_arr[: len(x) // 2], height=-1)
+        peak_heights = properties["peak_heights"]
 
-        # Argsort the local maxima in the ACF array in a descending order
-        periods = local_argmax[acf_arr[local_argmax].argsort()][::-1]
+        # Sort the peaks by height in descending order
+        periods = peaks[np.argsort(peak_heights)[::-1]]
 
         # Return the requested maximum count of detected periods
         return periods[:max_period_count]
