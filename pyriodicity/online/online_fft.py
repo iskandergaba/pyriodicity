@@ -53,7 +53,6 @@ class OnlineFFTPeriodicityDetector:
 
         # Initialize the buffer for time domain samples (real-valued)
         self.buffer = np.zeros(self.N)
-        self.buffer_idx = 0
 
         # Compute the initial spectrum and exclude the DC component
         self.spectrum = np.fft.rfft(self.buffer)
@@ -62,7 +61,7 @@ class OnlineFFTPeriodicityDetector:
         self.freqs = np.fft.rfftfreq(self.N)[1:]
 
         # Compute the possible periodicity lengths
-        self.periods = np.round(1 / self.freqs).astype(int)
+        self.periods = np.rint(1 / self.freqs).astype(int)
         self.period_filter = self.periods < self.N // 2 + 1
         self.periods = self.periods[self.period_filter]
 
@@ -103,28 +102,26 @@ class OnlineFFTPeriodicityDetector:
         """
 
         for sample in np.asarray(data).flat:
-            # Swap the oldest for the newest sample at the current buffer index
-            old_sample = self.buffer[self.buffer_idx]
-            self.buffer[self.buffer_idx] = sample
+            # Swap the oldest for the newest sample
+            old_sample = self.buffer[0]
+            self.buffer[0] = sample
+            self.buffer = np.roll(self.buffer, -1)
 
             # Detrend data
             if self.detrend_func is not None:
                 detrended_buffer = detrend(
-                    np.insert(np.roll(self.buffer, -self.buffer_idx), 0, old_sample),
-                    type=self.detrend_func,
+                    np.insert(self.buffer, 0, old_sample), type=self.detrend_func
                 )
                 old_sample = detrended_buffer[0]
                 sample = detrended_buffer[-1]
 
-            # Apply the window function on the newest and oldest samples
-            sample *= self.window[self.buffer_idx]
-            old_sample *= self.window[self.buffer_idx]
+            # Apply the window function on the oldest and newest samples
+            old_sample *= self.window[0]
+            self.window = np.roll(self.window, -1)
+            sample *= self.window[0]
 
             # Update the spectrum
             self.spectrum = self.twiddle * (self.spectrum + sample - old_sample)
-
-            # Update the buffer index
-            self.buffer_idx = (self.buffer_idx + 1) % self.N
 
         # Compute the frequency amplitudes
         amps = abs(self.spectrum[1:])
