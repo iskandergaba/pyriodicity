@@ -51,10 +51,10 @@ class OnlineFFTPeriodicityDetector:
         # Compute the twiddle factors
         self.twiddle = np.exp(-2j * np.pi * np.arange(self.N // 2 + 1) / self.N)
 
-        # Initialize the buffer for time domain samples (real-valued)
+        # Initialize the buffer for time domain samples
         self.buffer = np.zeros(self.N)
 
-        # Compute the initial spectrum and exclude the DC component
+        # Initialize the spectrum
         self.spectrum = np.fft.rfft(self.buffer)
 
         # Compute the DFT sample frequencies and exclude the DC frequency
