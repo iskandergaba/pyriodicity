@@ -53,7 +53,6 @@ class OnlineACFPeriodicityDetector:
 
         # Initialize the buffer for time domain samples (real-valued)
         self.buffer = np.zeros(self.N)
-        self.buffer_idx = 0
 
         # Compute the initial spectrum and exclude the DC component
         self.spectrum = np.fft.rfft(self.buffer)
@@ -95,39 +94,37 @@ class OnlineACFPeriodicityDetector:
         """
 
         for sample in np.asarray(data).flat:
-            # Swap the oldest for the newest sample at the current buffer index
-            old_sample = self.buffer[self.buffer_idx]
-            self.buffer[self.buffer_idx] = sample
+            # Swap the oldest for the newest sample
+            old_sample = self.buffer[0]
+            self.buffer[0] = sample
+            self.buffer = np.roll(self.buffer, -1)
 
             # Detrend data
             if self.detrend_func is not None:
                 detrended_buffer = detrend(
-                    np.insert(np.roll(self.buffer, -self.buffer_idx), 0, old_sample),
-                    type=self.detrend_func,
+                    np.insert(self.buffer, 0, old_sample), type=self.detrend_func
                 )
                 old_sample = detrended_buffer[0]
                 sample = detrended_buffer[-1]
 
-            # Apply the window function on the newest and oldest samples
-            sample *= self.window[self.buffer_idx]
-            old_sample *= self.window[self.buffer_idx]
+            # Apply the window function on the oldest and newest samples
+            old_sample *= self.window[0]
+            self.window = np.roll(self.window, -1)
+            sample *= self.window[0]
 
             # Update the spectrum
             self.spectrum = self.twiddle * (self.spectrum + sample - old_sample)
 
-            # Update the buffer index
-            self.buffer_idx = (self.buffer_idx + 1) % self.N
-
         # Compute ACF using inverse FFT
         acf_arr = np.fft.irfft(self.spectrum)
-        acf_arr = acf_arr if acf_arr[0] == 0 else acf_arr / acf_arr[0]
+        acf_arr = np.zeros_like(acf_arr) if acf_arr[0] == 0 else acf_arr / acf_arr[0]
 
         # Find peaks in the first half of the ACF array, excluding the first element
-        peaks, properties = find_peaks(acf_arr[1: self.N // 2], height=-1)
+        peaks, properties = find_peaks(acf_arr[: self.N // 2], height=-1)
         peak_heights = properties["peak_heights"]
 
         # Sort peaks by height in descending order and account for the excluded element
-        periods = peaks[np.argsort(peak_heights)[::-1]] + 1
+        periods = peaks[np.argsort(peak_heights)[::-1]]
 
         # Return the requested maximum count of detected periods
         return periods[: self.max_period_count]
