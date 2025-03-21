@@ -1,4 +1,4 @@
-from typing import Literal, Union
+from typing import Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -30,12 +30,7 @@ def acf(x: ArrayLike) -> NDArray:
 
 
 @staticmethod
-def power_threshold(
-    x: ArrayLike,
-    detrend_func: Literal["constant", "linear"],
-    k: int,
-    p: int,
-) -> np.floating:
+def power_threshold(x: ArrayLike, k: int, p: int) -> np.floating:
     """
     Compute the power threshold as the p-th percentile of the maximum
     power values of the periodogram of k permutations of the data.
@@ -44,9 +39,6 @@ def power_threshold(
     ----------
     x : array_like
         Data to be investigated. Must be squeezable to 1-d.
-    detrend_func : {'constant', 'linear'}
-        The kind of detrending to be applied on the signal. If None, no detrending
-        is applied.
     k : int
         The number of times the data is randomly permuted to compute
         the maximum power values.
@@ -68,7 +60,7 @@ def power_threshold(
     """
     max_powers = []
     while len(max_powers) < k:
-        _, power_p = periodogram(np.random.permutation(x), detrend=detrend_func)
-        max_powers.append(power_p.max())
+        _, pxx = periodogram(np.random.permutation(x), detrend=False)
+        max_powers.append(pxx.max())
     max_powers.sort()
     return np.percentile(max_powers, p)

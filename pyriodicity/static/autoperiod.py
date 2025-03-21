@@ -211,10 +211,10 @@ class Autoperiod:
 
         # Compute the power threshold
         detrend_func = "linear" if detrend_func is None else detrend_func
-        p_threshold = power_threshold(x, detrend_func, k, percentile)
+        p_threshold = power_threshold(x, k, percentile)
 
         # Find period hints
-        freq, power = periodogram(x)
+        freq, power = periodogram(x, detrend=False)
         hints = np.array(
             [
                 1 / f
