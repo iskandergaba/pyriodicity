@@ -120,11 +120,11 @@ class OnlineACFPeriodicityDetector:
         acf_arr = np.zeros_like(acf_arr) if acf_arr[0] == 0 else acf_arr / acf_arr[0]
 
         # Find peaks in the first half of the ACF array, excluding the first element
-        peaks, properties = find_peaks(acf_arr[: self.N // 2], height=-1)
+        peaks, properties = find_peaks(acf_arr[1 : self.N // 2], height=-1)
         peak_heights = properties["peak_heights"]
 
         # Sort peaks by height in descending order and account for the excluded element
-        periods = peaks[np.argsort(peak_heights)[::-1]]
+        periods = peaks[np.argsort(peak_heights)[::-1]] + 1
 
         # Return the requested maximum count of detected periods
         return periods[: self.max_period_count]
