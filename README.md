@@ -10,7 +10,7 @@
 </div>
 
 ## About Pyriodicity
-Pyriodicity provides an intuitive and easy-to-use Python implementation for periodicity detection in univariate signals. Pyriodicity supports the following detection methods:
+Pyriodicity provides an intuitive and efficient Python implementation of periodicity length detection methods in univariate signals. Pyriodicity supports the following detection methods:
 - [Autocorrelation Function (ACF)](https://otexts.com/fpp3/acf.html)
 - [Autoperiod](https://doi.org/10.1137/1.9781611972757.40)
 - [CFD-Autoperiod](https://doi.org/10.1007/978-3-030-39098-3_4)
