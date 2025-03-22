@@ -37,32 +37,33 @@ class OnlineFFTPeriodicityDetector:
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
         window_func: Optional[Union[float, str, tuple]] = None,
     ):
-        self.N = window_size
         self.max_period_count = max_period_count
         self.detrend_func = detrend_func
 
         # Initialize the window
         self.window = (
-            np.ones(self.N)
+            np.ones(window_size)
             if window_func is None
-            else apply_window(np.ones(self.N), window_func)
+            else apply_window(np.ones(window_size), window_func)
         )
 
         # Compute the twiddle factors
-        self.twiddle = np.exp(-2j * np.pi * np.arange(self.N // 2 + 1) / self.N)
+        self.twiddle = np.exp(
+            -2j * np.pi * np.arange(window_size // 2 + 1) / window_size
+        )
 
         # Initialize the buffer for time domain samples
-        self.buffer = np.zeros(self.N)
+        self.buffer = np.zeros(window_size)
 
         # Initialize the spectrum
         self.spectrum = np.fft.rfft(self.buffer)
 
         # Compute the DFT sample frequencies and exclude the DC frequency
-        self.freqs = np.fft.rfftfreq(self.N)[1:]
+        self.freqs = np.fft.rfftfreq(window_size)[1:]
 
         # Compute the possible periodicity lengths
         self.periods = np.rint(1 / self.freqs).astype(int)
-        self.period_filter = self.periods < self.N // 2 + 1
+        self.period_filter = self.periods < window_size // 2 + 1
         self.periods = self.periods[self.period_filter]
 
     def detect(self, data: Union[np.floating, ArrayLike]) -> NDArray:
