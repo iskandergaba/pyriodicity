@@ -63,8 +63,8 @@ class Autoperiod:
         data: ArrayLike,
         k: int = 100,
         percentile: int = 95,
+        window_func: Union[str, float, tuple] = "boxcar",
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
-        window_func: Optional[Union[str, float, tuple]] = None,
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -79,14 +79,14 @@ class Autoperiod:
         percentile : int, optional, default = 95
             Percentage for the percentile parameter used in computing the power
             threshold. Value must be between 0 and 100 inclusive.
-        detrend_func : {'constant', 'linear'}, optional, default = 'linear'
-            The kind of detrending to be applied on the signal. If None, no detrending
-            is applied.
-        window_func : float, str, tuple, optional, default = None
+        window_func : float, str, tuple, default = 'boxcar'
             Window function to be applied to the time series. Check
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
+        detrend_func : {'constant', 'linear'}, optional, default = 'linear'
+            The kind of detrending to be applied on the signal. If None, no detrending
+            is applied.
 
         Returns
         -------
@@ -207,7 +207,7 @@ class Autoperiod:
         # Detrend data
         x = x if detrend_func is None else detrend(x, type=detrend_func)
         # Apply window on data
-        x = x if window_func is None else apply_window(x, window_func)
+        x = apply_window(x, window_func)
 
         # Compute the power threshold
         detrend_func = "linear" if detrend_func is None else detrend_func
