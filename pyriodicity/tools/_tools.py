@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -30,7 +30,13 @@ def acf(x: ArrayLike) -> NDArray:
 
 
 @staticmethod
-def power_threshold(x: ArrayLike, k: int, p: int) -> np.floating:
+def power_threshold(
+    x: ArrayLike,
+    k: int,
+    p: int,
+    window_func: Union[str, tuple, ArrayLike] = "boxcar",
+    detrend_func: Optional[Literal["constant", "linear"]] = "linear",
+) -> np.floating:
     """
     Compute the power threshold as the p-th percentile of the maximum
     power values of the periodogram of k permutations of the data.
@@ -47,6 +53,7 @@ def power_threshold(x: ArrayLike, k: int, p: int) -> np.floating:
         It determines the cutoff point in the sorted list of the maximum
         power values from the periodograms of the permuted data.
         Value must be between 0 and 100 inclusive.
+    TODO
 
     See Also
     --------
@@ -60,7 +67,9 @@ def power_threshold(x: ArrayLike, k: int, p: int) -> np.floating:
     """
     max_powers = []
     while len(max_powers) < k:
-        _, pxx = periodogram(np.random.permutation(x), detrend=False)
+        _, pxx = periodogram(
+            np.random.permutation(x), window=window_func, detrend=detrend_func
+        )
         max_powers.append(pxx.max())
     max_powers.sort()
     return np.percentile(max_powers, p)
