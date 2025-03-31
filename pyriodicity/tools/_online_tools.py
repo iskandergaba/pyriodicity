@@ -29,7 +29,11 @@ class OnlineHelper:
         # Initialize the spectrum
         self.spectrum = np.fft.rfft(self.buffer)
 
-    def rfft(self, data: Union[np.floating, ArrayLike]) -> NDArray:
+    def update(
+        self,
+        data: Union[np.floating, ArrayLike],
+        return_value: Literal["rfft", "acf", "periodogram"] = "rfft",
+    ) -> NDArray:
         for sample in np.asarray(data).flat:
             # Swap the oldest for the newest sample
             old_sample = self.buffer[0]
@@ -49,12 +53,30 @@ class OnlineHelper:
             self.window = np.roll(self.window, -1)
             sample *= self.window[0]
 
-        # Update and return the spectrum
+        # Update the spectrum
         self.spectrum = self.twiddle * (self.spectrum + sample - old_sample)
+
+        # Return the requested value
+        match return_value:
+            case "rfft":
+                return self.get_rfft()
+            case "acf":
+                return self.get_acf()
+            case "periodogram":
+                return self.get_periodogram()
+            case _:
+                raise TypeError(f"Unsupported return_value '{return_value}'")
+
+    def get_rfft(self) -> NDArray:
         return self.spectrum
 
-    def acf(self, data: Union[np.floating, ArrayLike]) -> NDArray:
+    def get_acf(self) -> NDArray:
         # Compute the ACF using the inverse FFT
-        acf_arr = np.fft.irfft(self.rfft(data))
+        acf_arr = np.fft.irfft(self.get_rfft())
         # Return the normalized ACF
         return np.zeros_like(acf_arr) if acf_arr[0] == 0 else acf_arr / acf_arr[0]
+
+    def get_periodogram(self) -> NDArray:
+        pxx = np.abs(self.get_rfft()) ** 2
+        pxx = 2.0 * pxx / (1.0 * self.window_size)
+        return pxx[0] / 2 if len(pxx) > 0 else pxx

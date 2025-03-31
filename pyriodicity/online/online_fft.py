@@ -87,7 +87,7 @@ class OnlineFFTPeriodicityDetector:
         """
 
         # Update the frequency spectrum
-        spectrum = self.online_helper.rfft(data)
+        spectrum = self.online_helper.update(data, return_value="rfft")
 
         # Compute the frequency amplitudes
         amps = abs(spectrum[1:])

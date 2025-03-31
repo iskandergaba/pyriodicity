@@ -42,7 +42,7 @@ class OnlineACFPeriodicityDetector:
         self.max_period_count = max_period_count
 
         # Initialize the online helper
-        self.online_helper = OnlineHelper(window_size, detrend_func, window_func)
+        self.online_helper = OnlineHelper(window_size, window_func, detrend_func)
 
     def detect(self, data: Union[np.floating, ArrayLike]) -> NDArray:
         """
@@ -81,7 +81,7 @@ class OnlineACFPeriodicityDetector:
         """
 
         # Compute the ACF
-        acf_arr = self.online_helper.acf(data)
+        acf_arr = self.online_helper.update(data, return_value="acf")
 
         # Find peaks in the first half of the ACF array, excluding the first element
         peaks, properties = find_peaks(acf_arr[1 : self.window_size // 2], height=-1)
