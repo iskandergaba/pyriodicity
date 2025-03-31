@@ -2,9 +2,9 @@ from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import detrend, find_peaks
+from scipy.signal import find_peaks
 
-from pyriodicity.tools import apply_window
+from pyriodicity.tools import OnlineHelper
 
 
 class OnlineACFPeriodicityDetector:
@@ -37,25 +37,12 @@ class OnlineACFPeriodicityDetector:
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
         window_func: Optional[Union[float, str, tuple]] = None,
     ):
-        self.N = window_size
+        # Store the detector variables
+        self.window_size = window_size
         self.max_period_count = max_period_count
-        self.detrend_func = detrend_func
 
-        # Initialize the window
-        self.window = (
-            np.ones(self.N)
-            if window_func is None
-            else apply_window(np.ones(self.N), window_func)
-        )
-
-        # Compute the twiddle factors
-        self.twiddle = np.exp(-2j * np.pi * np.arange(self.N // 2 + 1) / self.N)
-
-        # Initialize the buffer for time domain samples (real-valued)
-        self.buffer = np.zeros(self.N)
-
-        # Compute the initial spectrum and exclude the DC component
-        self.spectrum = np.fft.rfft(self.buffer)
+        # Initialize the online helper
+        self.online_helper = OnlineHelper(window_size, detrend_func, window_func)
 
     def detect(self, data: Union[np.floating, ArrayLike]) -> NDArray:
         """
@@ -93,34 +80,11 @@ class OnlineACFPeriodicityDetector:
         and returned.
         """
 
-        for sample in np.asarray(data).flat:
-            # Swap the oldest for the newest sample
-            old_sample = self.buffer[0]
-            self.buffer[0] = sample
-            self.buffer = np.roll(self.buffer, -1)
-
-            # Detrend data
-            if self.detrend_func is not None:
-                detrended_buffer = detrend(
-                    np.insert(self.buffer, 0, old_sample), type=self.detrend_func
-                )
-                old_sample = detrended_buffer[0]
-                sample = detrended_buffer[-1]
-
-            # Apply the window function on the oldest and newest samples
-            old_sample *= self.window[0]
-            self.window = np.roll(self.window, -1)
-            sample *= self.window[0]
-
-            # Update the spectrum
-            self.spectrum = self.twiddle * (self.spectrum + sample - old_sample)
-
-        # Compute ACF using inverse FFT
-        acf_arr = np.fft.irfft(self.spectrum)
-        acf_arr = np.zeros_like(acf_arr) if acf_arr[0] == 0 else acf_arr / acf_arr[0]
+        # Compute the ACF
+        acf_arr = self.online_helper.acf(data)
 
         # Find peaks in the first half of the ACF array, excluding the first element
-        peaks, properties = find_peaks(acf_arr[1 : self.N // 2], height=-1)
+        peaks, properties = find_peaks(acf_arr[1 : self.window_size // 2], height=-1)
         peak_heights = properties["peak_heights"]
 
         # Sort peaks by height in descending order and account for the excluded element

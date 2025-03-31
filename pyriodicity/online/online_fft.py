@@ -2,9 +2,8 @@ from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import detrend
 
-from pyriodicity.tools import apply_window
+from pyriodicity.tools import OnlineHelper
 
 
 class OnlineFFTPeriodicityDetector:
@@ -37,26 +36,11 @@ class OnlineFFTPeriodicityDetector:
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
         window_func: Optional[Union[float, str, tuple]] = None,
     ):
+        # Store the detector variables
         self.max_period_count = max_period_count
-        self.detrend_func = detrend_func
 
-        # Initialize the window
-        self.window = (
-            np.ones(window_size)
-            if window_func is None
-            else apply_window(np.ones(window_size), window_func)
-        )
-
-        # Compute the twiddle factors
-        self.twiddle = np.exp(
-            -2j * np.pi * np.arange(window_size // 2 + 1) / window_size
-        )
-
-        # Initialize the buffer for time domain samples
-        self.buffer = np.zeros(window_size)
-
-        # Initialize the spectrum
-        self.spectrum = np.fft.rfft(self.buffer)
+        # Initialize the online helper
+        self.online_helper = OnlineHelper(window_size, detrend_func, window_func)
 
         # Compute the DFT sample frequencies and exclude the DC frequency
         self.freqs = np.fft.rfftfreq(window_size)[1:]
@@ -102,30 +86,11 @@ class OnlineFFTPeriodicityDetector:
         and returned.
         """
 
-        for sample in np.asarray(data).flat:
-            # Swap the oldest for the newest sample
-            old_sample = self.buffer[0]
-            self.buffer[0] = sample
-            self.buffer = np.roll(self.buffer, -1)
-
-            # Detrend data
-            if self.detrend_func is not None:
-                detrended_buffer = detrend(
-                    np.insert(self.buffer, 0, old_sample), type=self.detrend_func
-                )
-                old_sample = detrended_buffer[0]
-                sample = detrended_buffer[-1]
-
-            # Apply the window function on the oldest and newest samples
-            old_sample *= self.window[0]
-            self.window = np.roll(self.window, -1)
-            sample *= self.window[0]
-
-            # Update the spectrum
-            self.spectrum = self.twiddle * (self.spectrum + sample - old_sample)
+        # Update the frequency spectrum
+        spectrum = self.online_helper.rfft(data)
 
         # Compute the frequency amplitudes
-        amps = abs(self.spectrum[1:])
+        amps = abs(spectrum[1:])
         amps = amps[self.period_filter]
 
         # Sort period length values in the descending order of their amplitudes
