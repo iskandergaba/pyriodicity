@@ -9,7 +9,7 @@ class OnlineHelper:
     def __init__(
         self,
         window_size: int,
-        window_func: Union[float, str, tuple] = "boxcar",
+        window_func: Union[str, float, tuple] = "boxcar",
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
     ):
         self.window_size = window_size

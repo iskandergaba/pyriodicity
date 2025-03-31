@@ -53,7 +53,14 @@ def power_threshold(
         It determines the cutoff point in the sorted list of the maximum
         power values from the periodograms of the permuted data.
         Value must be between 0 and 100 inclusive.
-    TODO
+    window_func : float, tuple, array_like default = 'boxcar'
+            Window function to be applied to the time series. Check
+            ``window`` parameter documentation for ``scipy.signal.get_window``
+            function for more information on the accepted formats of this
+            parameter.
+    detrend_func : {'constant', 'linear'}, optional, default = 'linear'
+        The kind of detrending to be applied on the signal. If None, no detrending
+        is applied.
 
     See Also
     --------
