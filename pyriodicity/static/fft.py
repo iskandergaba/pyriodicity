@@ -55,9 +55,9 @@ class FFTPeriodicityDetector:
     @staticmethod
     def detect(
         data: ArrayLike,
-        max_period_count: Optional[int] = None,
+        window_func: Union[float, str, tuple] = "boxcar",
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
-        window_func: Optional[Union[float, str, tuple]] = None,
+        max_period_count: Optional[int] = None,
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -100,7 +100,7 @@ class FFTPeriodicityDetector:
         x = x if detrend_func is None else detrend(x, type=detrend_func)
 
         # Apply the window function on the data
-        x = x if window_func is None else apply_window(x, window_func=window_func)
+        x = apply_window(x, window_func=window_func)
 
         # Compute DFT and exclude the DC frequency
         freqs = np.fft.rfftfreq(len(x))[1:]

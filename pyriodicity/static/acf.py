@@ -49,9 +49,9 @@ class ACFPeriodicityDetector:
     @staticmethod
     def detect(
         data: ArrayLike,
-        max_period_count: Optional[int] = None,
+        window_func: Union[str, float, tuple] = "boxcar",
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
-        window_func: Optional[Union[str, float, tuple]] = None,
+        max_period_count: Optional[int] = None,
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -89,7 +89,7 @@ class ACFPeriodicityDetector:
         x = x if detrend_func is None else detrend(x, type=detrend_func)
 
         # Apply window on data
-        x = x if window_func is None else apply_window(x, window_func)
+        x = apply_window(x, window_func)
 
         # Compute the ACF
         acf_arr = acf(x)
