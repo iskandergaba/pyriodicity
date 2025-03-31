@@ -210,8 +210,7 @@ class Autoperiod:
         x = apply_window(x, window_func)
 
         # Compute the power threshold
-        detrend_func = "linear" if detrend_func is None else detrend_func
-        p_threshold = power_threshold(x, k, percentile)
+        p_threshold = power_threshold(x, k, percentile, detrend_func=None)
 
         # Find period hints
         freq, power = periodogram(x, detrend=False)
