@@ -15,14 +15,14 @@ class OnlineACFPeriodicityDetector:
     ----------
     window_size : int
         Size of the sliding window (should be a power of 2 for best performance).
-    max_period_count : int, optional
-        Maximum number of periods to return. Default is None (return all periods).
+    window_func : float or str or tuple
+        Window function to apply. Default is None (rectangular window). See
+        ``scipy.signal.get_window`` for accepted formats of the ``window`` parameter.
     detrend_func : {'constant', 'linear'}, optional
         The kind of detrending to apply. Default is 'linear'. If None,
         no detrending is applied.
-    window_func : float or str or tuple, optional
-        Window function to apply. Default is None (rectangular window). See
-        ``scipy.signal.get_window`` for accepted formats of the ``window`` parameter.
+    max_period_count : int, optional
+        Maximum number of periods to return. Default is None (return all periods).
 
     Notes
     -----
@@ -33,9 +33,9 @@ class OnlineACFPeriodicityDetector:
     def __init__(
         self,
         window_size: int,
-        max_period_count: Optional[int] = None,
+        window_func: Union[float, str, tuple] = "boxcar",
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
-        window_func: Optional[Union[float, str, tuple]] = None,
+        max_period_count: Optional[int] = None,
     ):
         # Store the detector variables
         self.window_size = window_size

@@ -14,14 +14,14 @@ class OnlineFFTPeriodicityDetector:
     ----------
     window_size : int
         Size of the sliding window (should be a power of 2 for best performance).
-    max_period_count : int, optional
-        Maximum number of periods to return. Default is None (return all periods).
+    window_func : float or str or tuple
+        Window function to apply. Default is None (rectangular window). See
+        ``scipy.signal.get_window`` for accepted formats of the ``window`` parameter.
     detrend_func : {'constant', 'linear'}, optional
         The kind of detrending to apply. Default is 'linear'. If None,
         no detrending is applied.
-    window_func : float or str or tuple, optional
-        Window function to apply. Default is None (rectangular window). See
-        ``scipy.signal.get_window`` for accepted formats of the ``window`` parameter.
+    max_period_count : int, optional
+        Maximum number of periods to return. Default is None (return all periods).
 
     Notes
     -----
@@ -32,15 +32,15 @@ class OnlineFFTPeriodicityDetector:
     def __init__(
         self,
         window_size: int,
-        max_period_count: Optional[int] = None,
+        window_func: Union[float, str, tuple] = "boxcar",
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
-        window_func: Optional[Union[float, str, tuple]] = None,
+        max_period_count: Optional[int] = None,
     ):
         # Store the detector variables
         self.max_period_count = max_period_count
 
         # Initialize the online helper
-        self.online_helper = OnlineHelper(window_size, detrend_func, window_func)
+        self.online_helper = OnlineHelper(window_size, window_func, detrend_func)
 
         # Compute the DFT sample frequencies and exclude the DC frequency
         self.freqs = np.fft.rfftfreq(window_size)[1:]

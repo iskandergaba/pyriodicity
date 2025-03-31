@@ -2,27 +2,21 @@ from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import detrend
-
-from ._tools import apply_window
+from scipy.signal import detrend, get_window
 
 
 class OnlineHelper:
     def __init__(
         self,
         window_size: int,
+        window_func: Union[float, str, tuple] = "boxcar",
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
-        window_func: Optional[Union[float, str, tuple]] = None,
     ):
         self.window_size = window_size
         self.detrend_func = detrend_func
 
-        # Initialize the window
-        self.window = (
-            np.ones(window_size)
-            if window_func is None
-            else apply_window(np.ones(window_size), window_func)
-        )
+        # Get the window
+        self.window = get_window(window=window_func, Nx=window_size)
 
         # Compute the twiddle factors
         self.twiddle = np.exp(
