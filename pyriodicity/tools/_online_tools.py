@@ -65,7 +65,13 @@ class OnlineHelper:
             case "periodogram":
                 return self.get_periodogram()
             case _:
-                raise TypeError(f"Unsupported return_value '{return_value}'")
+                raise ValueError(f"Unsupported return_value '{return_value}'")
+
+    def get_data(self) -> NDArray:
+        return self.buffer
+
+    def get_freq(self) -> NDArray:
+        return np.fft.rfftfreq(self.window_size)
 
     def get_rfft(self) -> NDArray:
         return self.spectrum
@@ -78,5 +84,7 @@ class OnlineHelper:
 
     def get_periodogram(self) -> NDArray:
         pxx = np.abs(self.get_rfft()) ** 2
-        pxx = 2.0 * pxx / (1.0 * self.window_size)
-        return pxx[0] / 2 if len(pxx) > 0 else pxx
+        pxx = 2.0 * pxx / self.window_size
+        if len(pxx) > 0:
+            pxx[0] = pxx[0] / 2
+        return pxx
