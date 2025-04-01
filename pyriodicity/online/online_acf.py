@@ -9,25 +9,22 @@ from pyriodicity.tools import OnlineHelper
 
 class OnlineACFPeriodicityDetector:
     """
-    Find periods in streaming signal data using Sliding DFT algorithm.
+    Online Autocorrelation Function (ACF) based periodicity detector.
 
     Parameters
     ----------
     window_size : int
-        Size of the sliding window (should be a power of 2 for best performance).
-    window_func : float or str or tuple
-        Window function to apply. Default is None (rectangular window). See
-        ``scipy.signal.get_window`` for accepted formats of the ``window`` parameter.
-    detrend_func : {'constant', 'linear'}, optional
-        The kind of detrending to apply. Default is 'linear'. If None,
-        no detrending is applied.
-    max_period_count : int, optional
-        Maximum number of periods to return. Default is None (return all periods).
+        Size of the sliding window for the ACF computation.
+    window_func : float, str, tuple, optional, default = 'boxcar'
+        Window function to apply. See ``scipy.signal.get_window`` for accepted formats
+        of the ``window`` parameter.
+    detrend_func : {'constant', 'linear'}, optional, default = 'linear'
+        The kind of detrending to apply. If None, no detrending is applied.
 
     Notes
     -----
-    Uses Sliding DFT for efficient online computation of frequency spectrum
-    and period detection in streaming data.
+    This detector uses an online approach to compute the ACF, allowing for efficient
+    periodicity detection in streaming data.
     """
 
     def __init__(
@@ -35,32 +32,32 @@ class OnlineACFPeriodicityDetector:
         window_size: int,
         window_func: Union[float, str, tuple] = "boxcar",
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
-        max_period_count: Optional[int] = None,
     ):
-        # Store the detector variables
         self.window_size = window_size
-        self.max_period_count = max_period_count
-
-        # Initialize the online helper
         self.online_helper = OnlineHelper(window_size, window_func, detrend_func)
 
-    def detect(self, data: Union[np.floating, ArrayLike]) -> NDArray:
+    def detect(
+        self,
+        data: Union[np.floating, ArrayLike],
+        max_period_count: Optional[int] = None,
+    ) -> NDArray:
         """
-        Detect periods in a signal using Sliding DFT with online updates.
+        Detect periods in a signal using online ACF.
 
         Process new samples through the detector's circular buffer, updating the
-        frequency spectrum and detecting periodic patterns in the signal using
-        the Sliding DFT algorithm.
+        ACF and detecting periodic patterns in the signal.
 
         Parameters
         ----------
         data : numpy.floating or array_like
             New samples to process. Can be a single value or an array of values.
-            Multi-dimensional arrays will be flattened.
+        max_period_count : int, optional, default = None
+            Maximum number of periods to return. If None, all detected periods are
+            returned.
 
         Returns
         -------
-        numpy.ndarray
+        NDArray
             Array of detected periods sorted by their amplitude strength in
             descending order. Only unique periods are returned, limited by
             max_period_count if specified. Each period represents the length
@@ -73,8 +70,8 @@ class OnlineACFPeriodicityDetector:
         * Updates the circular buffer
         * Applies detrending if specified
         * Applies windowing if specified
-        * Updates the frequency spectrum
-        * Computes periods from the spectrum
+        * Computes the ACF
+        * Finds peaks in the ACF to identify periods
 
         Only periods shorter than ``window_size // 2 + 1`` are considered reliable
         and returned.
@@ -91,4 +88,4 @@ class OnlineACFPeriodicityDetector:
         periods = peaks[np.argsort(peak_heights)[::-1]] + 1
 
         # Return the requested maximum count of detected periods
-        return periods[: self.max_period_count]
+        return periods[: max_period_count]
