@@ -13,6 +13,11 @@ class FFTPeriodicityDetector:
 
     Find the periods in a given signal or series using FFT [1]_.
 
+    See Also
+    --------
+    pyriodicity.OnlineFFTPeriodicityDetector
+        Online Fast Fourier Transform (FFT) based periodicity detector.
+
     References
     ----------
     .. [1] Hyndman, R.J., & Athanasopoulos, G. (2021)
