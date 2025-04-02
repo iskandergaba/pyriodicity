@@ -9,9 +9,9 @@ from pyriodicity.tools import OnlineHelper
 
 class OnlineACFPeriodicityDetector:
     """
-    Online autocorrelation function (ACF) based periodicity detector.
+    Online Autocorrelation Function (ACF) based periodicity detector.
 
-    Detect periodicities in a signal or series stream using online ACF. A lag value
+    Detect periodicities in a signal stream using online ACF. A lag value
     is considered a period if it is a local maximum of the ACF [1]_.
 
     Parameters
@@ -27,7 +27,7 @@ class OnlineACFPeriodicityDetector:
     See Also
     --------
     pyriodicity.ACFPeriodicityDetector
-        Autocorrelation function (ACF) based periodicity detector.
+        Autocorrelation Function (ACF) based periodicity detector.
 
     References
     ----------
@@ -51,7 +51,7 @@ class OnlineACFPeriodicityDetector:
         max_period_count: Optional[int] = None,
     ) -> NDArray:
         """
-        Update the online ACF for using the incoming data and detect periodicities.
+        Update the online ACF and detect periodicities.
 
         Process new samples through the detector's circular buffer, updating the ACF
         and detecting periodicities in the signal.
