@@ -88,6 +88,7 @@ class ACFPeriodicityDetector:
         scipy.signal.get_window
             Return a window of a given length and type.
         """
+
         x = to_1d_array(data)
 
         # Detrend data

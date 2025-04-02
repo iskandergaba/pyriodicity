@@ -34,8 +34,6 @@ class OnlineFFTPeriodicityDetector:
        Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia.
        https://OTexts.com/fpp3/useful-predictors.html#fourier-series.
        Accessed on 09-15-2024.
-
-
     """
 
     def __init__(
