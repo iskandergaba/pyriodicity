@@ -9,7 +9,10 @@ from pyriodicity.tools import OnlineHelper
 
 class OnlineACFPeriodicityDetector:
     """
-    Online Autocorrelation Function (ACF) based periodicity detector.
+    Online autocorrelation function (ACF) based periodicity detector.
+
+    Detect periodicities in a signal or series stream using online ACF. A lag value
+    is considered a period if it is a local maximum of the ACF [1]_.
 
     Parameters
     ----------
@@ -21,10 +24,16 @@ class OnlineACFPeriodicityDetector:
     detrend_func : {'constant', 'linear'}, optional, default = 'linear'
         The kind of detrending to apply. If None, no detrending is applied.
 
-    Notes
-    -----
-    This detector uses an online approach to compute the ACF, allowing for efficient
-    periodicity detection in streaming data.
+    See Also
+    --------
+    pyriodicity.ACFPeriodicityDetector
+        Autocorrelation function (ACF) based periodicity detector.
+
+    References
+    ----------
+    .. [1] Hyndman, R.J., & Athanasopoulos, G. (2021)
+       Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia.
+       https://OTexts.com/fpp3/acf.html. Accessed on 09-15-2024.
     """
 
     def __init__(
@@ -42,10 +51,10 @@ class OnlineACFPeriodicityDetector:
         max_period_count: Optional[int] = None,
     ) -> NDArray:
         """
-        Detect periods in a signal using online ACF.
+        Update the online ACF for using the incoming data and detect periodicities.
 
-        Process new samples through the detector's circular buffer, updating the
-        ACF and detecting periodic patterns in the signal.
+        Process new samples through the detector's circular buffer, updating the ACF
+        and detecting periodicities in the signal.
 
         Parameters
         ----------
@@ -58,23 +67,8 @@ class OnlineACFPeriodicityDetector:
         Returns
         -------
         NDArray
-            Array of detected periods sorted by their amplitude strength in
-            descending order. Only unique periods are returned, limited by
-            max_period_count if specified. Each period represents the length
-            (in samples) of a detected periodicity.
-
-        Notes
-        -----
-        The detection process follows these steps:
-
-        * Updates the circular buffer
-        * Applies detrending if specified
-        * Applies windowing if specified
-        * Computes the ACF
-        * Finds peaks in the ACF to identify periods
-
-        Only periods shorter than ``window_size // 2 + 1`` are considered reliable
-        and returned.
+            Array of detected periodicity lengths, sorted by strength in descending
+            order.
         """
 
         # Compute the ACF
@@ -88,4 +82,4 @@ class OnlineACFPeriodicityDetector:
         periods = peaks[np.argsort(peak_heights)[::-1]] + 1
 
         # Return the requested maximum count of detected periods
-        return periods[: max_period_count]
+        return periods[:max_period_count]
