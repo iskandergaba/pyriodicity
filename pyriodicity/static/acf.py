@@ -9,10 +9,15 @@ from pyriodicity.tools import acf, apply_window, to_1d_array
 
 class ACFPeriodicityDetector:
     """
-    Autocorrelation function (ACF) based periodicity detector.
+    Autocorrelation Function (ACF) based periodicity detector.
 
     Find the periods in a given signal or series using its ACF. A lag value
     is considered a period if it is a local maximum of the ACF [1]_.
+
+    See Also
+    --------
+    pyriodicity.OnlineACFPeriodicityDetector
+        online Autocorrelation Function (ACF) based periodicity detector.
 
     References
     ----------
@@ -60,16 +65,16 @@ class ACFPeriodicityDetector:
         ----------
         data : array_like
             Data to be investigated. Must be squeezable to 1-d.
-        max_period_count : int, optional, default = None
-            Maximum number of periods to look for.
-        detrend_func : {'constant', 'linear'} or None, default = 'linear'
-            The kind of detrending to be applied on the signal. If None, no detrending
-            is applied.
         window_func : float, str, tuple, optional, default = None
             Window function to be applied to the time series. Check
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
+        detrend_func : {'constant', 'linear'} or None, default = 'linear'
+            The kind of detrending to be applied on the signal. If None, no detrending
+            is applied.
+        max_period_count : int, optional, default = None
+            Maximum number of periods to look for.
 
         Returns
         -------
