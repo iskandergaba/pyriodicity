@@ -32,7 +32,7 @@ class OnlineHelper:
     def update(
         self,
         data: Union[np.floating, ArrayLike],
-        return_value: Literal["rfft", "acf", "periodogram"] = "rfft",
+        return_value: Literal["rfft", "acf"] = "rfft",
     ) -> NDArray:
         for sample in np.asarray(data).flat:
             # Swap the oldest for the newest sample
@@ -62,13 +62,8 @@ class OnlineHelper:
                 return self.get_rfft()
             case "acf":
                 return self.get_acf()
-            case "periodogram":
-                return self.get_periodogram()
             case _:
                 raise ValueError(f"Unsupported return_value '{return_value}'")
-
-    def get_data(self) -> NDArray:
-        return self.buffer
 
     def get_freq(self) -> NDArray:
         return np.fft.rfftfreq(self.window_size)
@@ -81,10 +76,3 @@ class OnlineHelper:
         acf_arr = np.fft.irfft(self.get_rfft())
         # Return the normalized ACF
         return np.zeros_like(acf_arr) if acf_arr[0] == 0 else acf_arr / acf_arr[0]
-
-    def get_periodogram(self) -> NDArray:
-        pxx = np.abs(self.get_rfft()) ** 2
-        pxx = 2.0 * pxx / self.window_size
-        if len(pxx) > 0:
-            pxx[0] = pxx[0] / 2
-        return pxx
