@@ -65,7 +65,7 @@ pygments==2.19.1
     #   sphinx
 pytest==8.3.5
     # via pytest-cov
-pytest-cov==6.1.0
+pytest-cov==6.1.1
 python-dateutil==2.9.0.post0
     # via pandas
 pytz==2025.2
