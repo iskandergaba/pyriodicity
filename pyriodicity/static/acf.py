@@ -65,26 +65,23 @@ class ACFPeriodicityDetector:
         ----------
         data : array_like
             Data to be investigated. Must be squeezable to 1-d.
-        window_func : float, str, tuple, optional, default = None
-            Window function to be applied to the time series. Check
-            ``window`` parameter documentation for ``scipy.signal.get_window``
-            function for more information on the accepted formats of this
-            parameter.
-        detrend_func : {'constant', 'linear'} or None, default = 'linear'
-            The kind of detrending to be applied on the signal. If None, no detrending
-            is applied.
+        window_func : float, str, tuple, optional, default = 'boxcar'
+            Window function to apply. See ``scipy.signal.get_window`` for accepted
+            formats of the ``window`` parameter.
+        detrend_func : {'constant', 'linear'}, optional, default = 'linear'
+            The kind of detrending to apply. If None, no detrending is applied.
         max_period_count : int, optional, default = None
-            Maximum number of periods to look for.
+            Maximum number of periods to return. If None, all detected periods are
+            returned.
 
         Returns
         -------
         NDArray
-            List of detected periods.
+            Array of detected periodicity lengths, sorted by strength in descending
+            order
 
         See Also
         --------
-        scipy.signal.detrend
-            Remove linear trend along axis from data.
         scipy.signal.get_window
             Return a window of a given length and type.
         """
@@ -107,5 +104,5 @@ class ACFPeriodicityDetector:
         # Sort peaks by height in descending order and account for the excluded element
         periods = peaks[np.argsort(peak_heights)[::-1]] + 1
 
-        # Return the requested maximum count of detected periods
+        # Return the requested maximum count of detected periodicity lengths
         return periods[:max_period_count]

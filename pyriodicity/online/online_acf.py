@@ -28,6 +28,8 @@ class OnlineACFPeriodicityDetector:
     --------
     pyriodicity.ACFPeriodicityDetector
         Autocorrelation Function (ACF) based periodicity detector.
+    scipy.signal.get_window
+            Return a window of a given length and type.
 
     References
     ----------
@@ -81,5 +83,5 @@ class OnlineACFPeriodicityDetector:
         # Sort peaks by height in descending order and account for the excluded element
         periods = peaks[np.argsort(peak_heights)[::-1]] + 1
 
-        # Return the requested maximum count of detected periods
+        # Return the requested maximum count of detected periodicity lengths
         return periods[:max_period_count]
