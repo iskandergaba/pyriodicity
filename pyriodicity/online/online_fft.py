@@ -2,61 +2,48 @@ from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import detrend
 
-from pyriodicity.tools import apply_window
+from pyriodicity.tools import OnlineHelper
 
 
 class OnlineFFTPeriodicityDetector:
     """
-    Find periods in streaming signal data using Sliding DFT algorithm.
+    Online Fast Fourier Transform (FFT) based periodicity detector.
+
+    Detect periodicities in a signal stream data using Sliding Discrete Fourier
+    Transform (DFT) algorithm [1]_.
 
     Parameters
     ----------
     window_size : int
-        Size of the sliding window (should be a power of 2 for best performance).
-    max_period_count : int, optional
-        Maximum number of periods to return. Default is None (return all periods).
-    detrend_func : {'constant', 'linear'}, optional
-        The kind of detrending to apply. Default is 'linear'. If None,
-        no detrending is applied.
-    window_func : float or str or tuple, optional
-        Window function to apply. Default is None (rectangular window). See
-        ``scipy.signal.get_window`` for accepted formats of the ``window`` parameter.
+        Size of the sliding window for the ACF computation.
+    window_func : float, str, tuple, optional, default = 'boxcar'
+        Window function to apply. See ``scipy.signal.get_window`` for accepted formats
+        of the ``window`` parameter.
+    detrend_func : {'constant', 'linear'}, optional, default = 'linear'
+        The kind of detrending to apply. If None, no detrending is applied.
 
-    Notes
-    -----
-    Uses Sliding DFT for efficient online computation of frequency spectrum
-    and period detection in streaming data.
+    See Also
+    --------
+    pyriodicity.FFTPeriodicityDetector
+        Fast Fourier Transform (FFT) based periodicity detector.
+
+    References
+    ----------
+    .. [1] Hyndman, R.J., & Athanasopoulos, G. (2021)
+       Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia.
+       https://OTexts.com/fpp3/useful-predictors.html#fourier-series.
+       Accessed on 09-15-2024.
     """
 
     def __init__(
         self,
         window_size: int,
-        max_period_count: Optional[int] = None,
+        window_func: Union[float, str, tuple] = "boxcar",
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
-        window_func: Optional[Union[float, str, tuple]] = None,
     ):
-        self.max_period_count = max_period_count
-        self.detrend_func = detrend_func
-
-        # Initialize the window
-        self.window = (
-            np.ones(window_size)
-            if window_func is None
-            else apply_window(np.ones(window_size), window_func)
-        )
-
-        # Compute the twiddle factors
-        self.twiddle = np.exp(
-            -2j * np.pi * np.arange(window_size // 2 + 1) / window_size
-        )
-
-        # Initialize the buffer for time domain samples
-        self.buffer = np.zeros(window_size)
-
-        # Initialize the spectrum
-        self.spectrum = np.fft.rfft(self.buffer)
+        # Initialize the online helper
+        self.online_helper = OnlineHelper(window_size, window_func, detrend_func)
 
         # Compute the DFT sample frequencies and exclude the DC frequency
         self.freqs = np.fft.rfftfreq(window_size)[1:]
@@ -66,66 +53,39 @@ class OnlineFFTPeriodicityDetector:
         self.period_filter = self.periods < window_size // 2 + 1
         self.periods = self.periods[self.period_filter]
 
-    def detect(self, data: Union[np.floating, ArrayLike]) -> NDArray:
+    def detect(
+        self,
+        data: Union[np.floating, ArrayLike],
+        max_period_count: Optional[int] = None,
+    ) -> NDArray:
         """
-        Detect periods in a signal using Sliding DFT with online updates.
+        Update the frequency spectrum and detect periodicities.
 
         Process new samples through the detector's circular buffer, updating the
-        frequency spectrum and detecting periodic patterns in the signal using
-        the Sliding DFT algorithm.
+        frequency spectrum and detecting periodicities in the signal using the SDFT
+        algorithm.
 
         Parameters
         ----------
         data : numpy.floating or array_like
             New samples to process. Can be a single value or an array of values.
             Multi-dimensional arrays will be flattened.
+        max_period_count : int, optional, default = None
+            Maximum number of periods to return. If None, all detected periods are
+            returned.
 
         Returns
         -------
         numpy.ndarray
-            Array of detected periods sorted by their amplitude strength in
-            descending order. Only unique periods are returned, limited by
-            max_period_count if specified. Each period represents the length
-            (in samples) of a detected periodicity.
-
-        Notes
-        -----
-        The detection process follows these steps:
-
-        * Updates the circular buffer
-        * Applies detrending if specified
-        * Applies windowing if specified
-        * Updates the frequency spectrum
-        * Computes periods from the spectrum
-
-        Only periods shorter than ``window_size // 2 + 1`` are considered reliable
-        and returned.
+            Array of detected periods sorted by their amplitude strength in descending
+            order.
         """
 
-        for sample in np.asarray(data).flat:
-            # Swap the oldest for the newest sample
-            old_sample = self.buffer[0]
-            self.buffer[0] = sample
-            self.buffer = np.roll(self.buffer, -1)
-
-            # Detrend data
-            if self.detrend_func is not None:
-                detrended_buffer = detrend(
-                    np.insert(self.buffer, 0, old_sample), type=self.detrend_func
-                )
-                old_sample = detrended_buffer[0]
-                sample = detrended_buffer[-1]
-
-            # Apply the window function on the oldest and newest samples
-            old_sample *= self.window[0]
-            self.window = np.roll(self.window, -1)
-            sample *= self.window[0]
-
-            # Update the spectrum
-            self.spectrum = self.twiddle * (self.spectrum + sample - old_sample)
+        # Update the frequency spectrum
+        spectrum = self.online_helper.update(data, return_value="rfft")
 
         # Compute the frequency amplitudes
-        amps = abs(self.spectrum[1:])
+        amps = abs(spectrum[1:])
         amps = amps[self.period_filter]
 
         # Sort period length values in the descending order of their amplitudes
@@ -133,4 +93,4 @@ class OnlineFFTPeriodicityDetector:
 
         # Return unique period length values
         _, unique_indices = np.unique(result, return_index=True)
-        return result[np.sort(unique_indices)][: self.max_period_count]
+        return result[np.sort(unique_indices)][:max_period_count]

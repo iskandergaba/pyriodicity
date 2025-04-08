@@ -9,10 +9,15 @@ from pyriodicity.tools import acf, apply_window, to_1d_array
 
 class ACFPeriodicityDetector:
     """
-    Autocorrelation function (ACF) based periodicity detector.
+    Autocorrelation Function (ACF) based periodicity detector.
 
     Find the periods in a given signal or series using its ACF. A lag value
     is considered a period if it is a local maximum of the ACF [1]_.
+
+    See Also
+    --------
+    pyriodicity.OnlineACFPeriodicityDetector
+        online Autocorrelation Function (ACF) based periodicity detector.
 
     References
     ----------
@@ -49,9 +54,9 @@ class ACFPeriodicityDetector:
     @staticmethod
     def detect(
         data: ArrayLike,
-        max_period_count: Optional[int] = None,
+        window_func: Union[str, float, tuple] = "boxcar",
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
-        window_func: Optional[Union[str, float, tuple]] = None,
+        max_period_count: Optional[int] = None,
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -60,36 +65,34 @@ class ACFPeriodicityDetector:
         ----------
         data : array_like
             Data to be investigated. Must be squeezable to 1-d.
+        window_func : float, str, tuple, optional, default = 'boxcar'
+            Window function to apply. See ``scipy.signal.get_window`` for accepted
+            formats of the ``window`` parameter.
+        detrend_func : {'constant', 'linear'}, optional, default = 'linear'
+            The kind of detrending to apply. If None, no detrending is applied.
         max_period_count : int, optional, default = None
-            Maximum number of periods to look for.
-        detrend_func : {'constant', 'linear'} or None, default = 'linear'
-            The kind of detrending to be applied on the signal. If None, no detrending
-            is applied.
-        window_func : float, str, tuple, optional, default = None
-            Window function to be applied to the time series. Check
-            ``window`` parameter documentation for ``scipy.signal.get_window``
-            function for more information on the accepted formats of this
-            parameter.
+            Maximum number of periods to return. If None, all detected periods are
+            returned.
 
         Returns
         -------
         NDArray
-            List of detected periods.
+            Array of detected periodicity lengths, sorted by strength in descending
+            order
 
         See Also
         --------
-        scipy.signal.detrend
-            Remove linear trend along axis from data.
         scipy.signal.get_window
             Return a window of a given length and type.
         """
+
         x = to_1d_array(data)
 
         # Detrend data
         x = x if detrend_func is None else detrend(x, type=detrend_func)
 
         # Apply window on data
-        x = x if window_func is None else apply_window(x, window_func)
+        x = apply_window(x, window_func)
 
         # Compute the ACF
         acf_arr = acf(x)
@@ -101,5 +104,5 @@ class ACFPeriodicityDetector:
         # Sort peaks by height in descending order and account for the excluded element
         periods = peaks[np.argsort(peak_heights)[::-1]] + 1
 
-        # Return the requested maximum count of detected periods
+        # Return the requested maximum count of detected periodicity lengths
         return periods[:max_period_count]

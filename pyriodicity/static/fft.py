@@ -13,6 +13,11 @@ class FFTPeriodicityDetector:
 
     Find the periods in a given signal or series using FFT [1]_.
 
+    See Also
+    --------
+    pyriodicity.OnlineFFTPeriodicityDetector
+        Online Fast Fourier Transform (FFT) based periodicity detector.
+
     References
     ----------
     .. [1] Hyndman, R.J., & Athanasopoulos, G. (2021)
@@ -55,9 +60,9 @@ class FFTPeriodicityDetector:
     @staticmethod
     def detect(
         data: ArrayLike,
-        max_period_count: Optional[int] = None,
+        window_func: Union[float, str, tuple] = "boxcar",
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
-        window_func: Optional[Union[float, str, tuple]] = None,
+        max_period_count: Optional[int] = None,
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -94,13 +99,14 @@ class FFTPeriodicityDetector:
         scipy.signal.get_window
             Return a window of a given length and type.
         """
+
         x = to_1d_array(data)
 
         # Detrend data
         x = x if detrend_func is None else detrend(x, type=detrend_func)
 
         # Apply the window function on the data
-        x = x if window_func is None else apply_window(x, window_func=window_func)
+        x = apply_window(x, window_func=window_func)
 
         # Compute DFT and exclude the DC frequency
         freqs = np.fft.rfftfreq(len(x))[1:]
