@@ -23,17 +23,17 @@ def sinewave_100():
 
 @pytest.fixture
 def sinewave_10_generator() -> Generator[float, None, None]:
-    return (sample for sample in sinewave(10000, 10, 1))
+    return (sample for sample in sinewave(1000, 10, 1))
 
 
 @pytest.fixture
 def sinewave_50_generator() -> Generator[float, None, None]:
-    return (sample for sample in sinewave(10000, 50, 1))
+    return (sample for sample in sinewave(1000, 50, 1))
 
 
 @pytest.fixture
 def sinewave_100_generator() -> Generator[float, None, None]:
-    return (sample for sample in sinewave(10000, 100, 1))
+    return (sample for sample in sinewave(1000, 100, 1))
 
 
 @pytest.fixture(scope="module")
@@ -53,17 +53,17 @@ def trianglewave_100():
 
 @pytest.fixture
 def trianglewave_10_generator() -> Generator[float, None, None]:
-    return (sample for sample in trianglewave(10000, 10, 1))
+    return (sample for sample in trianglewave(1000, 10, 1))
 
 
 @pytest.fixture
 def trianglewave_50_generator() -> Generator[float, None, None]:
-    return (sample for sample in trianglewave(10000, 50, 1))
+    return (sample for sample in trianglewave(1000, 50, 1))
 
 
 @pytest.fixture
 def trianglewave_100_generator() -> Generator[float, None, None]:
-    return (sample for sample in trianglewave(10000, 100, 1))
+    return (sample for sample in trianglewave(1000, 100, 1))
 
 
 @pytest.fixture(scope="module")

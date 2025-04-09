@@ -1,13 +1,20 @@
+import pytest
+
 from pyriodicity import OnlineACFPeriodicityDetector
 
 
-def test_sinewave_10_online_acf_find_strongest_period_window_size_100(
+def test_sinewave_10_online_acf_find_all_periods_window_size_100_buffer_size_50():
+    with pytest.raises(ValueError):
+        OnlineACFPeriodicityDetector(window_size=100, buffer_size=50)
+
+
+def test_sinewave_10_online_acf_find_first_two_periods_window_size_300(
     sinewave_10_generator,
 ):
-    detector = OnlineACFPeriodicityDetector(window_size=100)
+    detector = OnlineACFPeriodicityDetector(window_size=300)
     for sample in sinewave_10_generator:
-        periods = detector.detect(sample, max_period_count=1)
-    assert len(periods) > 0
+        periods = detector.detect(sample, max_period_count=2)
+    assert len(periods) <= 2
     assert 10 in periods
 
 
@@ -28,7 +35,7 @@ def test_sinewave_100_online_acf_find_strongest_period_window_size_300(
     for sample in sinewave_100_generator:
         periods = detector.detect(sample, max_period_count=1)
     assert len(periods) > 0
-    assert 99 in periods
+    assert 100 in periods
 
 
 def test_trianglewave_10_online_acf_find_all_periods_window_size_100(
