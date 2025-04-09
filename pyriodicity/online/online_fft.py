@@ -17,6 +17,8 @@ class OnlineFFTPeriodicityDetector:
     ----------
     window_size : int
         Size of the sliding window for the ACF computation.
+    buffer_size : int, optional, default = 2 * window_size
+        Size of the samples buffer. Must be at least equal to window_size.
     window_func : float, str, tuple, optional, default = 'boxcar'
         Window function to apply. See ``scipy.signal.get_window`` for accepted formats
         of the ``window`` parameter.
@@ -39,11 +41,14 @@ class OnlineFFTPeriodicityDetector:
     def __init__(
         self,
         window_size: int,
+        buffer_size: Optional[int] = None,
         window_func: Union[float, str, tuple] = "boxcar",
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
     ):
         # Initialize the online helper
-        self.online_helper = OnlineHelper(window_size, window_func, detrend_func)
+        self.online_helper = OnlineHelper(
+            window_size, buffer_size, window_func, detrend_func
+        )
 
         # Compute the DFT sample frequencies and exclude the DC frequency
         self.freqs = np.fft.rfftfreq(window_size)[1:]

@@ -2,7 +2,7 @@ from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import detrend, get_window
+from scipy.signal import detrend, get_window, stft
 
 
 class OnlineHelper:
@@ -17,6 +17,8 @@ class OnlineHelper:
     ----------
     window_size : int
         Size of the sliding window for signal processing.
+    buffer_size : int, optional, default = 2 * window_size
+        Size of the samples buffer. Must be at least equal to window_size.
     window_func : float or str or tuple, optional, default = 'boxcar'
         Window function to apply. See ``scipy.signal.get_window`` for accepted formats
         of the ``window`` parameter.
@@ -27,41 +29,58 @@ class OnlineHelper:
     ----------
     window : NDArray
         The window function array.
+    window_buffer : NDArray
+        Circular buffer storing the last ``window_size`` windowed signal samples.
     buffer : NDArray
-        Circular buffer storing the windowed signal samples.
-    spectrum : NDArray
+        Circular buffer storing the last ``buffer_size`` samples.
+    rfft : NDArray
         Current FFT spectrum of the windowed signal.
-    twiddle : NDArray
-        Pre-computed twiddle factors for efficient FFT updates.
 
     See Also
     --------
     scipy.signal.get_window
         Get a window function with the specified parameters.
+
+    Raises
+    ------
+    ValueError
+        If history_size is less than window_size.
     """
 
     def __init__(
         self,
         window_size: int,
+        buffer_size: Optional[int] = None,
         window_func: Union[str, float, tuple] = "boxcar",
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
     ):
+        # Initialize size attributes
         self.window_size = window_size
-        self.detrend_func = detrend_func
+        self.buffer_size = 2 * window_size if buffer_size is None else buffer_size
+        if self.buffer_size < window_size:
+            raise ValueError(
+                f"History size ({self.buffer_size}) must be at least "
+                f"equal to window size ({window_size})"
+            )
+
+        # Initialize the buffers
+        self.window_buffer = np.zeros(window_size)
+        self.buffer = np.zeros(self.buffer_size)
+        self._buffer_index = 0
+
+        # Initialize the detrend function attribute
+        self._detrend_func = detrend_func
 
         # Get the window
         self.window = get_window(window=window_func, Nx=window_size)
 
         # Compute the twiddle factors
-        self.twiddle = np.exp(
+        self._twiddle = np.exp(
             -2j * np.pi * np.arange(window_size // 2 + 1) / window_size
         )
 
-        # Initialize the buffer for time domain samples
-        self.buffer = np.zeros(window_size)
-
         # Initialize the FFT spectrum and frequencies
-        self.spectrum = np.fft.rfft(self.buffer)
+        self.rfft = np.fft.rfft(self.window_buffer)
         self.freq = np.fft.rfftfreq(self.window_size)
 
     def update(
@@ -97,51 +116,65 @@ class OnlineHelper:
         """
 
         for sample in np.asarray(data).flat:
-            # Swap the oldest for the newest sample
-            old_sample = self.buffer[0]
-            self.buffer[0] = sample
+            # Update history buffer
             self.buffer = np.roll(self.buffer, -1)
+            self.buffer[-1] = sample
 
-            # Detrend data
-            if self.detrend_func is not None:
+            # Update active buffer and spectrum using twiddle factors
+            old_sample = self.window_buffer[0]
+            self.window_buffer[0] = sample
+            self.window_buffer = np.roll(self.window_buffer, -1)
+
+            # Detrend if needed
+            if self._detrend_func is not None:
                 detrended_buffer = detrend(
-                    np.insert(self.buffer, 0, old_sample), type=self.detrend_func
+                    np.insert(self.window_buffer, 0, old_sample),
+                    type=self._detrend_func,
                 )
                 old_sample = detrended_buffer[0]
                 sample = detrended_buffer[-1]
 
-            # Apply the window function on the oldest and newest samples
+            # Apply window function
             old_sample *= self.window[0]
             self.window = np.roll(self.window, -1)
             sample *= self.window[0]
 
-        # Update the spectrum
-        self.spectrum = self.twiddle * (self.spectrum + sample - old_sample)
+            # Update spectrum using twiddle factors
+            self.rfft = self._twiddle * (self.rfft + sample - old_sample)
 
-        # Return the requested value
+            # Increment counter
+            self._buffer_index = (self._buffer_index + 1) % self.buffer_size
+
+            # Recompute spectrum when the buffer is filled
+            if self._buffer_index == 0:
+                # Prepare data for STFT
+                if self._detrend_func is not None:
+                    data_for_stft = detrend(self.buffer, type=self._detrend_func)
+                else:
+                    data_for_stft = self.buffer
+
+                # Compute STFT
+                _, _, Zxx = stft(
+                    data_for_stft,
+                    window=self.window,
+                    nperseg=self.window_size,
+                    noverlap=0,
+                )
+
+                # Use the last column of the STFT as our new spectrum
+                self.rfft = Zxx[:, -1]
+
         match return_value:
             case "rfft":
-                return self.get_rfft()
+                return self.rfft
             case "acf":
                 return self.get_acf()
             case _:
                 raise ValueError(f"Unsupported return_value '{return_value}'")
 
-    def get_rfft(self) -> NDArray:
-        """
-        Get the current FFT spectrum.
-
-        Returns
-        -------
-        NDArray
-            The real FFT spectrum of the current window.
-        """
-
-        return self.spectrum
-
     def get_acf(self) -> NDArray:
         """
-        Get the current autocorrelation function.
+        Get the current autocorrelation function array.
 
         Computes the ACF from the current FFT spectrum using the inverse FFT
         and normalizes it by the zero-lag autocorrelation.
@@ -149,8 +182,8 @@ class OnlineHelper:
         Returns
         -------
         NDArray
-            The normalized autocorrelation function of the current window.
+            The normalized autocorrelation function array of the current window buffer.
         """
 
-        acf_arr = np.fft.irfft(self.get_rfft())
+        acf_arr = np.fft.irfft(self.rfft)
         return np.zeros_like(acf_arr) if acf_arr[0] == 0 else acf_arr / acf_arr[0]
