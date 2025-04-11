@@ -66,3 +66,43 @@ def test_trianglewave_100_online_acf_find_all_periods_window_size_300(
         periods = detector.detect(sample)
     assert len(periods) > 0
     assert 100 in periods
+
+
+def test_co2_weekly_online_acf_find_all_periods_window_size_256(
+    co2_weekly_generator,
+):
+    detector = OnlineACFPeriodicityDetector(window_size=256)
+    for sample in co2_weekly_generator:
+        periods = detector.detect(sample)
+    assert len(periods) > 0
+    assert 52 in periods
+
+
+def test_co2_monthly_online_acf_find_all_periods_window_size_128(
+    co2_monthly_generator,
+):
+    detector = OnlineACFPeriodicityDetector(window_size=128)
+    for sample in co2_monthly_generator:
+        periods = detector.detect(sample)
+    assert len(periods) > 0
+    assert 12 in periods
+
+
+def test_co2_weekly_online_acf_find_all_periods_window_size_256_window_func_blackman(
+    co2_weekly_generator,
+):
+    detector = OnlineACFPeriodicityDetector(window_size=256, window_func="blackman")
+    for sample in co2_weekly_generator:
+        periods = detector.detect(sample)
+    assert len(periods) > 0
+    assert 52 in periods
+
+
+def test_co2_monthly_online_acf_find_all_periods_window_size_128_window_func_blackman(
+    co2_monthly_generator,
+):
+    detector = OnlineACFPeriodicityDetector(window_size=128, window_func="blackman")
+    for sample in co2_monthly_generator:
+        periods = detector.detect(sample)
+    assert len(periods) > 0
+    assert 12 in periods

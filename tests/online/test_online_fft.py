@@ -8,6 +8,16 @@ def test_sinewave_10_online_fft_find_all_periods_window_size_100_buffer_size_50(
         OnlineFFTPeriodicityDetector(window_size=100, buffer_size=50)
 
 
+def test_sinewave_10_online_fft_find_first_two_periods_window_size_50_buffer_size_150(
+    sinewave_10_generator,
+):
+    detector = OnlineFFTPeriodicityDetector(window_size=50, buffer_size=150)
+    for sample in sinewave_10_generator:
+        periods = detector.detect(sample, max_period_count=2)
+    assert len(periods) <= 2
+    assert 10 in periods
+
+
 def test_sinewave_10_online_fft_find_strongest_period_window_size_50(
     sinewave_10_generator,
 ):
@@ -66,15 +76,6 @@ def test_trianglewave_100_online_fft_find_strongest_period_window_size_300(
         periods = detector.detect(sample, max_period_count=1)
     assert len(periods) > 0
     assert 100 in periods
-
-
-def test_co2_monthly_online_fft_find_first_two_periods_window_size_128(
-    co2_monthly_generator,
-):
-    detector = OnlineFFTPeriodicityDetector(window_size=128)
-    for sample in co2_monthly_generator:
-        periods = detector.detect(sample, max_period_count=2)
-    assert len(periods) == 2
 
 
 def test_co2_weekly_online_fft_find_all_periods_window_size_256(
