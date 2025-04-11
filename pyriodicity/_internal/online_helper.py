@@ -2,7 +2,7 @@ from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import detrend, get_window, stft
+from scipy.signal import detrend, get_window, ShortTimeFFT
 
 
 class OnlineHelper:
@@ -83,6 +83,11 @@ class OnlineHelper:
         self.rfft = np.fft.rfft(self.window_buffer)
         self.freq = np.fft.rfftfreq(self.window_size)
 
+        # Initialize Short Time FFT
+        self._stft = ShortTimeFFT.from_window(
+            win_param=window_func, fs=1.0, nperseg=self.window_size, noverlap=0
+        )
+
     def update(
         self,
         data: Union[np.floating, ArrayLike],
@@ -148,21 +153,17 @@ class OnlineHelper:
             # Recompute spectrum when the buffer is filled
             if self._buffer_index == 0:
                 # Prepare data for STFT
-                if self._detrend_func is not None:
-                    data_for_stft = detrend(self.buffer, type=self._detrend_func)
-                else:
-                    data_for_stft = self.buffer
-
-                # Compute STFT
-                _, _, Zxx = stft(
-                    data_for_stft,
-                    window=self.window,
-                    nperseg=self.window_size,
-                    noverlap=0,
+                stft_buffer = (
+                    self.buffer
+                    if self._detrend_func is None
+                    else detrend(self.buffer, type=self._detrend_func)
                 )
 
+                # Compute STFT
+                S = self._stft.stft(stft_buffer)
+
                 # Use the last column of the STFT as our new spectrum
-                self.rfft = Zxx[:, -1]
+                self.rfft = S[:, -1]
 
         match return_value:
             case "rfft":
