@@ -4,7 +4,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.signal import argrelmax, detrend, periodogram
 
-from pyriodicity.tools import acf, apply_window, power_threshold, to_1d_array
+from .._internal.utils import acf, apply_window, power_threshold, to_1d_array
 
 
 class Autoperiod:

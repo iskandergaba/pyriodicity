@@ -3,7 +3,7 @@ from typing import Literal, Optional, Union
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from pyriodicity.tools import OnlineHelper
+from .._internal.online_helper import OnlineHelper
 
 
 class OnlineFFTPeriodicityDetector:

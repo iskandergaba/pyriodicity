@@ -4,7 +4,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.signal import find_peaks
 
-from pyriodicity.tools import OnlineHelper
+from .._internal.online_helper import OnlineHelper
 
 
 class OnlineACFPeriodicityDetector:

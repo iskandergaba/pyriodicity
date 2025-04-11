@@ -14,7 +14,7 @@ from scipy.sparse import dia_matrix, eye
 from scipy.sparse.linalg import spsolve
 from scipy.special import binom, huber
 
-from pyriodicity.tools import to_1d_array
+from .._internal.utils import to_1d_array
 
 
 class RobustPeriod:
