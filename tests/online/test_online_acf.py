@@ -88,20 +88,20 @@ def test_co2_monthly_online_acf_find_all_periods_window_size_128(
     assert 12 in periods
 
 
-def test_co2_weekly_online_acf_find_all_periods_window_size_256_window_func_blackman(
+def test_co2_weekly_online_acf_find_all_periods_window_size_128_window_func_blackman(
     co2_weekly_generator,
 ):
-    detector = OnlineACFPeriodicityDetector(window_size=256, window_func="blackman")
+    detector = OnlineACFPeriodicityDetector(window_size=128, window_func="blackman")
     for sample in co2_weekly_generator:
         periods = detector.detect(sample)
     assert len(periods) > 0
     assert 52 in periods
 
 
-def test_co2_monthly_online_acf_find_all_periods_window_size_128_window_func_blackman(
+def test_co2_monthly_online_acf_find_all_periods_window_size_64_window_func_blackman(
     co2_monthly_generator,
 ):
-    detector = OnlineACFPeriodicityDetector(window_size=128, window_func="blackman")
+    detector = OnlineACFPeriodicityDetector(window_size=64, window_func="blackman")
     for sample in co2_monthly_generator:
         periods = detector.detect(sample)
     assert len(periods) > 0
