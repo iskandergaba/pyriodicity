@@ -120,49 +120,55 @@ class OnlineHelper:
             If return_value is not one of {'rfft', 'acf'}.
         """
 
-        for sample in np.asarray(data).flat:
-            # Update history buffer
-            self.buffer = np.roll(self.buffer, -1)
-            self.buffer[-1] = sample
+        data_array = np.asarray(data).flat
+        n_samples = len(data_array)
 
-            # Update active buffer and spectrum using twiddle factors
-            old_sample = self.window_buffer[0]
-            self.window_buffer[0] = sample
-            self.window_buffer = np.roll(self.window_buffer, -1)
+        for i in range(0, n_samples, self.window_size):
+            batch = data_array[i : i + self.window_size]
+            batch_size = len(batch)
+
+            # Update history buffer
+            self.buffer = np.roll(self.buffer, -batch_size)
+            self.buffer[-batch_size:] = batch
+
+            # Get old samples and update window buffer
+            old_samples = self.window_buffer[:batch_size].copy()
+            self.window_buffer = np.roll(self.window_buffer, -batch_size)
+            self.window_buffer[-batch_size:] = batch
 
             # Detrend if needed
             if self._detrend_func is not None:
                 detrended_buffer = detrend(
-                    np.insert(self.window_buffer, 0, old_sample),
+                    np.insert(self.window_buffer, 0, old_samples),
                     type=self._detrend_func,
                 )
-                old_sample = detrended_buffer[0]
-                sample = detrended_buffer[-1]
+                old_samples = detrended_buffer[:batch_size]
+                batch = detrended_buffer[-batch_size:]
 
-            # Apply window function
-            old_sample *= self.window[0]
-            self.window = np.roll(self.window, -1)
-            sample *= self.window[0]
+            # Apply window
+            old_samples *= self.window[:batch_size]
+            self.window = np.roll(self.window, -batch_size)
+            batch *= self.window[-batch_size:]
 
-            # Update spectrum using twiddle factors
-            self.rfft = self._twiddle * (self.rfft + sample - old_sample)
+            # Update spectrum using twiddle factors for the batch
+            shift_indices = np.arange(batch_size)[:, None] * np.arange(
+                self.window_size // 2 + 1
+            )
+            shifts = np.exp(-2j * np.pi * shift_indices / self.window_size)
+            delta_spectrum = (batch - old_samples) @ shifts
+            self.rfft = self._twiddle**batch_size * (self.rfft + delta_spectrum)
 
-            # Increment counter
-            self._buffer_index = (self._buffer_index + 1) % self.buffer_size
+            # Update buffer index
+            self._buffer_index = (self._buffer_index + batch_size) % self.buffer_size
 
-            # Recompute spectrum when the buffer is filled
+            # Recompute spectrum when buffer is filled
             if self._buffer_index == 0:
-                # Prepare data for STFT
                 stft_buffer = (
                     self.buffer
                     if self._detrend_func is None
                     else detrend(self.buffer, type=self._detrend_func)
                 )
-
-                # Compute STFT
                 S = self._stft.stft(stft_buffer)
-
-                # Use the last column of the STFT as our new spectrum
                 self.rfft = S[:, -1]
 
         match return_value:
