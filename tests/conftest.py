@@ -22,18 +22,33 @@ def sinewave_100():
 
 
 @pytest.fixture
-def sinewave_10_generator() -> Generator[float, None, None]:
+def sinewave_10_stream() -> Generator[float, None, None]:
     return (sample for sample in sinewave(1000, 10, 1))
 
 
 @pytest.fixture
-def sinewave_50_generator() -> Generator[float, None, None]:
+def sinewave_50_stream() -> Generator[float, None, None]:
     return (sample for sample in sinewave(1000, 50, 1))
 
 
 @pytest.fixture
-def sinewave_100_generator() -> Generator[float, None, None]:
+def sinewave_100_stream() -> Generator[float, None, None]:
     return (sample for sample in sinewave(1000, 100, 1))
+
+
+@pytest.fixture
+def sinewave_10_batch_size_100_generator() -> Generator[float, None, None]:
+    return data_generator(sinewave(1000, 10, 1), batch_size=100)
+
+
+@pytest.fixture
+def sinewave_50_batch_size_100_generator() -> Generator[float, None, None]:
+    return data_generator(sinewave(1000, 50, 1), batch_size=100)
+
+
+@pytest.fixture
+def sinewave_100_batch_size_100_generator() -> Generator[float, None, None]:
+    return data_generator(sinewave(1000, 100, 1), batch_size=100)
 
 
 @pytest.fixture(scope="module")
@@ -52,18 +67,33 @@ def trianglewave_100():
 
 
 @pytest.fixture
-def trianglewave_10_generator() -> Generator[float, None, None]:
+def trianglewave_10_stream() -> Generator[float, None, None]:
     return (sample for sample in trianglewave(1000, 10, 1))
 
 
 @pytest.fixture
-def trianglewave_50_generator() -> Generator[float, None, None]:
+def trianglewave_50_stream() -> Generator[float, None, None]:
     return (sample for sample in trianglewave(1000, 50, 1))
 
 
 @pytest.fixture
-def trianglewave_100_generator() -> Generator[float, None, None]:
+def trianglewave_100_stream() -> Generator[float, None, None]:
     return (sample for sample in trianglewave(1000, 100, 1))
+
+
+@pytest.fixture
+def trianglewave_10_batch_size_100_generator() -> Generator[float, None, None]:
+    return data_generator(trianglewave(1000, 10, 1), batch_size=100)
+
+
+@pytest.fixture
+def trianglewave_50_batch_size_100_generator() -> Generator[float, None, None]:
+    return data_generator(trianglewave(1000, 50, 1), batch_size=100)
+
+
+@pytest.fixture
+def trianglewave_100_batch_size_100_generator() -> Generator[float, None, None]:
+    return data_generator(trianglewave(1000, 100, 1), batch_size=100)
 
 
 @pytest.fixture(scope="module")
@@ -77,13 +107,23 @@ def co2_monthly():
 
 
 @pytest.fixture
-def co2_weekly_generator():
+def co2_weekly_stream():
     return (sample for sample in co2_data().values)
 
 
 @pytest.fixture
-def co2_monthly_generator():
+def co2_monthly_stream():
     return (sample for sample in co2_data().resample("ME").mean().values)
+
+
+@pytest.fixture
+def co2_weekly_batch_size_100_generator():
+    return data_generator(co2_data().values, batch_size=100)
+
+
+@pytest.fixture
+def co2_monthly_batch_size_10_generator():
+    return data_generator(co2_data().resample("ME").mean().values, batch_size=10)
 
 
 def sinewave(n, period, amp):
@@ -100,3 +140,8 @@ def trianglewave(n, period, amp):
 
 def co2_data():
     return co2.load().data.ffill()
+
+
+def data_generator(data, batch_size):
+    for i in range(0, len(data), batch_size):
+        yield from data[i : i + batch_size]
