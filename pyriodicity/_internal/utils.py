@@ -7,6 +7,25 @@ from scipy.signal import get_window, periodogram
 
 @staticmethod
 def to_1d_array(x: ArrayLike) -> NDArray:
+    """
+    Convert input to a contiguous 1-dimensional numpy array.
+
+    Parameters
+    ----------
+    x : array_like
+        Input array to be converted. Must be squeezable to 1-d.
+
+    Returns
+    -------
+    NDArray
+        A contiguous 1-dimensional numpy array of type double.
+
+    Raises
+    ------
+    ValueError
+        If the input cannot be squeezed to 1-d.
+    """
+
     x = np.ascontiguousarray(np.squeeze(np.asarray(x)), dtype=np.double)
     if x.ndim != 1:
         raise ValueError("x must be a 1-dimensional array")
@@ -15,12 +34,51 @@ def to_1d_array(x: ArrayLike) -> NDArray:
 
 @staticmethod
 def apply_window(x: ArrayLike, window_func: Union[str, float, tuple]) -> NDArray:
+    """
+    Apply a window function to the input array.
+
+    Parameters
+    ----------
+    x : array_like
+        Input array. Must be squeezable to 1-d.
+    window_func : float, str, tuple
+        Window function to apply. See ``scipy.signal.get_window`` for accepted formats
+        of the ``window`` parameter.
+
+    Returns
+    -------
+    NDArray
+        Input array with the window function applied.
+
+    See Also
+    --------
+    scipy.signal.get_window
+        Get a window function.
+    """
+
     x = to_1d_array(x)
     return x * get_window(window=window_func, Nx=len(x))
 
 
 @staticmethod
 def acf(x: ArrayLike) -> NDArray:
+    """
+    Compute the autocorrelation function of a signal.
+
+    Uses FFT to compute the autocorrelation efficiently.
+
+    Parameters
+    ----------
+    x : array_like
+        Input array. Must be squeezable to 1-d.
+
+    Returns
+    -------
+    NDArray
+        The normalized autocorrelation function of the input.
+        Length is equal to the input length.
+    """
+
     x = to_1d_array(x)
     n = len(x)
     fft = np.fft.fft(x, n=n * 2)
@@ -53,25 +111,23 @@ def power_threshold(
         It determines the cutoff point in the sorted list of the maximum
         power values from the periodograms of the permuted data.
         Value must be between 0 and 100 inclusive.
-    window_func : float, tuple, array_like default = 'boxcar'
-            Window function to be applied to the time series. Check
-            ``window`` parameter documentation for ``scipy.signal.get_window``
-            function for more information on the accepted formats of this
-            parameter.
+    window_func : float, str, tuple, optional, default = 'boxcar'
+        Window function to apply. See ``scipy.signal.get_window`` for accepted formats
+        of the ``window`` parameter.
     detrend_func : {'constant', 'linear'}, optional, default = 'linear'
-        The kind of detrending to be applied on the signal. If None, no detrending
-        is applied.
+        The kind of detrending to apply. If None, no detrending is applied.
+
+    Returns
+    -------
+    numpy.floating
+        Power threshold of the target data.
 
     See Also
     --------
     scipy.signal.periodogram
         Estimate power spectral density using a periodogram.
-
-    Returns
-    -------
-    float
-        Power threshold of the target data.
     """
+
     max_powers = []
     while len(max_powers) < k:
         _, pxx = periodogram(

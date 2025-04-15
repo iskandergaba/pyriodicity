@@ -4,7 +4,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.signal import detrend
 
-from pyriodicity.tools import apply_window, to_1d_array
+from .._internal.utils import apply_window, to_1d_array
 
 
 class FFTPeriodicityDetector:

@@ -4,7 +4,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.signal import detrend, find_peaks
 
-from pyriodicity.tools import acf, apply_window, to_1d_array
+from .._internal.utils import acf, apply_window, to_1d_array
 
 
 class ACFPeriodicityDetector:

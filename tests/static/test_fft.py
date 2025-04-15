@@ -91,7 +91,7 @@ def test_co2_monthly_fft_find_all_periods(co2_monthly):
     assert len(periods) > 0
 
 
-def test_co2_monthly_fft_find_first_two_periods(co2_monthly):
+def test_co2_monthly_fft_find_two_periods(co2_monthly):
     data = co2_monthly
     periods = FFTPeriodicityDetector.detect(data, max_period_count=2)
     assert len(periods) == 2
