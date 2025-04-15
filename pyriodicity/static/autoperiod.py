@@ -2,7 +2,7 @@ from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import argrelmax, detrend, periodogram
+from scipy.signal import detrend, find_peaks, periodogram
 
 from .._internal.utils import acf, apply_window, power_threshold, to_1d_array
 
@@ -241,7 +241,7 @@ class Autoperiod:
         return np.array(
             list(
                 {
-                    r[0] + min(argrelmax(acf_arr[r])[0], key=lambda x: abs(x - h))
+                    r[0] + min(find_peaks(acf_arr[r])[0], key=lambda x: abs(x - h))
                     for h, r in zip(valid_hints, valid_hint_ranges)
                 }
             )
