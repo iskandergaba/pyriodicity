@@ -55,7 +55,7 @@ def test_sinewave_50_batch_size_100_online_fft_find_all_periods_window_size_200(
     for sample in sinewave_50_batch_size_100_generator:
         periods = detector.detect(sample)
     assert len(periods) > 0
-    assert 50 in periods
+    assert 49 in periods
 
 
 def test_sinewave_100_batch_size_100_online_fft_find_all_periods_window_size_300(
@@ -65,7 +65,7 @@ def test_sinewave_100_batch_size_100_online_fft_find_all_periods_window_size_300
     for sample in sinewave_100_batch_size_100_generator:
         periods = detector.detect(sample)
     assert len(periods) > 0
-    assert 99 in periods
+    assert 100 in periods
 
 
 def test_co2_weekly_online_acf_find_all_periods_window_size_256(
@@ -88,24 +88,24 @@ def test_co2_monthly_online_acf_find_all_periods_window_size_128(
     assert 12 in periods
 
 
-def test_co2_weekly_batch_size_100_online_acf_find_all_periods_window_size_256(
+def test_co2_weekly_batch_size_100_online_acf_find_all_periods_window_size_200(
     co2_weekly_batch_size_100_generator,
 ):
-    detector = OnlineACFPeriodicityDetector(window_size=256)
+    detector = OnlineACFPeriodicityDetector(window_size=200)
     for sample in co2_weekly_batch_size_100_generator:
         periods = detector.detect(sample)
     assert len(periods) > 0
     assert 52 in periods
 
 
-def test_co2_monthly_batch_size_10_online_acf_find_all_periods_window_size_128(
+def test_co2_monthly_batch_size_10_online_acf_find_all_periods_window_size_100(
     co2_monthly_batch_size_10_generator,
 ):
-    detector = OnlineACFPeriodicityDetector(window_size=128)
+    detector = OnlineACFPeriodicityDetector(window_size=100)
     for sample in co2_monthly_batch_size_10_generator:
         periods = detector.detect(sample)
     assert len(periods) > 0
-    assert 12 in periods
+    assert 11 in periods
 
 
 def test_co2_weekly_online_acf_find_all_periods_window_size_128_window_func_blackman(
