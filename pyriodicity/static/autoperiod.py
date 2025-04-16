@@ -237,12 +237,16 @@ class Autoperiod:
             for h in valid_hints
         ]
 
+        # Find peaks associated with each valid hint range
+        peaks = [find_peaks(acf_arr[r]) for r in valid_hint_ranges]
+
         # Return the closest ACF peak to each valid period hint
         return np.array(
             list(
                 {
-                    r[0] + min(find_peaks(acf_arr[r])[0], key=lambda x: abs(x - h))
-                    for h, r in zip(valid_hints, valid_hint_ranges)
+                    r[0] + min(p[0], key=lambda x: abs(x - h))
+                    for h, r, p in zip(valid_hints, valid_hint_ranges, peaks)
+                    if len(p[0]) > 0
                 }
             )
         )
