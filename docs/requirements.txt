@@ -76,7 +76,7 @@ requests==2.32.3
     # via sphinx
 roman-numerals-py==3.1.0 ; python_full_version >= '3.11'
     # via sphinx
-ruff==0.11.5
+ruff==0.11.6
 scipy==1.15.2
     # via
     #   pyriodicity
