@@ -2,7 +2,7 @@ from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import argrelmax, butter, detrend, periodogram, sosfiltfilt
+from scipy.signal import butter, detrend, find_peaks, periodogram, sosfiltfilt
 
 from .._internal.utils import acf, apply_window, power_threshold, to_1d_array
 
@@ -199,7 +199,7 @@ class CFDAutoperiod:
 
         # Return the closest ACF peak to each valid period hint
         acf_arr = acf(x)
-        peaks = [argrelmax(acf_arr[r])[0] for r in valid_hint_ranges]
+        peaks = [find_peaks(acf_arr[r])[0] for r in valid_hint_ranges]
         return np.array(
             [
                 r[0] + min(p, key=lambda x: abs(x - h))

@@ -2,7 +2,7 @@ from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import argrelmax, detrend, periodogram
+from scipy.signal import detrend, find_peaks, periodogram
 
 from .._internal.utils import acf, apply_window, power_threshold, to_1d_array
 
@@ -237,12 +237,16 @@ class Autoperiod:
             for h in valid_hints
         ]
 
+        # Find peaks associated with each valid hint range
+        peaks = [find_peaks(acf_arr[r])[0] for r in valid_hint_ranges]
+
         # Return the closest ACF peak to each valid period hint
         return np.array(
             list(
                 {
-                    r[0] + min(argrelmax(acf_arr[r])[0], key=lambda x: abs(x - h))
-                    for h, r in zip(valid_hints, valid_hint_ranges)
+                    r[0] + min(p, key=lambda x: abs(x - h))
+                    for h, r, p in zip(valid_hints, valid_hint_ranges, peaks)
+                    if len(p) > 0
                 }
             )
         )

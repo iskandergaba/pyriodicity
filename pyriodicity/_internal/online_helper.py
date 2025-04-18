@@ -2,7 +2,7 @@ from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import detrend, get_window, ShortTimeFFT
+from scipy.signal import ShortTimeFFT, detrend, get_window
 
 
 class OnlineHelper:
@@ -36,6 +36,12 @@ class OnlineHelper:
     rfft : NDArray
         Current FFT spectrum of the windowed signal.
 
+    Notes
+    -----
+    Results may differ slightly between stream and batch processing due to
+    floating-point arithmetic and detrending behavior. These differences are
+    more pronounced when detrending is enabled.
+
     See Also
     --------
     scipy.signal.get_window
@@ -44,7 +50,7 @@ class OnlineHelper:
     Raises
     ------
     ValueError
-        If history_size is less than window_size.
+        If ``buffer_size`` is less than ``window_size``.
     """
 
     def __init__(
@@ -59,7 +65,7 @@ class OnlineHelper:
         self.buffer_size = 2 * window_size if buffer_size is None else buffer_size
         if self.buffer_size < window_size:
             raise ValueError(
-                f"History size ({self.buffer_size}) must be at least "
+                f"Buffer size ({self.buffer_size}) must be at least "
                 f"equal to window size ({window_size})"
             )
 
@@ -117,17 +123,18 @@ class OnlineHelper:
         Raises
         ------
         ValueError
-            If return_value is not one of {'rfft', 'acf'}.
+            If ``return_value`` is not one of {'rfft', 'acf'}.
         """
 
+        i = 0
         data_array = np.asarray(data).flat
-        n_samples = len(data_array)
-
-        for i in range(0, n_samples, self.window_size):
-            batch = data_array[i : i + self.window_size]
+        while i < len(data_array):
+            # Retrieve batch
+            step = min(self.window_size, self.buffer_size - self._buffer_index)
+            batch = data_array[i : i + step]
             batch_size = len(batch)
 
-            # Update history buffer
+            # Update buffer
             self.buffer = np.roll(self.buffer, -batch_size)
             self.buffer[-batch_size:] = batch
 
@@ -170,6 +177,9 @@ class OnlineHelper:
                 )
                 S = self._stft.stft(stft_buffer)
                 self.rfft = S[:, -1]
+
+            # Increment data index
+            i += step
 
         match return_value:
             case "rfft":

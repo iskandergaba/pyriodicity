@@ -21,17 +21,17 @@ def sinewave_100():
 
 @pytest.fixture
 def sinewave_10_stream():
-    return (sample for sample in sinewave(1000, 10, 1))
+    return data_generator(sinewave(1000, 10, 1), batch_size=1)
 
 
 @pytest.fixture
 def sinewave_50_stream():
-    return (sample for sample in sinewave(1000, 50, 1))
+    return data_generator(sinewave(1000, 50, 1), batch_size=1)
 
 
 @pytest.fixture
 def sinewave_100_stream():
-    return (sample for sample in sinewave(1000, 100, 1))
+    return data_generator(sinewave(1000, 100, 1), batch_size=1)
 
 
 @pytest.fixture
@@ -66,17 +66,17 @@ def trianglewave_100():
 
 @pytest.fixture
 def trianglewave_10_stream():
-    return (sample for sample in trianglewave(1000, 10, 1))
+    return data_generator(trianglewave(1000, 10, 1), batch_size=1)
 
 
 @pytest.fixture
 def trianglewave_50_stream():
-    return (sample for sample in trianglewave(1000, 50, 1))
+    return data_generator(trianglewave(1000, 50, 1), batch_size=1)
 
 
 @pytest.fixture
 def trianglewave_100_stream():
-    return (sample for sample in trianglewave(1000, 100, 1))
+    return data_generator(trianglewave(1000, 100, 1), batch_size=1)
 
 
 @pytest.fixture
@@ -106,12 +106,12 @@ def co2_monthly():
 
 @pytest.fixture
 def co2_weekly_stream():
-    return (sample for sample in co2_data().values)
+    return data_generator(co2_data().values, batch_size=1)
 
 
 @pytest.fixture
 def co2_monthly_stream():
-    return (sample for sample in co2_data().resample("ME").mean().values)
+    return data_generator(co2_data().resample("ME").mean().values, batch_size=1)
 
 
 @pytest.fixture
@@ -142,4 +142,4 @@ def co2_data():
 
 def data_generator(data, batch_size):
     for i in range(0, len(data), batch_size):
-        yield from data[i : i + batch_size]
+        yield data[i : i + batch_size].flatten()
