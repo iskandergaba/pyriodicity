@@ -7,20 +7,12 @@ Pyriodicity
 
 |PyPI - Python Version| |GitHub License| |Codecov| |Docs| |CI Build|
 
-Pyriodicity provides an intuitive and efficient Python implementation of periodicity length detection methods in univariate signals.
+Pyriodicity provides an intuitive and efficient Python implementation of periodicity length detection methods in univariate signals. You can check the supported detection methods in the :doc:`api`.
 
 .. raw:: html
 
    </div>
 
-Supported Algorithms
-~~~~~~~~~~~~~~~~~~~~
-
-- `Autocorrelation Function (ACF) <https://otexts.com/fpp3/acf.html>`__
-- `Autoperiod <https://doi.org/10.1137/1.9781611972757.40>`__
-- `CFD-Autoperiod <https://doi.org/10.1007/978-3-030-39098-3_4>`__
-- `Fast Fourier Transform (FFT) <https://otexts.com/fpp3/useful-predictors.html#fourier-series>`__
-- `RobustPeriod <https://doi.org/10.1145/3448016.3452779>`__
 
 Installation
 ~~~~~~~~~~~~

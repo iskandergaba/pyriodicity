@@ -9,9 +9,9 @@ API Reference
    :nosignatures:
 
    ~ACFPeriodicityDetector
+   ~FFTPeriodicityDetector
    ~Autoperiod
    ~CFDAutoperiod
-   ~FFTPeriodicityDetector
+   ~RobustPeriod
    ~OnlineACFPeriodicityDetector
    ~OnlineFFTPeriodicityDetector
-   ~RobustPeriod

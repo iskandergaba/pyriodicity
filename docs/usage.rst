@@ -17,8 +17,8 @@ Use ``Autoperiod`` to find the list of periods based in this data (if any).
    >>> Autoperiod.detect(data)
    array([52])
 
-The detected periodicity length is 52 which suggests a strong yearly
-seasonality given that the data has a weekly frequency.
+The detected periodicity length is 52 which suggests a strong yearly seasonality given that the data
+has a weekly frequency.
 
 To confirm this, we run the ``Autoperiod`` again on the same data resampled to a monthly frequency.
 
@@ -32,7 +32,21 @@ To confirm this, we run the ``Autoperiod`` again on the same data resampled to a
 As expected, the detected periodicity length for the monthly frequency is 12, which confirms
 the strong yearly seasonality of the data.
 
-You can use other estimation algorithms like ``CFDAutoperiod`` variant of ``Autoperiod``,
-``ACFPeriodicityDetector``, or ``FFTPeriodicityDetector`` and compare results and performance.
-All the supported estimation algorithms can be used in the same manner as in the example above
-with different optional parameters. Check the :doc:`api` for more details.
+We can also use online detection methods for data streams as follows.
+
+.. code:: python
+
+   >>> data_stream = (sample for sample in data.values)
+   >>> detector = OnlineACFPeriodicityDetector(window_size=128)
+   >>> for sample in data_stream:
+   ...   periods = detector.detect(sample)
+   >>> 12 in periods
+   True
+
+As expected, the periodicity length of 12, corresponding to a yearly seasonality, was detected.
+
+Note that online detection methods accept data samples of any length so that it is suitable for data stream
+updates (i.e., single point updates), batch updates, or any arbitrary mixture of the two.
+
+All the supported periodicity detection methods can be used in the same manner as in the examples
+above with different optional parameters. Check the :doc:`api` for more details.

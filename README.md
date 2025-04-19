@@ -10,12 +10,7 @@
 </div>
 
 ## About Pyriodicity
-Pyriodicity provides an intuitive and efficient Python implementation of periodicity length detection methods in univariate signals. Pyriodicity supports the following detection methods:
-- [Autocorrelation Function (ACF)](https://otexts.com/fpp3/acf.html)
-- [Autoperiod](https://doi.org/10.1137/1.9781611972757.40)
-- [CFD-Autoperiod](https://doi.org/10.1007/978-3-030-39098-3_4)
-- [Fast Fourier Transform (FFT)](https://otexts.com/fpp3/useful-predictors.html#fourier-series)
-- [RobustPeriod](https://doi.org/10.1145/3448016.3452779)
+Pyriodicity provides an intuitive and efficient Python implementation of periodicity length detection methods in univariate signals. You can check the supported detection methods in the [API Reference](https://pyriodicity.readthedocs.io/en/stable/api.html) page.
 
 ## Installation
 To install ``pyriodicity``, simply run:
@@ -38,7 +33,7 @@ For this example, start by loading Mauna Loa Weekly Atmospheric CO2 Data from [`
 >>> data = data.resample("ME").mean().ffill()
 ```
 
-Use `Autoperiod` to find the list of periods based in this data (if any).
+Use `Autoperiod` to find the list of periodicity lengths in this data, if any.
 ```python
 >>> from pyriodicity import Autoperiod
 >>> Autoperiod.detect(data)
@@ -47,7 +42,18 @@ array([12])
 
 The detected periodicity length is 12 which suggests a strong yearly seasonality given that the data has a monthly frequency.
 
-All the supported estimation algorithms can be used in the same manner as in the example above with different optional parameters. Check the [API Reference](https://pyriodicity.readthedocs.io/en/stable/api.html) for more details.
+We can also use online detection methods for data streams as follows.
+```python
+>>> from pyriodicity import OnlineACFPeriodicityDetector
+>>> data_stream = (sample for sample in data.values)
+>>> detector = OnlineACFPeriodicityDetector(window_size=128)
+>>> for sample in data_stream:
+...   periods = detector.detect(sample)
+>>> 12 in periods
+True
+```
+
+All the supported periodicity detection methods can be used in the same manner as in the examples above with different optional parameters. Check the [API Reference](https://pyriodicity.readthedocs.io/en/stable/api.html) for more details.
 
 ## References
 - [1] Hyndman, R.J., & Athanasopoulos, G. (2021) Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia. [OTexts.com/fpp3](https://otexts.com/fpp3). Accessed on 09-15-2024.
