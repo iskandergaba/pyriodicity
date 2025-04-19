@@ -46,7 +46,7 @@ numpy==2.2.4
     #   scipy
     #   statsmodels
 numpydoc==1.8.0
-packaging==24.2
+packaging==25.0
     # via
     #   pytest
     #   sphinx
