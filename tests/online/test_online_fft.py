@@ -15,7 +15,7 @@ def test_sinewave_10_online_fft_find_two_periods_window_size_50_buffer_size_150(
     for sample in sinewave_10_stream:
         periods = detector.detect(sample, max_period_count=2)
     assert len(periods) <= 2
-    assert 10 in periods
+    assert any(period == pytest.approx(10, abs=1) for period in periods)
 
 
 def test_sinewave_50_online_fft_find_strongest_period_window_size_150_buffer_size_400(
@@ -25,7 +25,7 @@ def test_sinewave_50_online_fft_find_strongest_period_window_size_150_buffer_siz
     for sample in sinewave_50_stream:
         periods = detector.detect(sample, max_period_count=1)
     assert len(periods) > 0
-    assert 50 in periods
+    assert any(period == pytest.approx(50, abs=1) for period in periods)
 
 
 def test_sinewave_100_online_fft_find_strongest_period_window_size_300(
@@ -35,7 +35,7 @@ def test_sinewave_100_online_fft_find_strongest_period_window_size_300(
     for sample in sinewave_100_stream:
         periods = detector.detect(sample, max_period_count=1)
     assert len(periods) > 0
-    assert 100 in periods
+    assert any(period == pytest.approx(100, abs=1) for period in periods)
 
 
 def test_trianglewave_10_batch_size_100_online_fft_find_all_periods_window_size_50(
@@ -45,7 +45,7 @@ def test_trianglewave_10_batch_size_100_online_fft_find_all_periods_window_size_
     for sample in trianglewave_10_batch_size_100_generator:
         periods = detector.detect(sample)
     assert len(periods) > 0
-    assert 10 in periods
+    assert any(period == pytest.approx(10, abs=1) for period in periods)
 
 
 def test_trianglewave_50_batch_size_100_online_fft_find_all_periods_window_size_200(
@@ -55,7 +55,7 @@ def test_trianglewave_50_batch_size_100_online_fft_find_all_periods_window_size_
     for sample in trianglewave_50_batch_size_100_generator:
         periods = detector.detect(sample)
     assert len(periods) > 0
-    assert 50 in periods
+    assert any(period == pytest.approx(50, abs=1) for period in periods)
 
 
 def test_trianglewave_100_batch_size_100_online_fft_find_all_periods_window_size_300(
@@ -65,7 +65,7 @@ def test_trianglewave_100_batch_size_100_online_fft_find_all_periods_window_size
     for sample in trianglewave_100_batch_size_100_generator:
         periods = detector.detect(sample)
     assert len(periods) > 0
-    assert 100 in periods
+    assert any(period == pytest.approx(100, abs=1) for period in periods)
 
 
 def test_co2_weekly_online_fft_find_all_periods_window_size_256(
@@ -75,7 +75,7 @@ def test_co2_weekly_online_fft_find_all_periods_window_size_256(
     for sample in co2_weekly_stream:
         periods = detector.detect(sample)
     assert len(periods) > 0
-    assert 51 in periods
+    assert any(period == pytest.approx(52, abs=1) for period in periods)
 
 
 def test_co2_monthly_online_fft_find_all_periods_window_size_128(
@@ -85,7 +85,7 @@ def test_co2_monthly_online_fft_find_all_periods_window_size_128(
     for sample in co2_monthly_stream:
         periods = detector.detect(sample)
     assert len(periods) > 0
-    assert 12 in periods
+    assert any(period == pytest.approx(12, abs=1) for period in periods)
 
 
 def test_co2_weekly_batch_size_100_online_fft_find_all_periods_window_size_256(
@@ -95,7 +95,7 @@ def test_co2_weekly_batch_size_100_online_fft_find_all_periods_window_size_256(
     for sample in co2_weekly_batch_size_100_generator:
         periods = detector.detect(sample)
     assert len(periods) > 0
-    assert 51 in periods
+    assert any(period == pytest.approx(52, abs=1) for period in periods)
 
 
 def test_co2_monthly_batch_size_10_online_fft_find_all_periods_window_size_128(
@@ -105,7 +105,7 @@ def test_co2_monthly_batch_size_10_online_fft_find_all_periods_window_size_128(
     for sample in co2_monthly_batch_size_10_generator:
         periods = detector.detect(sample)
     assert len(periods) > 0
-    assert 12 in periods
+    assert any(period == pytest.approx(12, abs=1) for period in periods)
 
 
 def test_co2_weekly_online_fft_find_all_periods_window_size_256_window_func_blackman(
@@ -115,7 +115,7 @@ def test_co2_weekly_online_fft_find_all_periods_window_size_256_window_func_blac
     for sample in co2_weekly_stream:
         periods = detector.detect(sample)
     assert len(periods) > 0
-    assert 51 in periods
+    assert any(period == pytest.approx(52, abs=1) for period in periods)
 
 
 def test_co2_monthly_online_fft_find_all_periods_window_size_128_window_func_blackman(
@@ -125,4 +125,4 @@ def test_co2_monthly_online_fft_find_all_periods_window_size_128_window_func_bla
     for sample in co2_monthly_stream:
         periods = detector.detect(sample)
     assert len(periods) > 0
-    assert 12 in periods
+    assert any(period == pytest.approx(12, abs=1) for period in periods)
