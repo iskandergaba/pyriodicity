@@ -88,40 +88,40 @@ def test_co2_monthly_online_acf_find_all_periods_window_size_128(
     assert any(period == pytest.approx(12, abs=1) for period in periods)
 
 
-def test_co2_weekly_batch_size_100_online_acf_find_all_periods_window_size_200(
+def test_co2_weekly_batch_size_100_online_acf_find_all_periods_window_size_256(
     co2_weekly_batch_size_100_generator,
 ):
-    detector = OnlineACFPeriodicityDetector(window_size=200)
+    detector = OnlineACFPeriodicityDetector(window_size=256)
     for sample in co2_weekly_batch_size_100_generator:
         periods = detector.detect(sample)
     assert len(periods) > 0
     assert any(period == pytest.approx(52, abs=1) for period in periods)
 
 
-def test_co2_monthly_batch_size_10_online_acf_find_all_periods_window_size_100(
+def test_co2_monthly_batch_size_10_online_acf_find_all_periods_window_size_128(
     co2_monthly_batch_size_10_generator,
 ):
-    detector = OnlineACFPeriodicityDetector(window_size=100)
+    detector = OnlineACFPeriodicityDetector(window_size=128)
     for sample in co2_monthly_batch_size_10_generator:
         periods = detector.detect(sample)
     assert len(periods) > 0
     assert any(period == pytest.approx(12, abs=1) for period in periods)
 
 
-def test_co2_weekly_online_acf_find_all_periods_window_size_128_window_func_blackman(
+def test_co2_weekly_online_acf_find_all_periods_window_size_256_window_func_blackman(
     co2_weekly_stream,
 ):
-    detector = OnlineACFPeriodicityDetector(window_size=128, window_func="blackman")
+    detector = OnlineACFPeriodicityDetector(window_size=256, window_func="blackman")
     for sample in co2_weekly_stream:
         periods = detector.detect(sample)
     assert len(periods) > 0
     assert any(period == pytest.approx(52, abs=1) for period in periods)
 
 
-def test_co2_monthly_online_acf_find_all_periods_window_size_64_window_func_blackman(
+def test_co2_monthly_online_acf_find_all_periods_window_size_128_window_func_blackman(
     co2_monthly_stream,
 ):
-    detector = OnlineACFPeriodicityDetector(window_size=64, window_func="blackman")
+    detector = OnlineACFPeriodicityDetector(window_size=128, window_func="blackman")
     for sample in co2_monthly_stream:
         periods = detector.detect(sample)
     assert len(periods) > 0
