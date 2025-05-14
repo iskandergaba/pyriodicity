@@ -25,7 +25,7 @@ docutils==0.21.2
     # via
     #   pydata-sphinx-theme
     #   sphinx
-exceptiongroup==1.2.2 ; python_full_version < '3.11'
+exceptiongroup==1.3.0 ; python_full_version < '3.11'
     # via pytest
 idna==3.10
     # via requests
@@ -76,14 +76,14 @@ requests==2.32.3
     # via sphinx
 roman-numerals-py==3.1.0 ; python_full_version >= '3.11'
     # via sphinx
-ruff==0.11.8
-scipy==1.15.2
+ruff==0.11.9
+scipy==1.15.3
     # via
     #   pyriodicity
     #   statsmodels
 six==1.17.0
     # via python-dateutil
-snowballstemmer==2.2.0
+snowballstemmer==3.0.1
     # via sphinx
 soupsieve==2.7
     # via beautifulsoup4
@@ -119,6 +119,7 @@ tomli==2.2.1 ; python_full_version <= '3.11'
 typing-extensions==4.13.2
     # via
     #   beautifulsoup4
+    #   exceptiongroup
     #   pydata-sphinx-theme
 tzdata==2025.2
     # via pandas
