@@ -19,7 +19,7 @@ colorama==0.4.6 ; sys_platform == 'win32'
     # via
     #   pytest
     #   sphinx
-coverage==7.8.0
+coverage==7.8.2
     # via pytest-cov
 docutils==0.21.2
     # via
@@ -37,7 +37,7 @@ jinja2==3.1.6
     # via sphinx
 markupsafe==3.0.2
     # via jinja2
-numpy==2.2.5
+numpy==2.2.6
     # via
     #   pandas
     #   patsy
@@ -55,7 +55,7 @@ pandas==2.2.3
     # via statsmodels
 patsy==1.0.1
     # via statsmodels
-pluggy==1.5.0
+pluggy==1.6.0
     # via pytest
 pydata-sphinx-theme==0.16.1
 pygments==2.19.1
@@ -76,7 +76,7 @@ requests==2.32.3
     # via sphinx
 roman-numerals-py==3.1.0 ; python_full_version >= '3.11'
     # via sphinx
-ruff==0.11.9
+ruff==0.11.11
 scipy==1.15.3
     # via
     #   pyriodicity
