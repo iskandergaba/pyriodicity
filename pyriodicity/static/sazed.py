@@ -183,16 +183,18 @@ class SAZED:
         Parameters
         ----------
         data : array_like
-            Input data array.
-        window_func : str or float or tuple, optional
-            Window function to apply to the data. See scipy.signal.get_window for
-            details. Default is "boxcar".
-        detrend_func : {"linear", "constant"} or None, optional
-            Detrending function to apply to the data. If None, no detrending is
-            performed. Default is "linear".
-        method : {"optimal", "majority"}, optional
+            Data to be investigated. Must be squeezable to 1-d.
+        window_func : float, str, tuple, default = 'boxcar'
+            Window function to be applied to the time series. Check
+            ``window`` parameter documentation for ``scipy.signal.get_window``
+            function for more information on the accepted formats of this
+            parameter.
+        detrend_func : {'constant', 'linear'}, optional, default = 'linear'
+            The kind of detrending to be applied on the signal. If None, no detrending
+            is applied.
+        method : {'optimal', 'majority'}, default = 'optimal'
             The ensemble method to use. 'optimal' uses correlation-based period
-            selection, while 'majority' uses voting. Default is "optimal".
+            selection, while 'majority' uses voting.
 
         Returns
         -------
@@ -210,7 +212,7 @@ class SAZED:
         Raises
         ------
         ValueError
-            If method is not "optimal" or "majority".
+            If method is neither 'optimal' nor 'majority'.
         """
         if (
             np.any(np.isnan(data))
@@ -235,4 +237,4 @@ class SAZED:
         elif method == "majority":
             return SAZED._detect_majority(x)
         else:
-            raise ValueError('method must be either "optimal" or "majority"')
+            raise ValueError("method must be either 'optimal' or 'majority'")
