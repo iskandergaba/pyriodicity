@@ -121,21 +121,13 @@ class SAZED:
             SAZED._zed(acf_data),
         ]
 
-        # Filter None values and get periods > 2
-        valid_periods = [p for p in all_periods if p is not None and p > 2]
-
-        if not valid_periods:
-            return None
-
+        # Filter None values
+        valid_periods = [p for p in all_periods if p is not None]
         unique_periods = np.unique(valid_periods)
 
         # Compute certainty for each period
         certainties = []
         for period in unique_periods:
-            if period <= 2 or len(data) // period <= 3:
-                certainties.append(-1)
-                continue
-
             # Split data into segments of length period
             n_segments = len(data) // period
             segments = np.array(
@@ -147,7 +139,9 @@ class SAZED:
             certainties.append(np.min(corr_matrix))
 
         # Return period with highest certainty
-        return unique_periods[np.argmax(certainties)]
+        return (
+            None if len(unique_periods) == 0 else unique_periods[np.argmax(certainties)]
+        )
 
     @staticmethod
     def _detect_majority(data: NDArray) -> Optional[int]:
@@ -165,21 +159,16 @@ class SAZED:
             SAZED._zed(acf_data),
         ]
 
-        # Filter None values and get periods > 2
-        valid_periods = [p for p in all_periods if p is not None and p > 2]
-
-        if not valid_periods:
-            return None
-
-        # Count occurrences
+        # Filter None values
+        valid_periods = [p for p in all_periods if p is not None]
         unique_periods = np.unique(valid_periods)
-        period_counts = {p: valid_periods.count(p) for p in unique_periods}
 
-        # Get the period(s) with maximum count and take the largest
-        max_count = max(period_counts.values())
-        max_periods = [p for p, count in period_counts.items() if count == max_count]
+        # Find the period with maximum occurrences
+        counts = [valid_periods.count(p) for p in unique_periods]
+        max_count = max(counts) if counts else 0
+        max_periods = [p for p, c in zip(unique_periods, counts) if c == max_count]
 
-        return max(max_periods)
+        return None if len(max_periods) == 0 else max(max_periods)
 
     @staticmethod
     def detect(
