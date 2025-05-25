@@ -1,15 +1,3 @@
-"""
-SAZED (Spectral Autocorrelation Zero Ensemble Detector).
-
-Find the periods in a given signal or series using SAZED.
-
-References
-----------
-.. [1] Gaba, Iskandar. (2023) SazedR: A package for estimating the season length
-   of a seasonal time series.
-   https://github.com/cran/sazedR
-"""
-
 from typing import Literal, Optional, Union
 
 import numpy as np
@@ -26,18 +14,11 @@ class SAZED:
 
     Find the periods in a given signal or series using SAZED ensemble method [1]_.
 
-    See Also
-    --------
-    pyriodicity.FFTPeriodicityDetector
-        Fast Fourier Transform (FFT) based periodicity detector.
-    pyriodicity.ACFPeriodicityDetector
-        Autocorrelation Function (ACF) based periodicity detector.
-
     References
     ----------
-    .. [1] Gaba, Iskandar. (2023) SazedR: A package for estimating the season length
-       of a seasonal time series.
-       https://github.com/cran/sazedR
+    .. [1] Toller, M., Santos, T., & Kern, R. (2019). SAZED: parameter-free
+       domain-agnostic season length estimation in time series data. Data Mining
+       and Knowledge Discovery, 33(6), 1775-1798.
 
     Examples
     --------
@@ -194,16 +175,11 @@ class SAZED:
         unique_periods = np.unique(valid_periods)
         period_counts = {p: valid_periods.count(p) for p in unique_periods}
 
-        # Get the period(s) with maximum count
+        # Get the period(s) with maximum count and take the largest
         max_count = max(period_counts.values())
         max_periods = [p for p, count in period_counts.items() if count == max_count]
 
-        if len(max_periods) == 1:
-            # Clear winner
-            return max_periods[0]
-        else:
-            # Tie - take the largest period following R implementation
-            return max(max_periods)
+        return max(max_periods)
 
     @staticmethod
     def detect(
@@ -227,8 +203,7 @@ class SAZED:
             performed. Default is "linear".
         method : {"optimal", "majority"}, optional
             The ensemble method to use. 'optimal' uses correlation-based period
-            selection (equivalent to R's sazed()), while 'majority' uses voting
-            (equivalent to R's sazed.maj()). Default is "optimal".
+            selection, while 'majority' uses voting. Default is "optimal".
 
         Returns
         -------
@@ -257,7 +232,7 @@ class SAZED:
 
         x = to_1d_array(data)
 
-        if len(x) < 4 or np.var(x) == 0:
+        if np.var(x) == 0:
             return None
 
         # Data preprocessing
