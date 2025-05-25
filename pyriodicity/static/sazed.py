@@ -7,7 +7,7 @@ References
 ----------
 .. [1] Gaba, Iskandar. (2023) SazedR: A package for estimating the season length
    of a seasonal time series.
-   https://github.com/cran/sazedR. Accessed on 2025-05-25 14:15:54.
+   https://github.com/cran/sazedR
 """
 
 from typing import Literal, Optional, Union
@@ -37,7 +37,7 @@ class SAZED:
     ----------
     .. [1] Gaba, Iskandar. (2023) SazedR: A package for estimating the season length
        of a seasonal time series.
-       https://github.com/cran/sazedR. Accessed on 2025-05-25 14:15:54.
+       https://github.com/cran/sazedR
 
     Examples
     --------
@@ -53,12 +53,12 @@ class SAZED:
 
     >>> from pyriodicity import SAZED
     >>> SAZED.detect(data)
-    array([12, 24, 36])
+    12
 
-    You can also get just the most prominent period by setting max_period_count to 1.
+    You can also use the majority voting method:
 
-    >>> SAZED.detect(data, max_period_count=1)
-    array([12])
+    >>> SAZED.detect(data, method="majority")
+    12
     """
 
     @staticmethod
@@ -125,7 +125,7 @@ class SAZED:
         return round(period * 2)  # Multiply by 2 to get full period
 
     @staticmethod
-    def _detect_optimal(data: NDArray) -> NDArray:
+    def _detect_optimal(data: NDArray) -> Optional[int]:
         """Optimal SAZED detection method."""
         # Compute ACF once
         acf_data = acf(data)
@@ -144,7 +144,7 @@ class SAZED:
         valid_periods = [p for p in all_periods if p is not None and p > 2]
 
         if not valid_periods:
-            return np.array([], dtype=int)
+            return None
 
         unique_periods = np.unique(valid_periods)
 
@@ -166,10 +166,10 @@ class SAZED:
             certainties.append(np.min(corr_matrix))
 
         # Return period with highest certainty
-        return np.array([unique_periods[np.argmax(certainties)]])
+        return unique_periods[np.argmax(certainties)]
 
     @staticmethod
-    def _detect_majority(data: NDArray) -> NDArray:
+    def _detect_majority(data: NDArray) -> Optional[int]:
         """Majority voting SAZED detection method."""
         # Compute ACF once
         acf_data = acf(data)
@@ -188,29 +188,32 @@ class SAZED:
         valid_periods = [p for p in all_periods if p is not None and p > 2]
 
         if not valid_periods:
-            return np.array([], dtype=int)
+            return None
 
         # Count occurrences
         unique_periods = np.unique(valid_periods)
         period_counts = {p: valid_periods.count(p) for p in unique_periods}
 
-        # Sort by count (descending) then by period value (descending for ties)
-        sorted_periods = sorted(
-            period_counts.keys(), key=lambda p: (-period_counts[p], -p)
-        )
+        # Get the period(s) with maximum count
+        max_count = max(period_counts.values())
+        max_periods = [p for p, count in period_counts.items() if count == max_count]
 
-        return np.array(sorted_periods)
+        if len(max_periods) == 1:
+            # Clear winner
+            return max_periods[0]
+        else:
+            # Tie - take the largest period following R implementation
+            return max(max_periods)
 
     @staticmethod
     def detect(
         data: ArrayLike,
         window_func: Union[str, float, tuple] = "boxcar",
         detrend_func: Optional[Literal["constant", "linear"]] = "linear",
-        max_period_count: Optional[int] = None,
         method: Literal["optimal", "majority"] = "optimal",
-    ) -> NDArray:
+    ) -> Optional[int]:
         """
-        Detect periods in the input data using the SAZED ensemble method.
+        Detect a period in the input data using the SAZED ensemble method.
 
         Parameters
         ----------
@@ -222,9 +225,6 @@ class SAZED:
         detrend_func : {"linear", "constant"} or None, optional
             Detrending function to apply to the data. If None, no detrending is
             performed. Default is "linear".
-        max_period_count : int, optional
-            Maximum number of periods to return. If None, all detected periods are
-            returned. Default is None.
         method : {"optimal", "majority"}, optional
             The ensemble method to use. 'optimal' uses correlation-based period
             selection (equivalent to R's sazed()), while 'majority' uses voting
@@ -232,10 +232,9 @@ class SAZED:
 
         Returns
         -------
-        numpy.ndarray
-            Array of detected periods sorted by their strength in descending
-            order. Each period represents the length (in samples) of a detected
-            periodicity. Returns an empty array if no valid periods are found.
+        int or None
+            The detected period length in samples, or None if no valid period
+            is found.
 
         See Also
         --------
@@ -254,12 +253,12 @@ class SAZED:
             or np.any(np.isinf(data))
             or np.any(np.iscomplex(data))
         ):
-            return np.array([], dtype=int)
+            return None
 
         x = to_1d_array(data)
 
         if len(x) < 4 or np.var(x) == 0:
-            return np.array([], dtype=int)
+            return None
 
         # Data preprocessing
         x = x if detrend_func is None else detrend(x, type=detrend_func)
@@ -268,13 +267,8 @@ class SAZED:
 
         # Choose detection method
         if method == "optimal":
-            periods = SAZED._detect_optimal(x)
+            return SAZED._detect_optimal(x)
         elif method == "majority":
-            periods = SAZED._detect_majority(x)
+            return SAZED._detect_majority(x)
         else:
             raise ValueError('method must be either "optimal" or "majority"')
-
-        if max_period_count is not None:
-            periods = periods[:max_period_count]
-
-        return periods
