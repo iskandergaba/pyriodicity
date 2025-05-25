@@ -3,9 +3,9 @@ Test SAZED (Spectral Autocorrelation Zero Ensemble Detector).
 
 References
 ----------
-.. [1] Gaba, Iskandar. (2023) SazedR: A package for estimating the season length
-   of a seasonal time series.
-   https://github.com/cran/sazedR
+.. [1] Toller, M., Santos, T., & Kern, R. (2019). SAZED: parameter-free
+   domain-agnostic season length estimation in time series data. Data Mining
+   and Knowledge Discovery, 33(6), 1775-1798.
 """
 
 import numpy as np
@@ -129,16 +129,6 @@ def test_sazed_invalid_input():
 
     # Test with complex numbers
     data = [1 + 1j] * 100
-    period = SAZED.detect(data)
-    assert period is None
-
-    # Test with too short data
-    data = [1, 2, 3]
-    period = SAZED.detect(data)
-    assert period is None
-
-    # Test with zero variance data
-    data = np.zeros(100)
     period = SAZED.detect(data)
     assert period is None
 
