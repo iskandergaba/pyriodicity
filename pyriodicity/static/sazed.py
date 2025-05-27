@@ -3,7 +3,7 @@ from typing import Literal, Optional, Union
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.signal import detrend
-from scipy.stats import gaussian_kde
+from scipy.stats import gaussian_kde, zscore
 
 from .._internal.utils import acf, apply_window, to_1d_array
 
@@ -229,7 +229,7 @@ class SAZED:
         # Data preprocessing
         x = x if detrend_func is None else detrend(x, type=detrend_func)
         x = apply_window(x, window_func)
-        x = (x - np.mean(x)) / np.std(x)  # z-normalize
+        x = zscore(x)
 
         # Choose detection method
         if method == "optimal":
