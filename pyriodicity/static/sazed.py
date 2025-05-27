@@ -212,23 +212,25 @@ class SAZED:
         Raises
         ------
         ValueError
-            If method is neither 'optimal' nor 'majority'.
+            - If input data contains NaN or Inf values
+            - If method is neither 'optimal' nor 'majority'
         """
-        if (
-            np.any(np.isnan(data))
-            or np.any(np.isinf(data))
-            or np.any(np.iscomplex(data))
-        ):
-            return None
+
+        # Validate input data
+        if np.any(np.isnan(data)) or np.any(np.isinf(data)):
+            raise ValueError("Input data contains NaN or Inf values.")
 
         x = to_1d_array(data)
 
+        # Return None if data is constant
         if np.var(x) == 0:
             return None
 
-        # Data preprocessing
+        # Detrend data
         x = x if detrend_func is None else detrend(x, type=detrend_func)
+        # Apply window on data
         x = apply_window(x, window_func)
+        # Normalize data
         x = zscore(x)
 
         # Choose detection method
