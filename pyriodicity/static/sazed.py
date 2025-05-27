@@ -10,7 +10,7 @@ from .._internal.utils import acf, apply_window, to_1d_array
 
 class SAZED:
     """
-    SAZED (Spectral Autocorrelation Zero Ensemble Detector).
+    Spectral Autocorrelation Zero Ensemble Detector (SAZED).
 
     Find the periods in a given signal or series using SAZED ensemble method [1]_.
 
