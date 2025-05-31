@@ -1,3 +1,4 @@
+from collections import Counter
 from typing import Literal, Optional, Union
 
 import numpy as np
@@ -106,71 +107,6 @@ class SAZED:
         return round(period * 2)  # Multiply by 2 to get full period
 
     @staticmethod
-    def _detect_optimal(data: NDArray) -> Optional[int]:
-        """Optimal SAZED detection method."""
-        # Compute ACF once
-        acf_data = acf(data)
-
-        # Get all estimates directly
-        all_periods = [
-            SAZED._spectral(data),
-            SAZED._ze(data),
-            SAZED._zed(data),
-            SAZED._spectral(acf_data),
-            SAZED._ze(acf_data),
-            SAZED._zed(acf_data),
-        ]
-
-        # Filter None values
-        valid_periods = [p for p in all_periods if p is not None]
-        unique_periods = np.unique(valid_periods)
-
-        # Compute certainty for each period
-        certainties = []
-        for period in unique_periods:
-            # Split data into segments of length period
-            n_segments = len(data) // period
-            segments = np.array(
-                [data[i * period : (i + 1) * period] for i in range(n_segments)]
-            )
-
-            # Compute correlation matrix and get minimum correlation
-            corr_matrix = np.corrcoef(segments)
-            certainties.append(np.min(corr_matrix))
-
-        # Return period with highest certainty
-        return (
-            None if len(unique_periods) == 0 else unique_periods[np.argmax(certainties)]
-        )
-
-    @staticmethod
-    def _detect_majority(data: NDArray) -> Optional[int]:
-        """Majority voting SAZED detection method."""
-        # Compute ACF once
-        acf_data = acf(data)
-
-        # Get all estimates directly
-        all_periods = [
-            SAZED._spectral(data),
-            SAZED._ze(data),
-            SAZED._zed(data),
-            SAZED._spectral(acf_data),
-            SAZED._ze(acf_data),
-            SAZED._zed(acf_data),
-        ]
-
-        # Filter None values
-        valid_periods = [p for p in all_periods if p is not None]
-        unique_periods = np.unique(valid_periods)
-
-        # Find the period with maximum occurrences
-        counts = [valid_periods.count(p) for p in unique_periods]
-        max_count = max(counts) if counts else 0
-        max_periods = [p for p, c in zip(unique_periods, counts) if c == max_count]
-
-        return None if len(max_periods) == 0 else max(max_periods)
-
-    @staticmethod
     def detect(
         data: ArrayLike,
         window_func: Union[str, float, tuple] = "boxcar",
@@ -220,6 +156,11 @@ class SAZED:
         if np.any(np.isnan(data)) or np.any(np.isinf(data)):
             raise ValueError("Input data contains NaN or Inf values.")
 
+        # Validate the estimation method
+        if method not in ["optimal", "majority"]:
+            raise ValueError("Estimation method must be either 'optimal' or 'majority'")
+
+        # Squeeze the data to 1D
         x = to_1d_array(data)
 
         # Return None if data is constant
@@ -233,10 +174,41 @@ class SAZED:
         # Normalize data
         x = zscore(x)
 
-        # Choose detection method
-        if method == "optimal":
-            return SAZED._detect_optimal(x)
-        elif method == "majority":
-            return SAZED._detect_majority(x)
+        # Compute ACF
+        acf_arr = acf(x)
+        # Compute periodicty length estimates
+        period_counter = Counter(
+            [
+                SAZED._spectral(x),
+                SAZED._ze(x),
+                SAZED._zed(x),
+                SAZED._spectral(acf_arr),
+                SAZED._ze(acf_arr),
+                SAZED._zed(acf_arr),
+            ]
+        )
+        # Drop the None key from the counter if it exists
+        del period_counter[None]
+
+        # Return None if no periodicity length estimates are found
+        if len(period_counter) == 0:
+            return None
+
+        if method == "majority":
+            # Return the greatest periodicity length with maximum occurrences
+            return max(period_counter, key=lambda k: (period_counter[k], k))
         else:
-            raise ValueError("method must be either 'optimal' or 'majority'")
+            # Default to "optimal". Compute periodicity length certainties
+            certainties = []
+            for period in period_counter:
+                # Split data into segments of length period
+                n_segments = len(x) // period
+                segments = np.array(
+                    [x[i * period : (i + 1) * period] for i in range(n_segments)]
+                )
+                # Compute correlation matrix and get minimum correlation
+                corr_matrix = np.corrcoef(segments)
+                certainties.append(np.min(corr_matrix))
+
+            # Return period with highest certainty
+            return list(period_counter.keys())[np.argmax(certainties)]
