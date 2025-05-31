@@ -37,7 +37,15 @@ jinja2==3.1.6
     # via sphinx
 markupsafe==3.0.2
     # via jinja2
-numpy==2.2.6
+numpy==2.2.6 ; python_full_version < '3.11'
+    # via
+    #   pandas
+    #   patsy
+    #   pyriodicity
+    #   pywavelets
+    #   scipy
+    #   statsmodels
+numpy==2.3.0 ; python_full_version >= '3.11'
     # via
     #   pandas
     #   patsy
@@ -51,7 +59,7 @@ packaging==25.0
     #   pytest
     #   sphinx
     #   statsmodels
-pandas==2.2.3
+pandas==2.3.0
     # via statsmodels
 patsy==1.0.1
     # via statsmodels
@@ -62,8 +70,9 @@ pygments==2.19.1
     # via
     #   accessible-pygments
     #   pydata-sphinx-theme
+    #   pytest
     #   sphinx
-pytest==8.3.5
+pytest==8.4.0
     # via pytest-cov
 pytest-cov==6.1.1
 python-dateutil==2.9.0.post0
@@ -76,7 +85,7 @@ requests==2.32.3
     # via sphinx
 roman-numerals-py==3.1.0 ; python_full_version >= '3.11'
     # via sphinx
-ruff==0.11.11
+ruff==0.11.13
 scipy==1.15.3
     # via
     #   pyriodicity
@@ -116,7 +125,7 @@ tomli==2.2.1 ; python_full_version <= '3.11'
     #   numpydoc
     #   pytest
     #   sphinx
-typing-extensions==4.13.2
+typing-extensions==4.14.0
     # via
     #   beautifulsoup4
     #   exceptiongroup
