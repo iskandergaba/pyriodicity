@@ -44,69 +44,6 @@ class SAZED:
     """
 
     @staticmethod
-    def _spectral(data: NDArray) -> Optional[int]:
-        """Spectral component of SAZED (S)."""
-        freqs = np.fft.rfftfreq(len(data))[1:]
-        ft = np.fft.rfft(data)[1:]
-
-        # Compute period lengths and their respective amplitudes
-        periods = np.round(1 / freqs).astype(int)
-        amps = abs(ft)
-
-        # Filter periods greater than half the length
-        period_filter = periods < len(data) // 2
-        periods = periods[period_filter]
-        amps = amps[period_filter]
-
-        # Return the period with maximum amplitude
-        if len(periods) == 0:
-            return None
-        return periods[np.argmax(amps)]
-
-    @staticmethod
-    def _ze(data: NDArray) -> Optional[int]:
-        """Zero-crossing mean component (ZE)."""
-        signs = np.sign(data)
-        signs[signs == 0] = -1
-
-        # Find zero crossings
-        zero_crosses = np.where(signs[1:] != signs[:-1])[0]
-
-        if len(zero_crosses) < 2:
-            return None
-
-        # Calculate distances between zero crossings
-        distances = np.diff(zero_crosses)
-        if len(distances) == 0:
-            return None
-
-        return int(round(np.mean(distances))) * 2
-
-    @staticmethod
-    def _zed(data: NDArray) -> Optional[int]:
-        """Zero-crossing Density component (ZED)."""
-        signs = np.sign(data)
-        signs[signs == 0] = -1
-
-        # Find zero crossings
-        zero_crosses = np.where(signs[1:] != signs[:-1])[0]
-
-        if len(zero_crosses) < 2:
-            return None
-
-        # Calculate distances between zero crossings
-        distances = np.diff(zero_crosses)
-        if len(distances) == 0:
-            return None
-
-        # Use kernel density estimation to find the most common distance
-        kde = gaussian_kde(distances)
-        x = np.linspace(min(distances), max(distances), 100)
-        period = x[np.argmax(kde(x))]
-
-        return round(period * 2)  # Multiply by 2 to get full period
-
-    @staticmethod
     def detect(
         data: ArrayLike,
         window_func: Union[str, float, tuple] = "boxcar",
@@ -152,6 +89,105 @@ class SAZED:
             - If method is neither 'optimal' nor 'majority'
         """
 
+        def s(data: NDArray) -> Optional[int]:
+            """
+            Spectral component of SAZED (S).
+
+            Parameters
+            ----------
+            data : NDArray
+                Data to be investigated. Must be 1-dimensional.
+
+            Returns
+            -------
+            Optional[int]
+                The detected period length in samples, or None if no valid period
+                is found.
+            """
+            freqs = np.fft.rfftfreq(len(data))[1:]
+            ft = np.fft.rfft(data)[1:]
+
+            # Compute period lengths and their respective amplitudes
+            periods = np.round(1 / freqs).astype(int)
+            amps = abs(ft)
+
+            # Filter periods greater than half the length
+            period_filter = periods < len(data) // 2
+            periods = periods[period_filter]
+            amps = amps[period_filter]
+
+            # Return the period with maximum amplitude
+            if len(periods) == 0:
+                return None
+            return periods[np.argmax(amps)]
+
+        def ze(data: NDArray) -> Optional[int]:
+            """
+            Zero-crossing mean component (ZE).
+
+            Parameters
+            ----------
+            data : NDArray
+                Data to be investigated. Must be 1-dimensional.
+
+            Returns
+            -------
+            Optional[int]
+                The detected period length in samples based on mean zero-crossing
+                distance, or None if no valid period is found.
+            """
+            signs = np.sign(data)
+            signs[signs == 0] = -1
+
+            # Find zero crossings
+            zero_crosses = np.where(signs[1:] != signs[:-1])[0]
+
+            if len(zero_crosses) < 2:
+                return None
+
+            # Calculate distances between zero crossings
+            distances = np.diff(zero_crosses)
+            if len(distances) == 0:
+                return None
+
+            return int(round(np.mean(distances))) * 2
+
+        def zed(data: NDArray) -> Optional[int]:
+            """
+            Zero-crossing Density component (ZED).
+
+            Parameters
+            ----------
+            data : NDArray
+                Data to be investigated. Must be 1-dimensional.
+
+            Returns
+            -------
+            Optional[int]
+                The detected period length in samples based on zero-crossing
+                density estimation, or None if no valid period is found.
+            """
+            signs = np.sign(data)
+            signs[signs == 0] = -1
+
+            # Find zero crossings
+            zero_crosses = np.where(signs[1:] != signs[:-1])[0]
+
+            if len(zero_crosses) < 2:
+                return None
+
+            # Calculate distances between zero crossings
+            distances = np.diff(zero_crosses)
+            if len(distances) == 0:
+                return None
+
+            # Use kernel density estimation to find the most common distance
+            kde = gaussian_kde(distances)
+            x = np.linspace(min(distances), max(distances), 100)
+            period = x[np.argmax(kde(x))]
+
+            return round(period * 2)  # Multiply by 2 to get full period
+
         # Validate input data
         if np.any(np.isnan(data)) or np.any(np.isinf(data)):
             raise ValueError("Input data contains NaN or Inf values.")
@@ -178,14 +214,7 @@ class SAZED:
         acf_arr = acf(x)
         # Compute periodicty length estimates
         period_counter = Counter(
-            [
-                SAZED._spectral(x),
-                SAZED._ze(x),
-                SAZED._zed(x),
-                SAZED._spectral(acf_arr),
-                SAZED._ze(acf_arr),
-                SAZED._zed(acf_arr),
-            ]
+            [s(x), ze(x), zed(x), s(acf_arr), ze(acf_arr), zed(acf_arr)]
         )
         # Drop the None key from the counter if it exists
         del period_counter[None]
