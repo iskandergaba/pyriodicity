@@ -20,6 +20,7 @@ class SAZED:
     .. [1] Toller, M., Santos, T., & Kern, R. (2019). SAZED: parameter-free
        domain-agnostic season length estimation in time series data. Data Mining
        and Knowledge Discovery, 33(6), 1775-1798.
+       https://doi.org/10.1007/s10618-019-00645-z
 
     Examples
     --------
