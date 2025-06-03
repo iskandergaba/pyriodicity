@@ -137,21 +137,22 @@ class SAZED:
                 The detected period length in samples based on mean zero-crossing
                 distance, or None if no valid period is found.
             """
-            signs = np.sign(data)
-            signs[signs == 0] = -1
-
             # Find zero crossings
-            zero_crosses = np.where(signs[1:] != signs[:-1])[0]
+            zero_crosses = np.where(np.diff(np.signbit(data)))[0]
 
+            # Return None if there are not enough zero crossings
             if len(zero_crosses) < 2:
                 return None
 
             # Calculate distances between zero crossings
             distances = np.diff(zero_crosses)
-            if len(distances) == 0:
-                return None
-
-            return int(round(np.mean(distances))) * 2
+            
+            # Return the mean distance multiplied by 2 (for full period)
+            return (
+                None
+                if len(distances) == 0
+                else np.rint(np.mean(distances)).astype(int) * 2
+            )
 
         def zed(data: NDArray) -> Optional[int]:
             """
