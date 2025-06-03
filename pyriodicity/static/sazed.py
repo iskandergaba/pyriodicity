@@ -105,6 +105,7 @@ class SAZED:
                 The detected period length in samples, or None if no valid period
                 is found.
             """
+
             # Compute the periodogram and drop the DC frequency
             freqs, psd = periodogram(data, window="boxcar", detrend=False)
             freqs, psd = freqs[1:], psd[1:]
@@ -137,6 +138,7 @@ class SAZED:
                 The detected period length in samples based on mean zero-crossing
                 distance, or None if no valid period is found.
             """
+
             # Find zero crossings
             zero_crosses = np.where(np.diff(np.signbit(data)))[0]
 
@@ -146,7 +148,7 @@ class SAZED:
 
             # Calculate distances between zero crossings
             distances = np.diff(zero_crosses)
-            
+
             # Return the mean distance multiplied by 2 (for full period)
             return (
                 None
@@ -168,13 +170,18 @@ class SAZED:
             Optional[int]
                 The detected period length in samples based on zero-crossing
                 density estimation, or None if no valid period is found.
+
+            Notes
+            -----
+            While the original paper uses the Sheather-Jones bandwidth selector,
+            this implementation uses Scott's rule for bandwidth selection in the
+            kernel density estimation, as provided by ``scipy.stats.gaussian_kde``.
             """
-            signs = np.sign(data)
-            signs[signs == 0] = -1
 
             # Find zero crossings
-            zero_crosses = np.where(signs[1:] != signs[:-1])[0]
+            zero_crosses = np.where(np.diff(np.signbit(data)))[0]
 
+            # Return None if there are not enough zero crossings
             if len(zero_crosses) < 2:
                 return None
 
@@ -185,10 +192,11 @@ class SAZED:
 
             # Use kernel density estimation to find the most common distance
             kde = gaussian_kde(distances)
-            x = np.linspace(min(distances), max(distances), 100)
-            period = x[np.argmax(kde(x))]
+            x = np.unique(distances)
+            period = x[np.argmax(kde(x))] * 2
 
-            return round(period * 2)  # Multiply by 2 to get full period
+            # Return the rounded period length
+            return np.rint(period).astype(int)
 
         # Validate input data
         if np.any(np.isnan(data)) or np.any(np.isinf(data)):
