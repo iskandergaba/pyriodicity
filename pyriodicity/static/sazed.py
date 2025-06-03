@@ -3,7 +3,7 @@ from typing import Literal, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
-from scipy.signal import detrend
+from scipy.signal import detrend, periodogram
 from scipy.stats import gaussian_kde, zscore
 
 from .._internal.utils import acf, apply_window, to_1d_array
@@ -105,22 +105,22 @@ class SAZED:
                 The detected period length in samples, or None if no valid period
                 is found.
             """
-            freqs = np.fft.rfftfreq(len(data))[1:]
-            ft = np.fft.rfft(data)[1:]
+            # Compute the periodogram and drop the DC frequency
+            freqs, psd = periodogram(data, window="boxcar", detrend=False)
+            freqs, psd = freqs[1:], psd[1:]
 
             # Compute period lengths and their respective amplitudes
             periods = np.round(1 / freqs).astype(int)
-            amps = abs(ft)
 
             # Filter periods greater than half the length
             period_filter = periods < len(data) // 2
             periods = periods[period_filter]
-            amps = amps[period_filter]
+            psd = psd[period_filter]
 
             # Return the period with maximum amplitude
             if len(periods) == 0:
                 return None
-            return periods[np.argmax(amps)]
+            return periods[np.argmax(psd)]
 
         def ze(data: NDArray) -> Optional[int]:
             """
