@@ -43,12 +43,12 @@ class SAZED:
 
     >>> from pyriodicity import SAZED
     >>> SAZED.detect(data)
-    12
+    np.int64(12)
 
     You can also use the majority voting method:
 
     >>> SAZED.detect(data, method="majority")
-    12
+    np.int64(12)
     """
 
     @staticmethod
