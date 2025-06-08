@@ -15,6 +15,13 @@ class SAZED:
 
     Find the periods in a given signal or series using SAZED ensemble method [1]_.
 
+    Notes
+    -----
+    While the original paper uses the Sheather-Jones bandwidth selector in the kernel
+    density estimation, this implementation uses Scott's rule provided by
+    ``scipy.stats.gaussian_kde`` for convenience, as it is unclear how much better is
+    Sheather-Jones selector in practice.
+
     References
     ----------
     .. [1] Toller, M., Santos, T., & Kern, R. (2019). SAZED: parameter-free
