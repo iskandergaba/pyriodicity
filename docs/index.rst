@@ -47,7 +47,7 @@ References
    api
 
 .. |PyPI - Python Version| image:: https://img.shields.io/pypi/pyversions/pyriodicity?label=Python
-.. |GitHub License| image:: https://img.shields.io/github/license/iskandergaba/pyriodicity?label=License
+.. |GitHub License| image:: https://img.shields.io/pypi/l/pyriodicity?label=License
 .. |Docs| image:: https://readthedocs.org/projects/pyriodicity/badge/?version=latest
    :target: https://codecov.io/gh/iskandergaba/pyriodicity
 .. |Codecov| image:: https://codecov.io/gh/iskandergaba/pyriodicity/graph/badge.svg?token=D5F3PKSOEK
