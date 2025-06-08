@@ -13,5 +13,6 @@ API Reference
    ~Autoperiod
    ~CFDAutoperiod
    ~RobustPeriod
+   ~SAZED
    ~OnlineACFPeriodicityDetector
    ~OnlineFFTPeriodicityDetector

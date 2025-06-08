@@ -5,6 +5,7 @@ from .static import (
     CFDAutoperiod,
     FFTPeriodicityDetector,
     RobustPeriod,
+    SAZED,
 )
 
 __all__ = [
@@ -15,4 +16,5 @@ __all__ = [
     "OnlineACFPeriodicityDetector",
     "OnlineFFTPeriodicityDetector",
     "RobustPeriod",
+    "SAZED",
 ]
