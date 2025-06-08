@@ -7,10 +7,9 @@
 [![Codecov](https://codecov.io/gh/iskandergaba/pyriodicity/graph/badge.svg?token=D5F3PKSOEK)](https://codecov.io/gh/iskandergaba/pyriodicity)
 [![Docs](https://readthedocs.org/projects/pyriodicity/badge/?version=latest)](https://pyriodicity.readthedocs.io/en/latest)
 [![CI Build](https://github.com/iskandergaba/pyriodicity/actions/workflows/ci.yml/badge.svg)](https://github.com/iskandergaba/pyriodicity/actions/workflows/ci.yml)
-</div>
 
-## About Pyriodicity
-Pyriodicity provides an intuitive and efficient Python implementation of periodicity length detection methods in univariate signals. You can check the supported detection methods in the [API Reference](https://pyriodicity.readthedocs.io/en/stable/api.html) page.
+Pyriodicity provides an intuitive and efficient Python implementation of periodicity length detection methods in univariate signals. You can check the supported detection methods in the [API Reference](https://pyriodicity.readthedocs.io/en/stable/api.html).
+</div>
 
 ## Installation
 To install ``pyriodicity``, simply run:
