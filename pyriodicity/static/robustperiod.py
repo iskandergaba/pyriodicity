@@ -301,7 +301,7 @@ class RobustPeriod:
             # Second-order difference matrix
             offsets = np.array([0, 1, 2])
             data = np.repeat([[1.0], [-2.0], [1.0]], nobs, axis=1)
-            K = dia_matrix((data, offsets), shape=(nobs - 2, nobs))
+            K = dia_matrix((data, offsets), shape=(nobs - 2, nobs)).tocsr()
 
             # Solve the linear system
             trend = spsolve(identity + lamb * K.T.dot(K), x)
