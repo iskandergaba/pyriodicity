@@ -27,9 +27,9 @@ keywords = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "numpy>=2.2.3",
-    "pywavelets>=1.8.0",
-    "scipy>=1.15.2",
+    "numpy~=2.0",
+    "pywavelets~=1.8",
+    "scipy~=1.14",
 ]
 
 [project.urls]
@@ -38,14 +38,14 @@ documentation = "https://pyriodicity.readthedocs.io"
 
 [dependency-groups]
 dev = [
-    "pytest>=8.3.5",
-    "pytest-cov>=6.0.0",
-    "ruff>=0.9.10",
-    "statsmodels>=0.14.4",
+    "pytest~=8.4.0",
+    "pytest-cov~=6.2.0",
+    "ruff~=0.12.0",
+    "statsmodels~=0.14.0",
 ]
 docs = [
-    "numpydoc>=1.8.0",
-    "pydata-sphinx-theme>=0.16.1",
+    "numpydoc~=1.9.0",
+    "pydata-sphinx-theme~=0.16.0",
 ]
 
 [tool.uv]
