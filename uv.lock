@@ -567,11 +567,9 @@ wheels = [
 
 [[package]]
 name = "pyriodicity"
-version = "0.5.2"
+version = "0.5.3rc0"
 source = { editable = "." }
 dependencies = [
-    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
-    { name = "numpy", version = "2.3.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "pywavelets" },
     { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "scipy", version = "1.16.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
@@ -591,7 +589,6 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "numpy", specifier = "~=2.0" },
     { name = "pywavelets", specifier = "~=1.8" },
     { name = "scipy", specifier = "~=1.14" },
 ]

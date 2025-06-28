@@ -41,7 +41,6 @@ numpy==2.2.6 ; python_full_version < '3.11'
     # via
     #   pandas
     #   patsy
-    #   pyriodicity
     #   pywavelets
     #   scipy
     #   statsmodels
@@ -49,7 +48,6 @@ numpy==2.3.1 ; python_full_version >= '3.11'
     # via
     #   pandas
     #   patsy
-    #   pyriodicity
     #   pywavelets
     #   scipy
     #   statsmodels
