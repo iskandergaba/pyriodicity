@@ -567,7 +567,7 @@ wheels = [
 
 [[package]]
 name = "pyriodicity"
-version = "0.5.3rc0"
+version = "0.5.3"
 source = { editable = "." }
 dependencies = [
     { name = "pywavelets" },
