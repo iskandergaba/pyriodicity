@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+authors:
+- family-names: "Gaba"
+  given-names: "Iskander"
+title: "Pyriodicity"
+abstract: "Pyriodicity provides an intuitive and efficient Python implementation of periodicity length detection methods in univariate signals."
+url: "https://pyriodicity.readthedocs.io"
+repository-artifact: "https://pypi.org/project/pyriodicity"
+repository-code: "https://github.com/iskandergaba/pyriodicity"
+type: software
+license: MIT
+keywords:
+  - period
+  - periodicity
+  - seasonality
+  - period-detection
+  - periodicity-analysis
+  - seasonality-analysis
+  - autoperiod
+  - cfd-autoperiod
+  - robustperiod
+  - sazed
+  - signal-processing
+  - time-series-analysis
