@@ -37,9 +37,9 @@ documentation = "https://pyriodicity.readthedocs.io"
 
 [dependency-groups]
 dev = [
-    "ruff~=0.12.0",
+    "ruff~=0.14.0",
     "pytest~=8.4.0",
-    "pytest-cov~=6.2.0",
+    "pytest-cov~=7.0.0",
     "statsmodels~=0.14.0",
 ]
 docs = [
