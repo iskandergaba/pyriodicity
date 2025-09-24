@@ -17,7 +17,7 @@ jobs:
         python-version: ${{ fromJson(vars.PYTHON_VERSIONS) }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v6
