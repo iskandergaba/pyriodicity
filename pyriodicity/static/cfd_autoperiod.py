@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Union
+from typing import Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -64,8 +64,8 @@ class CFDAutoperiod:
         data: ArrayLike,
         k: int = 100,
         percentile: int = 99,
-        detrend_func: Optional[Literal["constant", "linear"]] = "linear",
-        window_func: Optional[Union[str, float, tuple]] = None,
+        detrend_func: Literal["constant", "linear"] | None = "linear",
+        window_func: str | float | tuple | None = None,
     ) -> NDArray:
         """
         Find periods in the given series.

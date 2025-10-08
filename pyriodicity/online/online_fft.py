@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Union
+from typing import Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -41,9 +41,9 @@ class OnlineFFTPeriodicityDetector:
     def __init__(
         self,
         window_size: int,
-        buffer_size: Optional[int] = None,
-        window_func: Union[float, str, tuple] = "boxcar",
-        detrend_func: Optional[Literal["constant", "linear"]] = "linear",
+        buffer_size: int | None = None,
+        window_func: float | str | tuple = "boxcar",
+        detrend_func: Literal["constant", "linear"] | None = "linear",
     ):
         # Initialize the online helper
         self.online_helper = OnlineHelper(
@@ -60,8 +60,8 @@ class OnlineFFTPeriodicityDetector:
 
     def detect(
         self,
-        data: Union[np.floating, ArrayLike],
-        max_period_count: Optional[int] = None,
+        data: np.floating | ArrayLike,
+        max_period_count: int | None = None,
     ) -> NDArray:
         """
         Update the frequency spectrum and detect periodicities.

@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Union
+from typing import Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -54,9 +54,9 @@ class ACFPeriodicityDetector:
     @staticmethod
     def detect(
         data: ArrayLike,
-        window_func: Union[str, float, tuple] = "boxcar",
-        detrend_func: Optional[Literal["constant", "linear"]] = "linear",
-        max_period_count: Optional[int] = None,
+        window_func: str | float | tuple = "boxcar",
+        detrend_func: Literal["constant", "linear"] | None = "linear",
+        max_period_count: int | None = None,
     ) -> NDArray:
         """
         Find periods in the given series.

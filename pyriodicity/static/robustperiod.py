@@ -3,7 +3,7 @@ from concurrent.futures import ProcessPoolExecutor
 from enum import Enum, unique
 from functools import partial
 from multiprocessing import cpu_count
-from typing import Literal, Optional, Tuple, Union
+from typing import Literal
 
 import numpy as np
 import pywt
@@ -153,13 +153,13 @@ class RobustPeriod:
     @staticmethod
     def detect(
         data: ArrayLike,
-        lamb: Union[float, Literal["hodrick-prescott", "ravn-uhlig"]] = "ravn-uhlig",
+        lamb: float | Literal["hodrick-prescott", "ravn-uhlig"] = "ravn-uhlig",
         c: float = 1.5,
         db_n: int = 8,
         modwt_level: int = 10,
         delta: float = 1.345,
-        max_worker_count: Optional[int] = None,
-        max_period_count: Optional[int] = None,
+        max_worker_count: int | None = None,
+        max_period_count: int | None = None,
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -249,9 +249,7 @@ class RobustPeriod:
         )
 
     @staticmethod
-    def _preprocess(
-        x: ArrayLike, lamb: Union[float, _LambdaSelection], c: float
-    ) -> NDArray:
+    def _preprocess(x: ArrayLike, lamb: float | _LambdaSelection, c: float) -> NDArray:
         """
         Apply the data preprocessing step of RobustPeriod.
 
@@ -274,7 +272,7 @@ class RobustPeriod:
             Preprocessed data.
         """
 
-        def hpfilter(x: NDArray, lamb: float) -> Tuple:
+        def hpfilter(x: NDArray, lamb: float) -> tuple:
             """
             Apply the Hodrick-Prescott filter to a series.
 
@@ -516,7 +514,7 @@ class RobustPeriod:
                 np.nan_to_num(binom(n, k)) * np.nan_to_num((1 - k * g0) ** (n - 1))
             )
 
-        def get_period(periodogram: NDArray) -> Optional[int]:
+        def get_period(periodogram: NDArray) -> int | None:
             """
             Determine the period of a given periodogram.
 

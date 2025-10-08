@@ -1,5 +1,5 @@
 from collections import Counter
-from typing import Literal, Optional, Union
+from typing import Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -54,10 +54,10 @@ class SAZED:
     @staticmethod
     def detect(
         data: ArrayLike,
-        window_func: Union[str, float, tuple] = "boxcar",
-        detrend_func: Optional[Literal["constant", "linear"]] = "linear",
+        window_func: str | float | tuple = "boxcar",
+        detrend_func: Literal["constant", "linear"] | None = "linear",
         method: Literal["optimal", "majority"] = "optimal",
-    ) -> Optional[int]:
+    ) -> int | None:
         """
         Detect a period in the input data using the SAZED ensemble method.
 
@@ -97,7 +97,7 @@ class SAZED:
             - If method is neither 'optimal' nor 'majority'
         """
 
-        def s(data: NDArray) -> Optional[int]:
+        def s(data: NDArray) -> int | None:
             """
             Spectral component of SAZED (S).
 
@@ -108,7 +108,7 @@ class SAZED:
 
             Returns
             -------
-            Optional[int]
+            int | None
                 The detected period length in samples, or None if no valid period
                 is found.
             """
@@ -130,7 +130,7 @@ class SAZED:
                 return None
             return periods[np.argmax(psd)]
 
-        def ze(data: NDArray) -> Optional[int]:
+        def ze(data: NDArray) -> int | None:
             """
             Zero-crossing mean component (ZE).
 
@@ -141,7 +141,7 @@ class SAZED:
 
             Returns
             -------
-            Optional[int]
+            int | None
                 The detected period length in samples based on mean zero-crossing
                 distance, or None if no valid period is found.
             """
@@ -163,7 +163,7 @@ class SAZED:
                 else np.rint(np.mean(distances)).astype(int) * 2
             )
 
-        def zed(data: NDArray) -> Optional[int]:
+        def zed(data: NDArray) -> int | None:
             """
             Zero-crossing Density component (ZED).
 
@@ -174,7 +174,7 @@ class SAZED:
 
             Returns
             -------
-            Optional[int]
+            int | None
                 The detected period length in samples based on zero-crossing
                 density estimation, or None if no valid period is found.
 
