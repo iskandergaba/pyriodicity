@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Union
+from typing import Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -33,7 +33,7 @@ def to_1d_array(x: ArrayLike) -> NDArray:
 
 
 @staticmethod
-def apply_window(x: ArrayLike, window_func: Union[str, float, tuple]) -> NDArray:
+def apply_window(x: ArrayLike, window_func: str | float | tuple) -> NDArray:
     """
     Apply a window function to the input array.
 
@@ -92,8 +92,8 @@ def power_threshold(
     x: ArrayLike,
     k: int,
     p: int,
-    window_func: Union[str, tuple, ArrayLike] = "boxcar",
-    detrend_func: Optional[Literal["constant", "linear"]] = "linear",
+    window_func: str | tuple | ArrayLike = "boxcar",
+    detrend_func: Literal["constant", "linear"] | None = "linear",
 ) -> np.floating:
     """
     Compute the power threshold as the p-th percentile of the maximum

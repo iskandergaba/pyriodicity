@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Union
+from typing import Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -63,8 +63,8 @@ class Autoperiod:
         data: ArrayLike,
         k: int = 100,
         percentile: int = 95,
-        window_func: Union[str, float, tuple] = "boxcar",
-        detrend_func: Optional[Literal["constant", "linear"]] = "linear",
+        window_func: str | float | tuple = "boxcar",
+        detrend_func: Literal["constant", "linear"] | None = "linear",
     ) -> NDArray:
         """
         Find periods in the given series.

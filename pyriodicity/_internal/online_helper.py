@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Union
+from typing import Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -56,9 +56,9 @@ class OnlineHelper:
     def __init__(
         self,
         window_size: int,
-        buffer_size: Optional[int] = None,
-        window_func: Union[str, float, tuple] = "boxcar",
-        detrend_func: Optional[Literal["constant", "linear"]] = "linear",
+        buffer_size: int | None = None,
+        window_func: str | float | tuple = "boxcar",
+        detrend_func: Literal["constant", "linear"] | None = "linear",
     ):
         # Initialize size attributes
         self.window_size = window_size
@@ -96,7 +96,7 @@ class OnlineHelper:
 
     def update(
         self,
-        data: Union[np.floating, ArrayLike],
+        data: np.floating | ArrayLike,
         return_value: Literal["rfft", "acf"] = "rfft",
     ) -> NDArray:
         """
