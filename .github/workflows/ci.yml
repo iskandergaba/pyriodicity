@@ -1,4 +1,4 @@
-# This workflow will install Puv, run tests and lint the code using a variety of Python versions.
+# This workflow will install uv, run tests and lint the code on various Python versions.
 
 name: CI Build
 
@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install the latest version of uv
+      - name: Setup uv
         uses: astral-sh/setup-uv@v7
         with:
           activate-environment: true
