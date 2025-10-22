@@ -5,7 +5,7 @@
 Pyriodicity
 -----------
 
-|PyPI - Python Version| |GitHub License| |Codecov| |Docs| |CI Build|
+|PyPI - Python Version| |License| |Codecov| |Docs| |CI Build|
 
 Pyriodicity provides an intuitive and efficient Python implementation of periodicity length detection methods in univariate signals. You can check the supported detection methods in the :doc:`api`.
 
@@ -47,10 +47,10 @@ References
    api
 
 .. |PyPI - Python Version| image:: https://img.shields.io/pypi/pyversions/pyriodicity?label=Python
-.. |GitHub License| image:: https://img.shields.io/pypi/l/pyriodicity?label=License
+.. |License| image:: https://img.shields.io/pypi/l/pyriodicity?label=License
 .. |Docs| image:: https://readthedocs.org/projects/pyriodicity/badge/?version=latest
-   :target: https://codecov.io/gh/iskandergaba/pyriodicity
-.. |Codecov| image:: https://codecov.io/gh/iskandergaba/pyriodicity/graph/badge.svg?token=D5F3PKSOEK
    :target: https://pyriodicity.readthedocs.io/en/latest
+.. |Codecov| image:: https://codecov.io/gh/iskandergaba/pyriodicity/graph/badge.svg?token=D5F3PKSOEK
+   :target: https://codecov.io/gh/iskandergaba/pyriodicity
 .. |CI Build| image:: https://github.com/iskandergaba/pyriodicity/actions/workflows/ci.yml/badge.svg
    :target: https://github.com/iskandergaba/pyriodicity/actions/workflows/ci.yml

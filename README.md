@@ -3,7 +3,7 @@
 
 [![PyPI Version](https://img.shields.io/pypi/v/pyriodicity.svg?label=PyPI)](https://pypi.org/project/pyriodicity/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyriodicity?label=Python)
-![GitHub License](https://img.shields.io/pypi/l/pyriodicity?label=License)
+![License](https://img.shields.io/pypi/l/pyriodicity?label=License)
 [![Codecov](https://codecov.io/gh/iskandergaba/pyriodicity/graph/badge.svg?token=D5F3PKSOEK)](https://codecov.io/gh/iskandergaba/pyriodicity)
 [![Docs](https://readthedocs.org/projects/pyriodicity/badge/?version=latest)](https://pyriodicity.readthedocs.io/en/latest)
 [![CI Build](https://github.com/iskandergaba/pyriodicity/actions/workflows/ci.yml/badge.svg)](https://github.com/iskandergaba/pyriodicity/actions/workflows/ci.yml)
