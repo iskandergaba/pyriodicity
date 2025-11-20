@@ -28,7 +28,7 @@ jobs:
 
       - name: Run tests
         run: uv run pytest
-      
+
       - name: Build the package
         run: uv build
 

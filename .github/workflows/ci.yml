@@ -4,7 +4,7 @@ name: CI Build
 
 on:
   push:
-    branches: '**'
+    branches: ["**"]
   pull_request:
     branches: ["main"]
 
@@ -43,5 +43,5 @@ jobs:
         uses: codecov/codecov-action@v5
         if: matrix.python-version == vars.PYTHON_LATEST_VERSION
         with:
-          token: '${{ secrets.CODECOV_TOKEN }}'
+          token: "${{ secrets.CODECOV_TOKEN }}"
           disable_telem: true
