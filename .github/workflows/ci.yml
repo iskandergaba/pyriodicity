@@ -17,7 +17,7 @@ jobs:
         python-version: ${{ fromJson(vars.PYTHON_VERSIONS) }}
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Setup uv
         uses: astral-sh/setup-uv@v7
@@ -28,16 +28,14 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
+      - name: Check line length violations with ruff
+        run: uv run ruff check --select=E501 --exit-zero
+
       - name: Lint with ruff
-        run: |
-          # Stop the build if the ruff check fails, except for line length check (E501)
-          uv run ruff check --ignore=E501
-          # Show line length violation warnings
-          uv run ruff check --exit-zero
+        run: uv run ruff check --ignore=E501
 
       - name: Run tests
-        run: |
-          uv run pytest --cov
+        run: uv run pytest --cov
 
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v5
