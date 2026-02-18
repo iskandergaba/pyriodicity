@@ -1,6 +1,6 @@
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build"]
+build-backend = "uv_build"
 
 [project]
 name = "pyriodicity"
@@ -8,9 +8,8 @@ version = "0.6.2"
 description = "Pyriodicity provides an intuitive and efficient Python implementation of periodicity length detection methods in univariate signals."
 license = "MIT"
 readme = "README.md"
-authors = [
-    {name = "Iskander Gaba", email = "iskander@hey.com"},
-]
+authors = [{ name = "Iskander Gaba", email = "iskander@hey.com" }]
+requires-python = ">=3.10"
 keywords = [
     "period",
     "periodicity",
@@ -25,15 +24,22 @@ keywords = [
     "signal-processing",
     "time-series-analysis"
 ]
-requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
 dependencies = [
     "scipy~=1.15",
     "pywavelets~=1.8",
 ]
 
 [project.urls]
-repository = "https://github.com/iskandergaba/pyriodicity"
-documentation = "https://pyriodicity.readthedocs.io"
+Documentation = "https://pyriodicity.readthedocs.io"
+Repository = "https://github.com/iskandergaba/pyriodicity"
 
 [dependency-groups]
 dev = [
