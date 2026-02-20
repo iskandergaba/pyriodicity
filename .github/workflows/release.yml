@@ -7,7 +7,7 @@ on:
     types: [published]
 
 jobs:
-  PyPI-Release:
+  pypi-release:
     name: Build and Publish to PyPI
     runs-on: ubuntu-latest
     environment: pypi
@@ -19,8 +19,6 @@ jobs:
 
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v7
-        with:
-          python-version: ${{ vars.PYTHON_LATEST_VERSION }}
 
       - name: Install dependencies
         run: uv sync

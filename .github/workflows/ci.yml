@@ -1,7 +1,6 @@
-# This workflow will install uv, run tests and lint the code on various Python versions.
+# This workflow installs uv, run tests and lint the code on various Python versions.
 
 name: CI Build
-
 on:
   push:
     branches: ["**"]
@@ -14,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ${{ fromJson(vars.PYTHON_VERSIONS) }}
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - uses: actions/checkout@v6
@@ -39,7 +38,6 @@ jobs:
 
       - name: Upload results to Codecov
         uses: codecov/codecov-action@v5
-        if: matrix.python-version == vars.PYTHON_LATEST_VERSION
         with:
           token: "${{ secrets.CODECOV_TOKEN }}"
           disable_telem: true

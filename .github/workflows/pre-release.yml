@@ -8,7 +8,7 @@ on:
       - "*.*.*"
 
 jobs:
-  TestPyPI-Release:
+  testpypi-release:
     name: Build and Publish to TestPyPI
     runs-on: ubuntu-latest
     environment: testpypi
@@ -20,8 +20,6 @@ jobs:
 
       - name: Install the latest version of uv
         uses: astral-sh/setup-uv@v7
-        with:
-          python-version: ${{ vars.PYTHON_LATEST_VERSION }}
 
       - name: Install dependencies
         run: uv sync
