@@ -131,7 +131,9 @@ def power_threshold(
     max_powers = []
     while len(max_powers) < k:
         _, pxx = periodogram(
-            np.random.permutation(x), window=window_func, detrend=detrend_func
+            np.random.permutation(x),
+            window=window_func,  # type: ignore[arg-type]
+            detrend=detrend_func,  # type: ignore[arg-type]
         )
         max_powers.append(pxx.max())
     max_powers.sort()
