@@ -1,5 +1,4 @@
 import datetime
-from concurrent.futures import ProcessPoolExecutor
 from enum import Enum, unique
 from functools import partial
 from multiprocessing import cpu_count
@@ -7,6 +6,7 @@ from typing import Literal
 
 import numpy as np
 import pywt
+from freethreading import WorkerPoolExecutor
 from numpy.typing import ArrayLike, NDArray
 from scipy.optimize import minimize
 from scipy.signal import find_peaks
@@ -71,7 +71,7 @@ class RobustPeriod:
                 The Huber M-Periodogram of the input data.
             """
 
-            with ProcessPoolExecutor(max_worker_count) as executor:
+            with WorkerPoolExecutor(max_worker_count) as executor:
                 periodogram = list(
                     executor.map(
                         partial(cls._compute_element, x, delta=delta), range(len(x))

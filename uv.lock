@@ -327,6 +327,15 @@ wheels = [
 ]
 
 [[package]]
+name = "free-threading"
+version = "1.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/99/ae/78bf0c2925e72d53c44b3f5837867250c56bc72f54f98dcf1edb373111f9/free_threading-1.1.0.tar.gz", hash = "sha256:2b54933573543ff5e30a2f02ddcd593efff0f429d34033f5882908c9d93c49d8", size = 11760, upload-time = "2025-12-29T23:33:36.022Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ed/ef/750d2d856a9086bb94d1f8d4adf099ec6684f2223c9e4308ef92b2e8353d/free_threading-1.1.0-py3-none-any.whl", hash = "sha256:30057e59e4db574ec02db17b3400850062fdc612383a9332ddb2b8a443cdab29", size = 12747, upload-time = "2025-12-29T23:33:37.01Z" },
+]
+
+[[package]]
 name = "idna"
 version = "3.11"
 source = { registry = "https://pypi.org/simple" }
@@ -821,6 +830,7 @@ name = "pyriodicity"
 version = "0.7.0rc0"
 source = { editable = "." }
 dependencies = [
+    { name = "free-threading" },
     { name = "pywavelets", version = "1.8.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "pywavelets", version = "1.9.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "scipy", version = "1.15.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -841,6 +851,7 @@ docs = [
 
 [package.metadata]
 requires-dist = [
+    { name = "free-threading", specifier = "~=1.1.0" },
     { name = "pywavelets", specifier = "~=1.8" },
     { name = "scipy", specifier = "~=1.15" },
 ]
