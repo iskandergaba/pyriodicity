@@ -3,7 +3,7 @@ import sys
 
 import tomllib
 
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath("../src"))
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -23,7 +23,7 @@ with open("../pyproject.toml", "rb") as f:
 # General configuration
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["numpydoc", "pydata_sphinx_theme", "sphinx.ext.intersphinx"]
+extensions = ["numpydoc", "autoapi.extension", "sphinx.ext.intersphinx"]
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
@@ -36,6 +36,23 @@ autodoc_typehints = "none"
 # https://numpydoc.readthedocs.io/en/latest/install.html#configuration
 
 numpydoc_show_class_members = False
+
+# Options for autoapi
+# https://sphinx-autoapi.readthedocs.io/en/latest/reference/config.html
+
+autoapi_dirs = ["../src/pyriodicity"]
+autoapi_type = "python"
+autoapi_root = "generated"
+autoapi_options = [
+    "members",
+    "undoc-members",
+    "show-inheritance",
+    "show-module-summary",
+]
+autoapi_keep_files = True
+autoapi_add_toctree_entry = False
+autoapi_own_page_level = "class"
+autoapi_member_order = "groupwise"
 
 # Options for intersphinx
 # https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html
