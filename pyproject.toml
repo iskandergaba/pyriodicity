@@ -54,8 +54,8 @@ docs = [
     "pydata-sphinx-theme~=0.16.0",
 ]
 
-[tool.uv]
-default-groups = "all"
+[tool.uv.dependency-groups]
+docs = { requires-python = ">=3.12" }
 
 [tool.ruff.lint]
 extend-select = ["E501"]
