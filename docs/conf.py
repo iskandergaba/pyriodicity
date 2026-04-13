@@ -23,7 +23,7 @@ with open("../pyproject.toml", "rb") as f:
 # General configuration
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["numpydoc", "pydata_sphinx_theme", "sphinx.ext.intersphinx"]
+extensions = ["numpydoc", "sphinx.ext.intersphinx"]
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
