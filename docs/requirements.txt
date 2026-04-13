@@ -8,6 +8,8 @@ anyio==4.13.0 ; python_full_version >= '3.12'
     # via
     #   starlette
     #   watchfiles
+astroid==4.1.2 ; python_full_version >= '3.12'
+    # via sphinx-autoapi
 babel==2.18.0 ; python_full_version >= '3.12'
     # via
     #   pydata-sphinx-theme
@@ -38,7 +40,9 @@ idna==3.11 ; python_full_version >= '3.12'
 imagesize==2.0.0 ; python_full_version >= '3.12'
     # via sphinx
 jinja2==3.1.6 ; python_full_version >= '3.12'
-    # via sphinx
+    # via
+    #   sphinx
+    #   sphinx-autoapi
 markupsafe==3.0.3 ; python_full_version >= '3.12'
     # via jinja2
 numpydoc==1.10.0 ; python_full_version >= '3.12'
@@ -50,6 +54,8 @@ pygments==2.20.0 ; python_full_version >= '3.12'
     #   accessible-pygments
     #   pydata-sphinx-theme
     #   sphinx
+pyyaml==6.0.3 ; python_full_version >= '3.12'
+    # via sphinx-autoapi
 requests==2.33.1 ; python_full_version >= '3.12'
     # via sphinx
 roman-numerals==4.1.0 ; python_full_version >= '3.12'
@@ -62,7 +68,9 @@ sphinx==9.1.0 ; python_full_version >= '3.12'
     # via
     #   numpydoc
     #   pydata-sphinx-theme
+    #   sphinx-autoapi
     #   sphinx-autobuild
+sphinx-autoapi==3.8.0 ; python_full_version >= '3.12'
 sphinx-autobuild==2025.8.25 ; python_full_version >= '3.12'
 sphinxcontrib-applehelp==2.0.0 ; python_full_version >= '3.12'
     # via sphinx
