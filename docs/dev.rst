@@ -44,4 +44,4 @@ This project is built and published using `uv <https  ://docs.astral.sh/uv>`__. 
 
 .. code:: shell
 
-   uv export --group docs --no-hashes > docs/requirements.txt
+   uv export --no-hashes --no-dev --group docs --output-file docs/requirements.txt
