@@ -3,7 +3,7 @@ import sys
 
 import tomllib
 
-sys.path.insert(0, os.path.abspath(".."))
+sys.path.insert(0, os.path.abspath("../src"))
 
 # Configuration file for the Sphinx documentation builder.
 #
@@ -23,7 +23,7 @@ with open("../pyproject.toml", "rb") as f:
 # General configuration
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["numpydoc", "pydata_sphinx_theme", "sphinx.ext.intersphinx"]
+extensions = ["numpydoc", "sphinx.ext.intersphinx"]
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
@@ -50,7 +50,7 @@ intersphinx_mapping = {
 
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
-html_js_files = ["pypi-icon.js"]
+html_js_files = [("custom-icons.js", {"defer": "defer"})]
 html_sidebars = {"usage": [], "dev": []}
 html_theme_options = {
     "icon_links": [
