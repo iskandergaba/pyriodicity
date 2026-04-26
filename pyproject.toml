@@ -46,7 +46,7 @@ Repository = "https://github.com/iskandergaba/pyriodicity"
 dev = [
     "ruff~=0.15.0",
     "pytest~=9.0.0",
-    "pytest-cov~=7.0.0",
+    "pytest-cov~=7.1.0",
     "statsmodels~=0.14.0",
 ]
 docs = [
