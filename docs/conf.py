@@ -50,7 +50,7 @@ intersphinx_mapping = {
 
 html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
-html_js_files = ["pypi-icon.js"]
+html_js_files = [("custom-icons.js", {"defer": "defer"})]
 html_sidebars = {"usage": [], "dev": []}
 html_theme_options = {
     "icon_links": [
