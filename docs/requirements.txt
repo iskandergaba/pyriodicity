@@ -15,11 +15,11 @@ babel==2.18.0 ; python_full_version >= '3.12'
     #   sphinx
 beautifulsoup4==4.14.3 ; python_full_version >= '3.12'
     # via pydata-sphinx-theme
-certifi==2026.4.22 ; python_full_version >= '3.12'
+certifi==2026.5.20 ; python_full_version >= '3.12'
     # via requests
 charset-normalizer==3.4.7 ; python_full_version >= '3.12'
     # via requests
-click==8.4.0 ; python_full_version >= '3.12'
+click==8.4.1 ; python_full_version >= '3.12'
     # via uvicorn
 colorama==0.4.6 ; python_full_version >= '3.12'
     # via
@@ -34,7 +34,7 @@ free-threading==1.1.1
     # via pyriodicity
 h11==0.16.0 ; python_full_version >= '3.12'
     # via uvicorn
-idna==3.15 ; python_full_version >= '3.12'
+idna==3.16 ; python_full_version >= '3.12'
     # via
     #   anyio
     #   requests
@@ -55,7 +55,7 @@ numpy==2.4.6 ; python_full_version >= '3.11'
 numpydoc==1.10.0 ; python_full_version >= '3.12'
 packaging==26.2 ; python_full_version >= '3.12'
     # via sphinx
-pydata-sphinx-theme==0.17.1 ; python_full_version >= '3.12'
+pydata-sphinx-theme==0.18.0 ; python_full_version >= '3.12'
 pygments==2.20.0 ; python_full_version >= '3.12'
     # via
     #   accessible-pygments
@@ -95,7 +95,7 @@ sphinxcontrib-qthelp==2.0.0 ; python_full_version >= '3.12'
     # via sphinx
 sphinxcontrib-serializinghtml==2.0.0 ; python_full_version >= '3.12'
     # via sphinx
-starlette==1.0.0 ; python_full_version >= '3.12'
+starlette==1.0.1 ; python_full_version >= '3.12'
     # via sphinx-autobuild
 typing-extensions==4.15.0 ; python_full_version >= '3.12'
     # via
