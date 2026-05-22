@@ -7,7 +7,7 @@ default:
 # Upgrade dependencies
 upgrade:
     uv sync --upgrade
-    uv export --quiet --no-hashes --no-dev --group docs --output-file docs/requirements.txt
+    uv export --quiet --no-hashes --no-emit-project --no-dev --group docs --output-file docs/requirements.txt
 
 # Serve the docs
 [no-exit-message]
