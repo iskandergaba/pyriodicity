@@ -45,13 +45,13 @@ Repository = "https://github.com/iskandergaba/pyriodicity"
 [dependency-groups]
 dev = [
     "ruff~=0.15.0",
-    "pytest~=9.0.0",
+    "pytest~=9.1.0",
     "pytest-cov~=7.1.0",
     "statsmodels~=0.14.0",
 ]
 docs = [
     "numpydoc~=1.10.0",
-    "pydata-sphinx-theme~=0.18.0",
+    "pydata-sphinx-theme~=0.19.0",
     "sphinx-autobuild~=2025.08.0",
 ]
 
