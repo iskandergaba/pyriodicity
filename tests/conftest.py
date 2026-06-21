@@ -1,7 +1,9 @@
+from pathlib import Path
+
 import numpy as np
+import pandas as pd
 import pytest
 from scipy.signal import sawtooth
-from statsmodels.datasets import co2
 
 
 @pytest.fixture(scope="module")
@@ -137,7 +139,11 @@ def trianglewave(n, period, amp):
 
 
 def co2_data():
-    return co2.load().data.ffill()
+    return pd.read_csv(
+        Path(__file__).parent / "data" / "co2.csv",
+        index_col=0,
+        parse_dates=True,
+    ).ffill()
 
 
 def data_generator(data, batch_size):

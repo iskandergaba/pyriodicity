@@ -33,7 +33,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "scipy~=1.15",
+    "scipy>=1.15,<1.18",
     "pywavelets~=1.8",
     "free-threading~=1.1.0",
 ]
@@ -45,9 +45,9 @@ Repository = "https://github.com/iskandergaba/pyriodicity"
 [dependency-groups]
 dev = [
     "ruff~=0.15.0",
+    "pandas~=2.3.0",
     "pytest~=9.1.0",
     "pytest-cov~=7.1.0",
-    "statsmodels~=0.14.0",
 ]
 docs = [
     "numpydoc~=1.10.0",

@@ -47,7 +47,11 @@ numpy==2.2.6 ; python_full_version < '3.11'
     # via
     #   pywavelets
     #   scipy
-numpy==2.4.6 ; python_full_version >= '3.11'
+numpy==2.4.6 ; python_full_version == '3.11.*'
+    # via
+    #   pywavelets
+    #   scipy
+numpy==2.5.0 ; python_full_version >= '3.12'
     # via
     #   pywavelets
     #   scipy
@@ -70,9 +74,7 @@ roman-numerals==4.1.0 ; python_full_version >= '3.12'
     # via sphinx
 scipy==1.15.3 ; python_full_version < '3.11'
     # via pyriodicity
-scipy==1.17.1 ; python_full_version == '3.11.*'
-    # via pyriodicity
-scipy==1.18.0 ; python_full_version >= '3.12'
+scipy==1.17.1 ; python_full_version >= '3.11'
     # via pyriodicity
 snowballstemmer==3.1.1 ; python_full_version >= '3.12'
     # via sphinx
