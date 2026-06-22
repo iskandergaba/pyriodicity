@@ -31,14 +31,14 @@ def to_1d_array(x: ArrayLike) -> NDArray:
     return x
 
 
-def apply_window(x: ArrayLike, window_func: str | float | tuple) -> NDArray:
+def apply_window(x: NDArray, window_func: str | float | tuple) -> NDArray:
     """
     Apply a window function to the input array.
 
     Parameters
     ----------
     x : array_like
-        Input array. Must be squeezable to 1-d.
+        Input array. Must be a 1-d array.
     window_func : float, str, tuple
         Window function to apply. See ``scipy.signal.get_window`` for accepted formats
         of the ``window`` parameter.
@@ -54,7 +54,6 @@ def apply_window(x: ArrayLike, window_func: str | float | tuple) -> NDArray:
         Get a window function.
     """
 
-    x = to_1d_array(x)
     return x * get_window(window=window_func, Nx=len(x))
 
 
