@@ -46,53 +46,71 @@ class RobustPeriod:
     array([12])
     """
 
-    class _HuberPeriodogram:
-        @classmethod
-        def compute(
-            cls,
-            x: NDArray,
-            delta: float,
-            max_worker_count: int,
-        ) -> NDArray:
-            """
-            Compute the Huber M-Periodogram using ADMM with parallel execution.
+    @staticmethod
+    def _huber_m_periodogram(
+        x: NDArray,
+        delta: float,
+        max_worker_count: int,
+    ) -> NDArray:
+        """
+        Compute the Huber M-Periodogram using ADMM with parallel execution.
 
-            Parameters
-            ----------
-            x : array_like
-                Input data to be transformed. Must be squeezable to 1-d.
-            delta : float
-                The tuning constant for the Huber loss function.
+        Parameters
+        ----------
+        x : array_like
+            Input data to be transformed. Must be squeezable to 1-d.
+        delta : float
+            The tuning constant for the Huber loss function.
 
-            Returns
-            -------
-            NDArray
-                The Huber M-Periodogram of the input data.
-            """
+        Returns
+        -------
+        NDArray
+            The Huber M-Periodogram of the input data.
+        """
 
-            with WorkerPoolExecutor(max_worker_count) as executor:
-                periodogram = list(
-                    executor.map(
-                        partial(cls._compute_element, x, delta=delta), range(len(x))
-                    )
+        with WorkerPoolExecutor(max_worker_count) as executor:
+            periodogram = list(
+                executor.map(
+                    partial(RobustPeriod._huber_m_periodogram_element, x, delta=delta),
+                    range(len(x)),
                 )
+            )
 
-            return np.array(periodogram)
+        return np.array(periodogram)
 
-        @classmethod
-        def _compute_element(cls, x: NDArray, k: int, delta: float) -> np.floating:
-            n = len(x)
-            t = np.arange(n)
-            phi = np.array(
-                [np.cos(2 * np.pi * k * t / n), np.sin(2 * np.pi * k * t / n)]
-            ).T
+    @staticmethod
+    def _huber_m_periodogram_element(x: NDArray, k: int, delta: float) -> np.floating:
+        """
+        Compute a single frequency element of the Huber M-Periodogram.
 
-            # Huber Robust M-Periodogram objective function
-            def objective(beta):
-                return np.linalg.norm(huber(delta, phi @ beta - x.T))
+        Fit a sinusoid at frequency index ``k`` to the data by minimizing the Huber
+        loss of the residuals, and return the corresponding periodogram value.
 
-            result = minimize(objective, np.zeros(phi.shape[1]))
-            return n * np.linalg.norm(result.x) ** 2 / 4
+        Parameters
+        ----------
+        x : array_like
+            Input data to be transformed. Must be squeezable to 1-d.
+        k : int
+            The frequency index at which the periodogram element is computed.
+        delta : float
+            The tuning constant for the Huber loss function.
+
+        Returns
+        -------
+        numpy.floating
+            The Huber M-Periodogram value at frequency index ``k``.
+        """
+
+        n = len(x)
+        t = np.arange(n)
+        phi = np.array([np.cos(2 * np.pi * k * t / n), np.sin(2 * np.pi * k * t / n)]).T
+
+        # Huber Robust M-Periodogram objective function
+        def objective(beta):
+            return np.linalg.norm(huber(delta, phi @ beta - x.T))
+
+        result = minimize(objective, np.zeros(phi.shape[1]))
+        return n * np.linalg.norm(result.x) ** 2 / 4
 
     @staticmethod
     def detect(
@@ -544,7 +562,7 @@ class RobustPeriod:
 
         # Compute the periodograms
         periodograms = [
-            RobustPeriod._HuberPeriodogram.compute(
+            RobustPeriod._huber_m_periodogram(
                 np.pad(w_coeffs, (0, len(w_coeffs))), delta, max_worker_count
             )
             for w_coeffs in w_coeff_list
