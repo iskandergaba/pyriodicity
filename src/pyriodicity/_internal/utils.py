@@ -5,7 +5,6 @@ from numpy.typing import ArrayLike, NDArray
 from scipy.signal import get_window, periodogram
 
 
-@staticmethod
 def to_1d_array(x: ArrayLike) -> NDArray:
     """
     Convert input to a contiguous 1-dimensional numpy array.
@@ -32,7 +31,6 @@ def to_1d_array(x: ArrayLike) -> NDArray:
     return x
 
 
-@staticmethod
 def apply_window(x: ArrayLike, window_func: str | float | tuple) -> NDArray:
     """
     Apply a window function to the input array.
@@ -60,7 +58,6 @@ def apply_window(x: ArrayLike, window_func: str | float | tuple) -> NDArray:
     return x * get_window(window=window_func, Nx=len(x))
 
 
-@staticmethod
 def acf(x: ArrayLike) -> NDArray:
     """
     Compute the autocorrelation function of a signal.
@@ -87,7 +84,6 @@ def acf(x: ArrayLike) -> NDArray:
     return acf_arr[:n] / acf_arr[0]
 
 
-@staticmethod
 def power_threshold(
     x: ArrayLike,
     k: int,

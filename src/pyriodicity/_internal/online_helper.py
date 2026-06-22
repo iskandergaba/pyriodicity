@@ -85,9 +85,8 @@ class OnlineHelper:
             -2j * np.pi * np.arange(window_size // 2 + 1) / window_size
         )
 
-        # Initialize the FFT spectrum and frequencies
+        # Initialize the FFT spectrum
         self.rfft = np.fft.rfft(self.window_buffer)
-        self.freq = np.fft.rfftfreq(self.window_size)
 
         # Initialize Short Time FFT
         self._stft = ShortTimeFFT.from_window(
