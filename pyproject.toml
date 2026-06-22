@@ -9,7 +9,7 @@ description = "Pyriodicity provides an intuitive and efficient Python implementa
 license = "MIT"
 readme = "README.md"
 authors = [{ name = "Iskander Gaba", email = "iskander@hey.com" }]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 keywords = [
     "period",
     "periodicity",
@@ -26,15 +26,14 @@ keywords = [
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "scipy>=1.15,<1.18",
-    "pywavelets~=1.8",
+    "scipy~=1.17",
+    "pywavelets~=1.9.0",
     "free-threading~=1.1.0",
 ]
 
@@ -45,7 +44,7 @@ Repository = "https://github.com/iskandergaba/pyriodicity"
 [dependency-groups]
 dev = [
     "ruff~=0.15.0",
-    "pandas~=2.3.0",
+    "pandas~=3.0.0",
     "pytest~=9.1.0",
     "pytest-cov~=7.1.0",
 ]

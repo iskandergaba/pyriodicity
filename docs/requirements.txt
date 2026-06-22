@@ -43,11 +43,7 @@ jinja2==3.1.6 ; python_full_version >= '3.12'
     # via sphinx
 markupsafe==3.0.3 ; python_full_version >= '3.12'
     # via jinja2
-numpy==2.2.6 ; python_full_version < '3.11'
-    # via
-    #   pywavelets
-    #   scipy
-numpy==2.4.6 ; python_full_version == '3.11.*'
+numpy==2.4.6 ; python_full_version < '3.12'
     # via
     #   pywavelets
     #   scipy
@@ -64,17 +60,15 @@ pygments==2.20.0 ; python_full_version >= '3.12'
     #   accessible-pygments
     #   pydata-sphinx-theme
     #   sphinx
-pywavelets==1.8.0 ; python_full_version < '3.11'
-    # via pyriodicity
-pywavelets==1.9.0 ; python_full_version >= '3.11'
+pywavelets==1.9.0
     # via pyriodicity
 requests==2.34.2 ; python_full_version >= '3.12'
     # via sphinx
 roman-numerals==4.1.0 ; python_full_version >= '3.12'
     # via sphinx
-scipy==1.15.3 ; python_full_version < '3.11'
+scipy==1.17.1 ; python_full_version < '3.12'
     # via pyriodicity
-scipy==1.17.1 ; python_full_version >= '3.11'
+scipy==1.18.0 ; python_full_version >= '3.12'
     # via pyriodicity
 snowballstemmer==3.1.1 ; python_full_version >= '3.12'
     # via sphinx
