@@ -170,20 +170,8 @@ class Autoperiod:
                 )
                 line1, stats1 = np.polynomial.Polynomial.fit(x1, y1, deg=1, full=True)
                 line2, stats2 = np.polynomial.Polynomial.fit(x2, y2, deg=1, full=True)
-                resid1 = (
-                    stats1[0][0]
-                    if isinstance(stats1, tuple)
-                    and len(stats1) > 0
-                    and isinstance(stats1[0], np.ndarray)
-                    else 0
-                )
-                resid2 = (
-                    stats2[0][0]
-                    if isinstance(stats2, tuple)
-                    and len(stats2) > 0
-                    and isinstance(stats2[0], np.ndarray)
-                    else 0
-                )
+                resid1 = stats1[0][0] if len(stats1[0]) else 0
+                resid2 = stats2[0][0] if len(stats2[0]) else 0
                 return line1.convert(), line2.convert(), resid1 + resid2
 
             length = len(x)
