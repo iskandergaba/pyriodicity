@@ -1,5 +1,4 @@
 import datetime
-from enum import Enum, unique
 from functools import partial
 from multiprocessing import cpu_count
 from typing import Literal
@@ -95,61 +94,6 @@ class RobustPeriod:
             result = minimize(objective, np.zeros(phi.shape[1]))
             return n * np.linalg.norm(result.x) ** 2 / 4
 
-    @unique
-    class _LambdaSelection(Enum):
-        """
-        Enum for selecting the Hodrick-Prescott filter lambda parameter calculation
-        method.
-
-        Attributes
-        ----------
-        HODRICK_PRESCOTT : str
-            Use the Hodrick and Prescott method for lambda calculation [1]_.
-        RAVN_UHLIG : str
-            Use the Ravn and Uhlig method for lambda calculation [2]_.
-
-        References
-        ----------
-        .. [1] Hodrick, R. J., & Prescott, E. C. (1997).
-           Postwar US business cycles: an empirical investigation.
-           Journal of Money, Credit, and Banking, 1-16.
-           https://doi.org/10.2307/2953682
-        .. [2] Ravn, M. O., & Uhlig, H. (2002).
-           On adjusting the Hodrick-Prescott filter for the frequency of observations.
-           Review of Economics and Statistics, 84(2), 371-376.
-           https://doi.org/10.1162/003465302317411604
-        """
-
-        HODRICK_PRESCOTT = "hodrick-prescott"
-        RAVN_UHLIG = "ravn-uhlig"
-
-        def compute(self, yearly_nobs: int) -> float:
-            """
-            Compute the lambda value based on the selected method and yearly number of
-            observations.
-
-            Parameters
-            ----------
-            yearly_nobs : int
-                The number of observations per year.
-
-            Returns
-            -------
-            float
-                The computed lambda value.
-
-            Raises
-            ------
-            ValueError
-                If the lambda selection method is unknown.
-            """
-            if self == RobustPeriod._LambdaSelection.HODRICK_PRESCOTT:
-                return 100 * yearly_nobs**2
-            elif self == RobustPeriod._LambdaSelection.RAVN_UHLIG:
-                return 6.25 * yearly_nobs**4
-            else:
-                raise ValueError("Unknown lambda selection method")
-
     @staticmethod
     def detect(
         data: ArrayLike,
@@ -234,11 +178,7 @@ class RobustPeriod:
         # Validate max_period_count parameter
         max_period_count = modwt_level if max_period_count is None else max_period_count
 
-        x = RobustPeriod._preprocess(
-            data,
-            RobustPeriod._LambdaSelection(lamb) if isinstance(lamb, str) else lamb,
-            c,
-        )
+        x = RobustPeriod._preprocess(data, lamb, c)
 
         # Decouple multiple periodicities
         w_coeff_list = RobustPeriod._wavelet_coeffs(x, db_n, modwt_level)
@@ -249,7 +189,11 @@ class RobustPeriod:
         )
 
     @staticmethod
-    def _preprocess(x: ArrayLike, lamb: float | _LambdaSelection, c: float) -> NDArray:
+    def _preprocess(
+        x: ArrayLike,
+        lamb: float | Literal["hodrick-prescott", "ravn-uhlig"],
+        c: float,
+    ) -> NDArray:
         """
         Apply the data preprocessing step of RobustPeriod.
 
@@ -257,10 +201,10 @@ class RobustPeriod:
         ----------
         x : array_like
             Data to be preprocessed. Must be squeezable to 1-d.
-        lamb : float, LambdaSelection
-            The Hodrick-Prescott filter smoothing parameter. If a
-            `RobustPeriod.LambdaSelection` value is provided, then ``x`` must be a data
-            array with a datetime-like index.
+        lamb : float, {'hodrick-prescott', 'ravn-uhlig'}
+            The Hodrick-Prescott filter smoothing parameter. If a lambda selection
+            method name is provided, then ``x`` must be a data array with a
+            datetime-like index.
         c : float
             The constant threshold that determines the robustness of the Huber function.
             A smaller value makes the Huber function more sensitive to outliers. Huber
@@ -327,7 +271,7 @@ class RobustPeriod:
             return np.sign(x) * np.minimum(np.abs(x), c)
 
         # Compute the lambda parameter if a lambda selection method is provided
-        if isinstance(lamb, RobustPeriod._LambdaSelection):
+        if isinstance(lamb, str):
             index = getattr(x, "index", None)
             if index is None or not hasattr(index, "values"):
                 raise AttributeError("Data has no attribute 'index'.")
@@ -341,7 +285,12 @@ class RobustPeriod:
             yearly_nobs = np.rint(
                 np.timedelta64(365, "D") / np.diff(index_values).mean()
             )
-            lamb = lamb.compute(yearly_nobs)
+            if lamb == "hodrick-prescott":
+                lamb = 100 * yearly_nobs**2
+            elif lamb == "ravn-uhlig":
+                lamb = 6.25 * yearly_nobs**4
+            else:
+                raise ValueError("Unknown lambda selection method: '{}'".format(lamb))
 
         # Convert to one-dimensional array
         y = to_1d_array(x)
