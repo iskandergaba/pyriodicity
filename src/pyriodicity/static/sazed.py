@@ -194,13 +194,18 @@ class SAZED:
 
             # Calculate distances between zero crossings
             distances = np.diff(zero_crosses)
-            if len(distances) == 0:
+            if len(distances) < 2:
                 return None
 
-            # Use kernel density estimation to find the most common distance
-            kde = gaussian_kde(distances)
-            x = np.unique(distances)
-            period = x[np.argmax(kde(x))] * 2
+            # Constant distances make the KDE covariance singular; the mode is
+            # then simply the repeated distance value itself
+            if np.ptp(distances) == 0:
+                period = distances[0] * 2
+            else:
+                # Use kernel density estimation to find the most common distance
+                kde = gaussian_kde(distances)
+                x = np.unique(distances)
+                period = x[np.argmax(kde(x))] * 2
 
             # Return the rounded period length
             return np.rint(period).astype(int)
@@ -235,6 +240,10 @@ class SAZED:
         )
         # Drop the None key from the counter if it exists
         del period_counter[None]
+
+        # Drop periods too long to yield at least two comparable segments
+        for period in [p for p in period_counter if len(x) // p < 2]:
+            del period_counter[period]
 
         # Return None if no periodicity length estimates are found
         if len(period_counter) == 0:
