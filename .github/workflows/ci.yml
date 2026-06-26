@@ -25,7 +25,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --resolution lowest-direct
 
       - name: Check line length violations with ruff
         run: uv run ruff check --select=E501 --exit-zero
