@@ -32,8 +32,9 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
+    "numpy~=2.4",
     "scipy~=1.17",
-    "pywavelets~=1.9.0",
+    "pywavelets~=1.9",
     "free-threading~=1.1.0",
 ]
 
