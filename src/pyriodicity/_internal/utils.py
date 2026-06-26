@@ -89,6 +89,7 @@ def power_threshold(
     p: int,
     window_func: str | tuple | ArrayLike = "boxcar",
     detrend_func: Literal["constant", "linear"] | None = "linear",
+    seed: int | None = None,
 ) -> np.floating:
     """
     Compute the power threshold as the p-th percentile of the maximum
@@ -111,6 +112,9 @@ def power_threshold(
         of the ``window`` parameter.
     detrend_func : {'constant', 'linear'}, optional, default = 'linear'
         The kind of detrending to apply. If None, no detrending is applied.
+    seed : int, optional, default = None
+        A seed or generator to make the random permutations reproducible. See
+        ``numpy.random.default_rng`` for the accepted values.
 
     Returns
     -------
@@ -124,9 +128,10 @@ def power_threshold(
     """
 
     max_powers = []
+    rng = np.random.default_rng(seed)
     while len(max_powers) < k:
         _, pxx = periodogram(
-            np.random.permutation(x),
+            rng.permutation(x),
             window=window_func,  # type: ignore[arg-type]
             detrend=detrend_func,  # type: ignore[arg-type]
         )

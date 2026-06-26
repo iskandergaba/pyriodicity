@@ -65,6 +65,7 @@ class Autoperiod:
         percentile: int = 95,
         window_func: str | float | tuple = "boxcar",
         detrend_func: Literal["constant", "linear"] | None = "linear",
+        seed: int | None = None,
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -87,6 +88,9 @@ class Autoperiod:
         detrend_func : {'constant', 'linear'}, optional, default = 'linear'
             The kind of detrending to be applied on the signal. If None, no detrending
             is applied.
+        seed : int, optional, default = None
+            A seed or generator to make the random permutations reproducible. See
+            ``numpy.random.default_rng`` for the accepted values.
 
         Returns
         -------
@@ -198,7 +202,7 @@ class Autoperiod:
         x = apply_window(x, window_func)
 
         # Compute the power threshold
-        p_threshold = power_threshold(x, k, percentile, detrend_func=None)
+        p_threshold = power_threshold(x, k, percentile, detrend_func=None, seed=seed)
 
         # Find period hints
         freq, power = periodogram(x, detrend=False)

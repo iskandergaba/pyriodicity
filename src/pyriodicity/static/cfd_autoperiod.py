@@ -66,6 +66,7 @@ class CFDAutoperiod:
         percentile: int = 99,
         detrend_func: Literal["constant", "linear"] | None = "linear",
         window_func: str | float | tuple | None = None,
+        seed: int | None = None,
     ) -> NDArray:
         """
         Find periods in the given series.
@@ -88,6 +89,9 @@ class CFDAutoperiod:
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
+        seed : int, optional, default = None
+            A seed or generator to make the random permutations reproducible. See
+            ``numpy.random.default_rng`` for the accepted values.
 
         Returns
         -------
@@ -164,7 +168,7 @@ class CFDAutoperiod:
 
         # Compute the power threshold
         detrend_func = "linear" if detrend_func is None else detrend_func
-        p_threshold = power_threshold(x, k, percentile)
+        p_threshold = power_threshold(x, k, percentile, seed=seed)
 
         # Find period hints
         freq, power = periodogram(x, detrend=False)
