@@ -1,3 +1,7 @@
+# Weekly Atmospheric CO2 from Continuous Air Samples at Mauna Loa Observatory, Hawaii, U.S.A.
+# Period of Record: March 1958 - December 2001
+# Extracted from statsmodels: https://www.statsmodels.org/stable/datasets/generated/co2.html
+
 ,co2
 1958-03-29,316.1
 1958-04-05,317.3

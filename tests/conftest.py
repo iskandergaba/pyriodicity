@@ -142,6 +142,7 @@ def co2_data():
     return pd.read_csv(
         Path(__file__).parent / "data" / "co2.csv",
         index_col=0,
+        comment="#",
         parse_dates=True,
     ).ffill()
 
