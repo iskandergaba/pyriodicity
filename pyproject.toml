@@ -5,7 +5,7 @@ build-backend = "uv_build"
 [project]
 name = "pyriodicity"
 version = "0.7.0rc2"
-description = "Pyriodicity provides an intuitive and efficient Python implementation of periodicity length detection methods in univariate signals."
+description = "Efficient periodicity length detection for univariate signals in Python."
 license = "MIT"
 readme = "README.md"
 authors = [{ name = "Iskander Gaba", email = "iskander@hey.com" }]

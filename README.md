@@ -8,24 +8,30 @@
 [![Docs](https://readthedocs.org/projects/pyriodicity/badge/?version=latest)](https://pyriodicity.readthedocs.io/en/latest)
 [![CI Build](https://github.com/iskandergaba/pyriodicity/actions/workflows/ci.yml/badge.svg)](https://github.com/iskandergaba/pyriodicity/actions/workflows/ci.yml)
 
-Pyriodicity provides an intuitive and efficient Python implementation of periodicity length detection methods in univariate signals. You can check the supported detection methods in the [API Reference](https://pyriodicity.readthedocs.io/en/stable/api.html).
+Efficient periodicity length detection for univariate signals in Python. You can check the supported detection methods in the [API Reference](https://pyriodicity.readthedocs.io/en/stable/api.html).
+
 </div>
 
 ## Installation
-To install ``pyriodicity``, simply run:
+
+To install `pyriodicity`, simply run:
+
 ```shell
 pip install pyriodicity
 ```
 
 To install the latest development version, you can run:
+
 ```shell
 pip install git+https://github.com/iskandergaba/pyriodicity.git
 ```
 
 ## Usage
+
 Please refer to the [package documentation](https://pyriodicity.readthedocs.io) for more information.
 
 For this example, start by loading Mauna Loa Weekly Atmospheric CO2 Data from [`statsmodels`](https://www.statsmodels.org) and downsampling its data to a monthly frequency.
+
 ```python
 >>> from statsmodels.datasets import co2
 >>> data = co2.load().data
@@ -33,6 +39,7 @@ For this example, start by loading Mauna Loa Weekly Atmospheric CO2 Data from [`
 ```
 
 Use `Autoperiod` to find the list of periodicity lengths in this data, if any.
+
 ```python
 >>> from pyriodicity import Autoperiod
 >>> Autoperiod.detect(data)
@@ -42,6 +49,7 @@ array([12])
 The detected periodicity length is 12 which suggests a strong yearly seasonality given that the data has a monthly frequency.
 
 We can also use online detection methods for data streams as follows.
+
 ```python
 >>> from pyriodicity import OnlineACFPeriodicityDetector
 >>> data_stream = (sample for sample in data.values)
@@ -55,6 +63,7 @@ True
 All the supported periodicity detection methods can be used in the same manner as in the examples above with different optional parameters. Check the [API Reference](https://pyriodicity.readthedocs.io/en/stable/api.html) for more details.
 
 ## References
+
 1. Hyndman, R.J., & Athanasopoulos, G. (2021). Forecasting: principles and practice, 3rd edition, OTexts: Melbourne, Australia. [OTexts.com/fpp3](https://otexts.com/fpp3). Accessed on 09-15-2024.
 2. Vlachos, M., Yu, P., & Castelli, V. (2005). On periodicity detection and Structural Periodic similarity. Proceedings of the 2005 SIAM International Conference on Data Mining. [doi.org/10.1137/1.9781611972757.40](https://doi.org/10.1137/1.9781611972757.40).
 3. Puech, T., Boussard, M., D'Amato, A., & Millerand, G. (2020). A fully automated periodicity detection in time series. In Advanced Analytics and Learning on Temporal Data: 4th ECML PKDD Workshop, AALTD 2019, Würzburg, Germany, September 20, 2019, Revised Selected Papers 4 (pp. 43-54). Springer International Publishing. [doi.org/10.1007/978-3-030-39098-3_4](https://doi.org/10.1007/978-3-030-39098-3_4).
