@@ -314,7 +314,7 @@ class SAZED:
                 )
                 # Compute correlation matrix and get minimum correlation
                 corr_matrix = np.corrcoef(segments)
-                certainties.append(np.min(corr_matrix))
+                certainties.append(np.nanmin(corr_matrix))
 
             # Return period with highest certainty
             return list(period_counter.keys())[np.argmax(certainties)]
