@@ -3,6 +3,8 @@ from typing import Literal
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
+from scipy.fft import dct
+from scipy.optimize import fminbound
 from scipy.signal import detrend, periodogram
 from scipy.stats import gaussian_kde, zscore
 
@@ -17,10 +19,8 @@ class SAZED:
 
     Notes
     -----
-    While the original paper uses the Sheather-Jones bandwidth selector in the kernel
-    density estimation, this implementation uses Scott's rule provided by
-    ``scipy.stats.gaussian_kde`` for convenience, as it is unclear how much better is
-    Sheather-Jones selector in practice.
+    While the original paper uses the Sheather-Jones bandwidth selector, this
+    implementation uses the Improved Sheather-Jones (ISJ) selector [2]_.
 
     References
     ----------
@@ -28,6 +28,9 @@ class SAZED:
        domain-agnostic season length estimation in time series data. Data Mining
        and Knowledge Discovery, 33(6), 1775-1798.
        https://doi.org/10.1007/s10618-019-00645-z
+    .. [2] Botev, Z. I., Grotowski, J. F., & Kroese, D. P. (2010). Kernel density
+       estimation via diffusion. The Annals of Statistics, 38(5), 2916-2957.
+       https://doi.org/10.1214/10-AOS799
 
     Examples
     --------
@@ -177,13 +180,61 @@ class SAZED:
             int | None
                 The detected period length in samples based on zero-crossing
                 density estimation, or None if no valid period is found.
-
-            Notes
-            -----
-            While the original paper uses the Sheather-Jones bandwidth selector,
-            this implementation uses Scott's rule for bandwidth selection in the
-            kernel density estimation, as provided by ``scipy.stats.gaussian_kde``.
             """
+
+            def isj(kde: gaussian_kde) -> float:
+                """
+                Improved Sheather-Jones (ISJ) bandwidth selector.
+
+                A ``bw_method`` callable for ``scipy.stats.gaussian_kde``, ported
+                from Botev's R reference implementation
+                (https://web.maths.unsw.edu.au/~zdravkobotev/kde.R). Returns the
+                bandwidth divided by the data standard deviation, which is the scale
+                ``factor`` that ``gaussian_kde`` expects.
+                """
+
+                def fixed_point(t: float, n: int, i: NDArray, a2: NDArray) -> float:
+                    f = (
+                        2
+                        * np.pi ** (2 * 7)
+                        * np.sum(i**7 * a2 * np.exp(-i * np.pi**2 * t))
+                    )
+                    for s in range(6, 1, -1):
+                        k0 = np.prod(np.arange(1, 2 * s, 2)) / np.sqrt(2 * np.pi)
+                        const = (1 + 0.5 ** (s + 0.5)) / 3
+                        time = (2 * const * k0 / n / f) ** (2 / (3 + 2 * s))
+                        f = (
+                            2
+                            * np.pi ** (2 * s)
+                            * np.sum(i**s * a2 * np.exp(-i * np.pi**2 * time))
+                        )
+                    # Ensure f stays finite
+                    f = max(f, np.finfo(float).tiny)
+                    return t - (2 * n * np.sqrt(np.pi) * f) ** (-2 / 5)
+
+                data = kde.dataset.ravel()
+                n = len(np.unique(data))
+
+                # Bin the data onto a power-of-two mesh over a padded range
+                n_grid = 2**14
+                minimum, maximum = data.min(), data.max()
+                data_range = maximum - minimum
+                low, high = minimum - data_range / 2, maximum + data_range / 2
+                r = high - low
+                hist = np.histogram(data, bins=n_grid, range=(low, high))[0]
+                hist = hist / hist.sum()
+
+                # Discrete cosine transform of the binned density (Botev's a2)
+                a2 = (dct(hist, type=2, norm=None)[1:] / 2) ** 2
+                i = np.arange(1, n_grid, dtype=float) ** 2
+
+                # Solve the fixed-point equation for the smoothing parameter t*
+                t_star = fminbound(
+                    lambda x: abs(fixed_point(x, n, i, a2)), 0, 0.1, xtol=1e-14
+                )
+
+                # Convert the smoothing parameter to a scipy bandwidth factor
+                return np.sqrt(t_star) * r / np.std(data, ddof=1)
 
             # Find zero crossings
             zero_crosses = np.where(np.diff(np.signbit(data)))[0]
@@ -203,7 +254,7 @@ class SAZED:
                 period = distances[0] * 2
             else:
                 # Use kernel density estimation to find the most common distance
-                kde = gaussian_kde(distances)
+                kde = gaussian_kde(distances, bw_method=isj)
                 x = np.unique(distances)
                 period = x[np.argmax(kde(x))] * 2
 
