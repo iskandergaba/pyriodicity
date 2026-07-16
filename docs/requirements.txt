@@ -40,7 +40,9 @@ idna==3.18 ; python_full_version >= '3.12'
 imagesize==2.0.0 ; python_full_version >= '3.12'
     # via sphinx
 jinja2==3.1.6 ; python_full_version >= '3.12'
-    # via sphinx
+    # via
+    #   pydata-sphinx-theme
+    #   sphinx
 markupsafe==3.0.3 ; python_full_version >= '3.12'
     # via jinja2
 numpy==2.4.6 ; python_full_version < '3.12'
@@ -56,7 +58,7 @@ numpy==2.5.1 ; python_full_version >= '3.12'
 numpydoc==1.10.0 ; python_full_version >= '3.12'
 packaging==26.2 ; python_full_version >= '3.12'
     # via sphinx
-pydata-sphinx-theme==0.19.0 ; python_full_version >= '3.12'
+pydata-sphinx-theme==0.20.0 ; python_full_version >= '3.12'
 pygments==2.20.0 ; python_full_version >= '3.12'
     # via
     #   accessible-pygments
@@ -65,7 +67,9 @@ pygments==2.20.0 ; python_full_version >= '3.12'
 pywavelets==1.9.0
     # via pyriodicity
 requests==2.34.2 ; python_full_version >= '3.12'
-    # via sphinx
+    # via
+    #   pydata-sphinx-theme
+    #   sphinx
 roman-numerals==4.1.0 ; python_full_version >= '3.12'
     # via sphinx
 scipy==1.17.1 ; python_full_version < '3.12'
@@ -100,7 +104,6 @@ typing-extensions==4.16.0 ; python_full_version >= '3.12'
     # via
     #   anyio
     #   beautifulsoup4
-    #   pydata-sphinx-theme
     #   starlette
 urllib3==2.7.0 ; python_full_version >= '3.12'
     # via requests
