@@ -666,7 +666,7 @@ wheels = [
 
 [[package]]
 name = "pyriodicity"
-version = "0.8.0"
+version = "0.8.1rc0"
 source = { editable = "." }
 dependencies = [
     { name = "free-threading" },
