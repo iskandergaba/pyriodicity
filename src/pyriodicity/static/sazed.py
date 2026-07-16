@@ -194,12 +194,14 @@ class SAZED:
                 """
 
                 def fixed_point(t: float, n: int, i: NDArray, a2: NDArray) -> float:
+                    # ell = 7 corresponds to the 5 steps recommended in the paper
+                    ell = 7
                     f = (
                         2
-                        * np.pi ** (2 * 7)
-                        * np.sum(i**7 * a2 * np.exp(-i * np.pi**2 * t))
+                        * np.pi ** (2 * ell)
+                        * np.sum(i**ell * a2 * np.exp(-i * np.pi**2 * t))
                     )
-                    for s in range(6, 1, -1):
+                    for s in range(ell - 1, 1, -1):
                         k0 = np.prod(np.arange(1, 2 * s, 2)) / np.sqrt(2 * np.pi)
                         const = (1 + 0.5 ** (s + 0.5)) / 3
                         time = (2 * const * k0 / n / f) ** (2 / (3 + 2 * s))
