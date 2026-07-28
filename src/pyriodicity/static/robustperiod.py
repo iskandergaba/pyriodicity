@@ -188,7 +188,7 @@ class RobustPeriod:
         """
 
         # Validate db_n parameter
-        assert 1 <= db_n <= 38, "Invalid db_n parameter value: '{}'".format(db_n)
+        assert 1 <= db_n <= 38, f"Invalid db_n parameter value: '{db_n}'"
 
         # Validate max_worker_count parameter
         max_worker_count = cpu_count() if max_worker_count is None else max_worker_count
@@ -308,7 +308,7 @@ class RobustPeriod:
             elif lamb == "ravn-uhlig":
                 lamb = 6.25 * yearly_nobs**4
             else:
-                raise ValueError("Unknown lambda selection method: '{}'".format(lamb))
+                raise ValueError(f"Unknown lambda selection method: '{lamb}'")
 
         # Convert to one-dimensional array
         y = to_1d_array(x)
@@ -369,7 +369,7 @@ class RobustPeriod:
             y = np.pad(x, (0, padding), "wrap")
 
             # Compute the Maximal Overlap Discrete Wavelet Transform
-            coeffs = pywt.swt(y, "db{}".format(db_n), level, norm=True)
+            coeffs = pywt.swt(y, f"db{db_n}", level, norm=True)
             return np.array([cD[: len(x)] for _, cD in coeffs])
 
         def biweight_midvariance(x: NDArray, c: float) -> float:
@@ -474,7 +474,7 @@ class RobustPeriod:
                 If g0 is not within the range (0, 1].
             """
             # Validate the g0 parameter
-            assert 0 < g0 <= 1, "Invalid g0 parameter value: '{}'".format(g0)
+            assert 0 < g0 <= 1, f"Invalid g0 parameter value: '{g0}'"
 
             k = np.arange(1, int(1 // g0) + 1)
             return np.sum(

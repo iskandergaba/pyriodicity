@@ -1,14 +1,15 @@
 from .online import OnlineACFPeriodicityDetector, OnlineFFTPeriodicityDetector
 from .static import (
+    SAZED,
     ACFPeriodicityDetector,
     Autoperiod,
     CFDAutoperiod,
     FFTPeriodicityDetector,
     RobustPeriod,
-    SAZED,
 )
 
 __all__ = [
+    "SAZED",
     "ACFPeriodicityDetector",
     "Autoperiod",
     "CFDAutoperiod",
@@ -16,5 +17,4 @@ __all__ = [
     "OnlineACFPeriodicityDetector",
     "OnlineFFTPeriodicityDetector",
     "RobustPeriod",
-    "SAZED",
 ]

@@ -6,10 +6,10 @@ from .robustperiod import RobustPeriod
 from .sazed import SAZED
 
 __all__ = [
+    "SAZED",
     "ACFPeriodicityDetector",
     "Autoperiod",
     "CFDAutoperiod",
     "FFTPeriodicityDetector",
     "RobustPeriod",
-    "SAZED",
 ]

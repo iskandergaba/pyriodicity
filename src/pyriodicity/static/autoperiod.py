@@ -162,9 +162,8 @@ class Autoperiod:
                 """
                 if not start < split < end:
                     raise ValueError(
-                        "Invalid start, split, and end values ({}, {}, {})".format(
-                            start, split, end
-                        )
+                        f"Expected start < split < end, but got "
+                        f"start={start}, split={split}, end={end}"
                     )
                 x1, y1, x2, y2 = (
                     x[start : split + 1],
