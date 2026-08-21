@@ -60,7 +60,7 @@ class SAZED:
         window_func: str | float | tuple = "boxcar",
         detrend_func: Literal["constant", "linear"] | None = "linear",
         method: Literal["optimal", "majority"] = "optimal",
-    ) -> int | None:
+    ) -> np.integer | None:
         """
         Detect a period in the input data using the SAZED ensemble method.
 
@@ -68,7 +68,7 @@ class SAZED:
         ----------
         data : array_like
             Data to be investigated. Must be squeezable to 1-d.
-        window_func : float, str, tuple, default = 'boxcar'
+        window_func : str, float, tuple, default = 'boxcar'
             Window function to be applied to the time series. Check
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
@@ -100,7 +100,7 @@ class SAZED:
             - If method is neither 'optimal' nor 'majority'
         """
 
-        def s(data: NDArray) -> int | None:
+        def s(data: NDArray[np.floating]) -> np.integer | None:
             """
             Spectral component of SAZED (S).
 
@@ -133,7 +133,7 @@ class SAZED:
                 return None
             return periods[np.argmax(psd)]
 
-        def ze(data: NDArray) -> int | None:
+        def ze(data: NDArray[np.floating]) -> np.integer | None:
             """
             Zero-crossing mean component (ZE).
 
@@ -166,7 +166,7 @@ class SAZED:
                 else np.rint(np.mean(distances)).astype(int) * 2
             )
 
-        def zed(data: NDArray) -> int | None:
+        def zed(data: NDArray[np.floating]) -> np.integer | None:
             """
             Zero-crossing Density component (ZED).
 
@@ -193,7 +193,9 @@ class SAZED:
                 ``factor`` that ``gaussian_kde`` expects.
                 """
 
-                def fixed_point(t: float, n: int, i: NDArray, a2: NDArray) -> float:
+                def fixed_point(
+                    t: float, n: int, i: NDArray[np.floating], a2: NDArray[np.floating]
+                ) -> float:
                     # ell = 7 corresponds to the 5 steps recommended in the paper
                     ell = 7
                     f = (
@@ -289,10 +291,10 @@ class SAZED:
         acf_arr = acf(x)
         # Compute periodicty length estimates
         period_counter = Counter(
-            [s(x), ze(x), zed(x), s(acf_arr), ze(acf_arr), zed(acf_arr)]
+            e
+            for e in (s(x), ze(x), zed(x), s(acf_arr), ze(acf_arr), zed(acf_arr))
+            if e is not None
         )
-        # Drop the None key from the counter if it exists
-        del period_counter[None]
 
         # Drop periods too long to yield at least two comparable segments
         for period in [p for p in period_counter if len(x) // p < 2]:

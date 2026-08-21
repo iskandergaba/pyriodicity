@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, overload
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -19,7 +19,7 @@ class OnlineHelper:
         Size of the sliding window for signal processing.
     buffer_size : int, optional, default = 2 * window_size
         Size of the samples buffer. Must be at least equal to window_size.
-    window_func : float or str or tuple, optional, default = 'boxcar'
+    window_func : str, float, tuple, optional, default = 'boxcar'
         Window function to apply. See ``scipy.signal.get_window`` for accepted formats
         of the ``window`` parameter.
     detrend_func : {'constant', 'linear'}, optional, default = 'linear'
@@ -93,11 +93,21 @@ class OnlineHelper:
             win_param=window_func, fs=1.0, nperseg=self.window_size, noverlap=0
         )
 
+    @overload
+    def update(
+        self, data: float | ArrayLike, return_value: Literal["acf"]
+    ) -> NDArray[np.floating]: ...
+
+    @overload
+    def update(
+        self, data: float | ArrayLike, return_value: Literal["rfft"] = ...
+    ) -> NDArray[np.complexfloating]: ...
+
     def update(
         self,
-        data: np.floating | ArrayLike,
-        return_value: Literal["rfft", "acf"] = "rfft",
-    ) -> NDArray:
+        data: float | ArrayLike,
+        return_value: Literal["acf", "rfft"] = "rfft",
+    ) -> NDArray[np.floating] | NDArray[np.complexfloating]:
         """
         Update the signal buffer with new samples and compute transforms.
 
@@ -107,22 +117,22 @@ class OnlineHelper:
 
         Parameters
         ----------
-        data : numpy.floating or array_like
+        data : float or array_like
             New samples to process. Can be a single value or an array of values.
-        return_value : {'rfft', 'acf'}, optional, default = 'rfft'
+        return_value : {'acf', 'rfft'}, optional, default = 'rfft'
             The type of transform to return:
-            - 'rfft': Return the real FFT spectrum
             - 'acf': Return the autocorrelation function
+            - 'rfft': Return the real FFT spectrum
 
         Returns
         -------
-        NDArray
-            The requested transform (FFT spectrum or ACF) of the current window.
+        ndarray
+            The requested transform (ACF or FFT spectrum) of the current window.
 
         Raises
         ------
         ValueError
-            If ``return_value`` is not one of {'rfft', 'acf'}.
+            If ``return_value`` is not one of {'acf', 'rfft'}.
         """
 
         i = 0
@@ -188,7 +198,7 @@ class OnlineHelper:
             case _:
                 raise ValueError(f"Unsupported return_value '{return_value}'")
 
-    def get_acf(self) -> NDArray:
+    def get_acf(self) -> NDArray[np.floating]:
         """
         Get the current autocorrelation function array.
 
@@ -197,7 +207,7 @@ class OnlineHelper:
 
         Returns
         -------
-        NDArray
+        ndarray
             The normalized autocorrelation function array of the current window buffer.
         """
 

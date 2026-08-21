@@ -25,7 +25,7 @@ def test_sazed_data_const():
 def test_sazed_method_invalid(sinewave_10):
     data = sinewave_10
     with pytest.raises(ValueError):
-        SAZED.detect(data, method="invalid")
+        SAZED.detect(data, method="invalid")  # ty: ignore[invalid-argument-type]
 
 
 def test_sinewave_10_sazed_majority(sinewave_10):

@@ -19,7 +19,7 @@ class OnlineFFTPeriodicityDetector:
         Size of the sliding window for the ACF computation.
     buffer_size : int, optional, default = 2 * window_size
         Size of the samples buffer. Must be at least equal to window_size.
-    window_func : float, str, tuple, optional, default = 'boxcar'
+    window_func : str, float, tuple, optional, default = 'boxcar'
         Window function to apply. See ``scipy.signal.get_window`` for accepted formats
         of the ``window`` parameter.
     detrend_func : {'constant', 'linear'}, optional, default = 'linear'
@@ -42,7 +42,7 @@ class OnlineFFTPeriodicityDetector:
         self,
         window_size: int,
         buffer_size: int | None = None,
-        window_func: float | str | tuple = "boxcar",
+        window_func: str | float | tuple = "boxcar",
         detrend_func: Literal["constant", "linear"] | None = "linear",
     ):
         # Initialize the online helper
@@ -60,9 +60,9 @@ class OnlineFFTPeriodicityDetector:
 
     def detect(
         self,
-        data: np.floating | ArrayLike,
+        data: float | ArrayLike,
         max_period_count: int | None = None,
-    ) -> NDArray:
+    ) -> NDArray[np.integer]:
         """
         Update the frequency spectrum and detect periodicities.
 
@@ -72,7 +72,7 @@ class OnlineFFTPeriodicityDetector:
 
         Parameters
         ----------
-        data : numpy.floating or array_like
+        data : float or array_like
             New samples to process. Can be a single value or an array of values.
             Multi-dimensional arrays will be flattened.
         max_period_count : int, optional, default = None
@@ -81,7 +81,7 @@ class OnlineFFTPeriodicityDetector:
 
         Returns
         -------
-        numpy.ndarray
+        ndarray
             Array of detected periods sorted by their amplitude strength in descending
             order.
         """

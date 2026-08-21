@@ -60,10 +60,10 @@ class FFTPeriodicityDetector:
     @staticmethod
     def detect(
         data: ArrayLike,
-        window_func: float | str | tuple = "boxcar",
+        window_func: str | float | tuple = "boxcar",
         detrend_func: Literal["constant", "linear"] | None = "linear",
         max_period_count: int | None = None,
-    ) -> NDArray:
+    ) -> NDArray[np.integer]:
         """
         Find periods in the given series.
 
@@ -71,20 +71,20 @@ class FFTPeriodicityDetector:
         ----------
         data : array_like
             Data to be investigated. Must be squeezable to 1-d.
-        max_period_count : int, optional, default = None
-            Maximum number of periods to look for.
-        detrend_func : {'constant', 'linear'}, optional, default = 'linear'
-            The kind of detrending to be applied on the signal. If None, no detrending
-            is applied.
-        window_func : float, str, tuple, optional, default = None
+        window_func : str, float, tuple, optional, default = 'boxcar'
             Window function to be applied to the time series. Check
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
             parameter.
+        detrend_func : {'constant', 'linear'}, optional, default = 'linear'
+            The kind of detrending to be applied on the signal. If None, no detrending
+            is applied.
+        max_period_count : int, optional, default = None
+            Maximum number of periods to look for.
 
         Returns
         -------
-        numpy.ndarray
+        ndarray
             Array of detected periods sorted by their amplitude strength in
             descending order. Only unique periods are returned, limited by
             max_period_count if specified. Each period represents the length
