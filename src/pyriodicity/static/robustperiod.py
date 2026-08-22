@@ -83,7 +83,7 @@ class RobustPeriod:
     @staticmethod
     def _huber_m_periodogram_element(
         x: NDArray[np.floating], k: int, delta: float
-    ) -> float:
+    ) -> np.floating:
         """
         Compute a single frequency element of the Huber M-Periodogram.
 
@@ -110,7 +110,7 @@ class RobustPeriod:
         phi = np.array([np.cos(2 * np.pi * k * t / n), np.sin(2 * np.pi * k * t / n)]).T
 
         # Huber Robust M-Periodogram objective function
-        def objective(beta: NDArray[np.floating]) -> float:
+        def objective(beta: NDArray[np.floating]) -> np.floating:
             return np.linalg.norm(huber(delta, phi @ beta - x.T))
 
         result = minimize(objective, np.zeros(phi.shape[1]))
@@ -382,7 +382,7 @@ class RobustPeriod:
             coeffs = pywt.swt(y, f"db{db_n}", level, norm=True)
             return np.array([cD[: len(x)] for _, cD in coeffs])
 
-        def biweight_midvariance(x: NDArray[np.floating], c: float) -> float:
+        def biweight_midvariance(x: NDArray[np.floating], c: float) -> np.floating:
             """
             Compute the biweight midvariance of a given array.
 
@@ -462,7 +462,7 @@ class RobustPeriod:
             List of detected periods.
         """
 
-        def fisher_g_test(g0: float, n: int) -> float:
+        def fisher_g_test(g0: float, n: int) -> np.floating:
             """
             Perform Fisher's exact test for a given g-statistic and sample size.
 

@@ -92,7 +92,7 @@ def power_threshold(
     window_func: str | tuple | ArrayLike = "boxcar",
     detrend_func: Literal["constant", "linear"] | None = "linear",
     seed: int | None = None,
-) -> float:
+) -> np.floating:
     """
     Compute the power threshold as the p-th percentile of the maximum
     power values of the periodogram of k permutations of the data.

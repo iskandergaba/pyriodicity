@@ -182,7 +182,7 @@ class SAZED:
                 density estimation, or None if no valid period is found.
             """
 
-            def isj(kde: gaussian_kde) -> float:
+            def isj(kde: gaussian_kde) -> np.floating:
                 """
                 Improved Sheather-Jones (ISJ) bandwidth selector.
 
@@ -195,7 +195,7 @@ class SAZED:
 
                 def fixed_point(
                     t: float, n: int, i: NDArray[np.floating], a2: NDArray[np.floating]
-                ) -> float:
+                ) -> np.floating:
                     # ell = 7 corresponds to the 5 steps recommended in the paper
                     ell = 7
                     f = (
