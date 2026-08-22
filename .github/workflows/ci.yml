@@ -10,6 +10,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      UV_RESOLUTION: lowest-direct
     strategy:
       fail-fast: false
       matrix:
@@ -25,7 +27,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --resolution lowest-direct
+        run: uv sync
 
       - name: Type check with ty
         run: uv run ty check
