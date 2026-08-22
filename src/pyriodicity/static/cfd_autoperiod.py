@@ -67,7 +67,7 @@ class CFDAutoperiod:
         detrend_func: Literal["constant", "linear"] | None = "linear",
         window_func: str | float | tuple | None = None,
         seed: int | None = None,
-    ) -> NDArray:
+    ) -> NDArray[np.integer]:
         """
         Find periods in the given series.
 
@@ -84,7 +84,7 @@ class CFDAutoperiod:
         detrend_func : {'constant', 'linear'}, optional, default = 'linear'
             The kind of detrending to be applied on the signal. If None, no detrending
             is applied.
-        window_func : float, str, tuple, optional, default = None
+        window_func : str, float, tuple, optional, default = None
             Window function to be applied to the time series. Check
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
@@ -95,7 +95,7 @@ class CFDAutoperiod:
 
         Returns
         -------
-        NDArray
+        ndarray
             List of detected periods.
 
         See Also
@@ -106,20 +106,22 @@ class CFDAutoperiod:
             Return a window of a given length and type.
         """
 
-        def cluster_period_hints(hints: NDArray, n: int) -> NDArray:
+        def cluster_period_hints(
+            hints: NDArray[np.floating], n: int
+        ) -> NDArray[np.floating]:
             """
             Find the centroids of the period hint density clusters.
 
             Parameters
             ----------
-            period_hints : array_like
+            hints : array_like
                 List of period hints.
             n : int
                 Length of the data.
 
             Returns
             -------
-            NDArray
+            ndarray
                 List of period hint density cluster centroids.
             """
             hints = np.sort(hints)
@@ -131,7 +133,9 @@ class CFDAutoperiod:
             return np.array([c.mean() for c in clusters if len(c) > 0])
 
         def is_hint_valid(
-            x: NDArray, hint: float, detrend_func: Literal["linear", "constant"]
+            x: NDArray[np.floating],
+            hint: float,
+            detrend_func: Literal["constant", "linear"],
         ) -> bool:
             """
             Validate the period hint.
@@ -144,14 +148,14 @@ class CFDAutoperiod:
                 The period hint to be validated.
             detrend_func : str
                 The kind of detrending to be applied on the signal. It can either be
-                'linear' or 'constant'.
+                'constant' or 'linear'.
 
             Returns
             -------
             bool
                 Whether the period hint is valid.
             """
-            hint_range = np.arange(hint // 2, 1 + hint + hint // 2, dtype=int)
+            hint_range = np.arange(hint // 2, 1 + hint + hint // 2).astype(int)
             acf_arr = acf(x)
             polynomial = np.polynomial.Polynomial.fit(
                 hint_range, detrend(acf_arr[hint_range], type=detrend_func), deg=2

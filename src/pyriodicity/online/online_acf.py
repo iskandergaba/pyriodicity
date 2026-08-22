@@ -20,7 +20,7 @@ class OnlineACFPeriodicityDetector:
         Size of the sliding window for the ACF computation.
     buffer_size : int, optional, default = 2 * window_size
         Size of the samples buffer. Must be at least equal to window_size.
-    window_func : float, str, tuple, optional, default = 'boxcar'
+    window_func : str, float, tuple, optional, default = 'boxcar'
         Window function to apply. See ``scipy.signal.get_window`` for accepted formats
         of the ``window`` parameter.
     detrend_func : {'constant', 'linear'}, optional, default = 'linear'
@@ -44,7 +44,7 @@ class OnlineACFPeriodicityDetector:
         self,
         window_size: int,
         buffer_size: int | None = None,
-        window_func: float | str | tuple = "boxcar",
+        window_func: str | float | tuple = "boxcar",
         detrend_func: Literal["constant", "linear"] | None = "linear",
     ):
         self.window_size = window_size
@@ -54,9 +54,9 @@ class OnlineACFPeriodicityDetector:
 
     def detect(
         self,
-        data: np.floating | ArrayLike,
+        data: float | ArrayLike,
         max_period_count: int | None = None,
-    ) -> NDArray:
+    ) -> NDArray[np.integer]:
         """
         Update the online ACF and detect periodicities.
 
@@ -65,7 +65,7 @@ class OnlineACFPeriodicityDetector:
 
         Parameters
         ----------
-        data : numpy.floating or array_like
+        data : float or array_like
             New samples to process. Can be a single value or an array of values.
         max_period_count : int, optional, default = None
             Maximum number of periods to return. If None, all detected periods are
@@ -73,7 +73,7 @@ class OnlineACFPeriodicityDetector:
 
         Returns
         -------
-        NDArray
+        ndarray
             Array of detected periodicity lengths, sorted by strength in descending
             order.
         """

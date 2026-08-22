@@ -66,7 +66,7 @@ class Autoperiod:
         window_func: str | float | tuple = "boxcar",
         detrend_func: Literal["constant", "linear"] | None = "linear",
         seed: int | None = None,
-    ) -> NDArray:
+    ) -> NDArray[np.integer]:
         """
         Find periods in the given series.
 
@@ -80,7 +80,7 @@ class Autoperiod:
         percentile : int, optional, default = 95
             Percentage for the percentile parameter used in computing the power
             threshold. Value must be between 0 and 100 inclusive.
-        window_func : float, str, tuple, default = 'boxcar'
+        window_func : str, float, tuple, default = 'boxcar'
             Window function to be applied to the time series. Check
             ``window`` parameter documentation for ``scipy.signal.get_window``
             function for more information on the accepted formats of this
@@ -94,7 +94,7 @@ class Autoperiod:
 
         Returns
         -------
-        NDArray
+        ndarray
             List of detected periods.
 
         See Also
@@ -106,7 +106,7 @@ class Autoperiod:
         """
 
         def is_hint_valid(
-            acf_arr: NDArray,
+            acf_arr: NDArray[np.floating],
             hint: float,
         ) -> bool:
             """
@@ -126,8 +126,12 @@ class Autoperiod:
             """
 
             def split(
-                x: NDArray, y: NDArray, start: int, end: int, split: int
-            ) -> tuple:
+                x: NDArray[np.integer],
+                y: NDArray[np.floating],
+                start: int,
+                end: int,
+                split: int,
+            ) -> tuple[np.polynomial.Polynomial, np.polynomial.Polynomial, float]:
                 """
                 Approximate a function at [start, end] with two line segments at
                 [start, split] and [split, end].
@@ -171,10 +175,10 @@ class Autoperiod:
                     x[split:end],
                     y[split:end],
                 )
-                line1, stats1 = np.polynomial.Polynomial.fit(x1, y1, deg=1, full=True)
-                line2, stats2 = np.polynomial.Polynomial.fit(x2, y2, deg=1, full=True)
-                resid1 = stats1[0][0] if len(stats1[0]) else 0
-                resid2 = stats2[0][0] if len(stats2[0]) else 0
+                line1 = np.polynomial.Polynomial.fit(x1, y1, deg=1)
+                line2 = np.polynomial.Polynomial.fit(x2, y2, deg=1)
+                resid1 = np.sum((y1 - line1(x1)) ** 2)
+                resid2 = np.sum((y2 - line2(x2)) ** 2)
                 return line1.convert(), line2.convert(), resid1 + resid2
 
             length = len(x)
@@ -188,9 +192,7 @@ class Autoperiod:
                 split(hint_range, acf_arr[hint_range], 0, len(hint_range), i)
                 for i in range(1, len(hint_range) - 1)
             ]
-            line1, line2, _ = splits[
-                np.array([error for _, _, error in splits]).argmin()
-            ]
+            line1, line2, _ = splits[np.argmin([error for _, _, error in splits])]
             return line1.coef[-1] > 0 > line2.coef[-1]
 
         x = to_1d_array(data)

@@ -48,10 +48,10 @@ class RobustPeriod:
 
     @staticmethod
     def _huber_m_periodogram(
-        x: NDArray,
+        x: NDArray[np.floating],
         delta: float,
         max_worker_count: int,
-    ) -> NDArray:
+    ) -> NDArray[np.floating]:
         """
         Compute the Huber M-Periodogram using ADMM with parallel execution.
 
@@ -61,10 +61,12 @@ class RobustPeriod:
             Input data to be transformed. Must be squeezable to 1-d.
         delta : float
             The tuning constant for the Huber loss function.
+        max_worker_count : int
+            The maximum number of parallel workers.
 
         Returns
         -------
-        NDArray
+        ndarray
             The Huber M-Periodogram of the input data.
         """
 
@@ -79,7 +81,9 @@ class RobustPeriod:
         return np.array(periodogram)
 
     @staticmethod
-    def _huber_m_periodogram_element(x: NDArray, k: int, delta: float) -> np.floating:
+    def _huber_m_periodogram_element(
+        x: NDArray[np.floating], k: int, delta: float
+    ) -> np.floating:
         """
         Compute a single frequency element of the Huber M-Periodogram.
 
@@ -97,7 +101,7 @@ class RobustPeriod:
 
         Returns
         -------
-        numpy.floating
+        float
             The Huber M-Periodogram value at frequency index ``k``.
         """
 
@@ -106,7 +110,7 @@ class RobustPeriod:
         phi = np.array([np.cos(2 * np.pi * k * t / n), np.sin(2 * np.pi * k * t / n)]).T
 
         # Huber Robust M-Periodogram objective function
-        def objective(beta):
+        def objective(beta: NDArray[np.floating]) -> np.floating:
             return np.linalg.norm(huber(delta, phi @ beta - x.T))
 
         result = minimize(objective, np.zeros(phi.shape[1]))
@@ -122,7 +126,7 @@ class RobustPeriod:
         delta: float = 1.345,
         max_worker_count: int | None = None,
         max_period_count: int | None = None,
-    ) -> NDArray:
+    ) -> NDArray[np.integer]:
         """
         Find periods in the given series.
 
@@ -159,7 +163,7 @@ class RobustPeriod:
 
         Returns
         -------
-        NDArray
+        ndarray
             List of detected periods.
 
         Raises
@@ -211,7 +215,7 @@ class RobustPeriod:
         x: ArrayLike,
         lamb: float | Literal["hodrick-prescott", "ravn-uhlig"],
         c: float,
-    ) -> NDArray:
+    ) -> NDArray[np.floating]:
         """
         Apply the data preprocessing step of RobustPeriod.
 
@@ -230,11 +234,13 @@ class RobustPeriod:
 
         Returns
         -------
-        NDArray
+        ndarray
             Preprocessed data.
         """
 
-        def hpfilter(x: NDArray, lamb: float) -> tuple:
+        def hpfilter(
+            x: NDArray[np.floating], lamb: float
+        ) -> tuple[NDArray[np.floating], NDArray[np.floating]]:
             """
             Apply the Hodrick-Prescott filter to a series.
 
@@ -268,9 +274,9 @@ class RobustPeriod:
             cycle = x - trend
             return cycle, trend
 
-        def huber_function(x: ArrayLike, c: float) -> NDArray:
+        def huber_function(x: ArrayLike, c: float) -> NDArray[np.floating]:
             """
-            Compute the Huber function for an array-like input.
+            Compute the Huber function for an array_like input.
 
             Parameters
             ----------
@@ -283,8 +289,8 @@ class RobustPeriod:
 
             Returns
             -------
-            NDArray
-                An array-like object with the Huber function applied element-wise.
+            ndarray
+                Huber function result array.
             """
             return np.sign(x) * np.minimum(np.abs(x), c)
 
@@ -322,7 +328,9 @@ class RobustPeriod:
         return huber_function((y - mean) / mad, c)
 
     @staticmethod
-    def _wavelet_coeffs(x: NDArray, db_n: int, level: int):
+    def _wavelet_coeffs(
+        x: NDArray[np.floating], db_n: int, level: int
+    ) -> NDArray[np.floating]:
         """
         Compute the wavelet coefficients for a given series using the Maximal Overlap
         Discrete Wavelet Transform (MODWT) and the Daubechies wavelet.
@@ -339,11 +347,13 @@ class RobustPeriod:
 
         Returns
         -------
-        NDArray
+        ndarray
             The wavelet coefficients ordered in the descending order of their variances.
         """
 
-        def modwt(x: NDArray, db_n: int, level: int) -> NDArray:
+        def modwt(
+            x: NDArray[np.floating], db_n: int, level: int
+        ) -> NDArray[np.floating]:
             """
             Compute the Maximal Overlap Discrete Wavelet Transform (MODWT) of a series
             using the Daubechies wavelet.
@@ -360,7 +370,7 @@ class RobustPeriod:
 
             Returns
             -------
-            NDArray
+            ndarray
                 The MODWT coefficients of the input data.
             """
 
@@ -372,13 +382,13 @@ class RobustPeriod:
             coeffs = pywt.swt(y, f"db{db_n}", level, norm=True)
             return np.array([cD[: len(x)] for _, cD in coeffs])
 
-        def biweight_midvariance(x: NDArray, c: float) -> float:
+        def biweight_midvariance(x: NDArray[np.floating], c: float) -> np.floating:
             """
             Compute the biweight midvariance of a given array.
 
             Parameters
             ----------
-            x : array-like
+            x : array_like
                 The input array for which the biweight midvariance is to be computed.
             c : float
                 The tuning constant that determines the robustness and efficiency of
@@ -425,11 +435,11 @@ class RobustPeriod:
 
     @staticmethod
     def _detect(
-        w_coeff_list: NDArray,
+        w_coeff_list: NDArray[np.floating],
         delta: float,
         max_worker_count: int,
         max_period_count: int,
-    ) -> NDArray:
+    ) -> NDArray[np.integer]:
         """
         Detect periods in the given wavelet coefficient list.
 
@@ -448,11 +458,11 @@ class RobustPeriod:
 
         Returns
         -------
-        NDArray
+        ndarray
             List of detected periods.
         """
 
-        def fisher_g_test(g0: float, n: int) -> float:
+        def fisher_g_test(g0: float, n: int) -> np.floating:
             """
             Perform Fisher's exact test for a given g-statistic and sample size.
 
@@ -481,13 +491,13 @@ class RobustPeriod:
                 np.nan_to_num(binom(n, k)) * np.nan_to_num((1 - k * g0) ** (n - 1))
             )
 
-        def get_period(periodogram: NDArray) -> int | None:
+        def get_period(periodogram: NDArray[np.floating]) -> int | None:
             """
             Determine the period of a given periodogram.
 
             Parameters
             ----------
-            periodogram : array-like
+            periodogram : array_like
                 The input periodogram for which the period is to be determined.
 
             Returns
@@ -503,19 +513,19 @@ class RobustPeriod:
             rescaled ACF.
             """
 
-            def huber_acf(periodogram: NDArray) -> NDArray:
+            def huber_acf(periodogram: NDArray[np.floating]) -> NDArray[np.floating]:
                 """
                 Compute the modified autocorrelation function (ACF) for a given
                 periodogram using the Huber loss function.
 
                 Parameters
                 ----------
-                periodogram : array-like
+                periodogram : array_like
                     The input periodogram for which the ACF is to be computed.
 
                 Returns
                 -------
-                NDArray
+                ndarray
                     The modified autocorrelation function of the input periodogram.
                 """
 
@@ -543,7 +553,7 @@ class RobustPeriod:
             # Compute and rescale the Huber ACF
             n_prime = len(periodogram)
             acf = huber_acf(periodogram)
-            acf_rescaled = (acf - acf.min()) / (acf.max() - acf.min())
+            acf_rescaled = (acf - np.min(acf)) / (np.max(acf) - np.min(acf))
 
             # The periodicity must be less than n // 2, i.e. less than n_prime // 4
             k = np.argmax(periodogram)
@@ -572,7 +582,7 @@ class RobustPeriod:
         periodograms = [
             pg
             for pg in periodograms
-            if fisher_g_test(np.max(pg) / np.sum(pg), len(pg)) < 0.05
+            if fisher_g_test((np.max(pg) / np.sum(pg)).item(), len(pg)) < 0.05
         ]
 
         # Compute the periods

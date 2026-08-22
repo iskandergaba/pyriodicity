@@ -5,7 +5,7 @@ from numpy.typing import ArrayLike, NDArray
 from scipy.signal import get_window, periodogram
 
 
-def to_1d_array(x: ArrayLike) -> NDArray:
+def to_1d_array(x: ArrayLike) -> NDArray[np.floating]:
     """
     Convert input to a contiguous 1-dimensional numpy array.
 
@@ -16,7 +16,7 @@ def to_1d_array(x: ArrayLike) -> NDArray:
 
     Returns
     -------
-    NDArray
+    ndarray
         A contiguous 1-dimensional numpy array of type double.
 
     Raises
@@ -31,7 +31,9 @@ def to_1d_array(x: ArrayLike) -> NDArray:
     return x
 
 
-def apply_window(x: NDArray, window_func: str | float | tuple) -> NDArray:
+def apply_window(
+    x: NDArray[np.floating], window_func: str | float | tuple
+) -> NDArray[np.floating]:
     """
     Apply a window function to the input array.
 
@@ -39,13 +41,13 @@ def apply_window(x: NDArray, window_func: str | float | tuple) -> NDArray:
     ----------
     x : array_like
         Input array. Must be a 1-d array.
-    window_func : float, str, tuple
+    window_func : str, float, tuple
         Window function to apply. See ``scipy.signal.get_window`` for accepted formats
         of the ``window`` parameter.
 
     Returns
     -------
-    NDArray
+    ndarray
         Input array with the window function applied.
 
     See Also
@@ -57,7 +59,7 @@ def apply_window(x: NDArray, window_func: str | float | tuple) -> NDArray:
     return x * get_window(window=window_func, Nx=len(x))
 
 
-def acf(x: ArrayLike) -> NDArray:
+def acf(x: ArrayLike) -> NDArray[np.floating]:
     """
     Compute the autocorrelation function of a signal.
 
@@ -70,7 +72,7 @@ def acf(x: ArrayLike) -> NDArray:
 
     Returns
     -------
-    NDArray
+    ndarray
         The normalized autocorrelation function of the input.
         Length is equal to the input length.
     """
@@ -107,8 +109,8 @@ def power_threshold(
         It determines the cutoff point in the sorted list of the maximum
         power values from the periodograms of the permuted data.
         Value must be between 0 and 100 inclusive.
-    window_func : float, str, tuple, optional, default = 'boxcar'
-        Window function to apply. See ``scipy.signal.get_window`` for accepted formats
+    window_func : str, tuple, array_like, optional, default = 'boxcar'
+        Window function to apply. See ``scipy.signal.periodogram`` for accepted formats
         of the ``window`` parameter.
     detrend_func : {'constant', 'linear'}, optional, default = 'linear'
         The kind of detrending to apply. If None, no detrending is applied.
@@ -118,7 +120,7 @@ def power_threshold(
 
     Returns
     -------
-    numpy.floating
+    float
         Power threshold of the target data.
 
     See Also
@@ -132,8 +134,8 @@ def power_threshold(
     while len(max_powers) < k:
         _, pxx = periodogram(
             rng.permutation(x),
-            window=window_func,  # type: ignore[arg-type]
-            detrend=detrend_func,  # type: ignore[arg-type]
+            window=window_func,
+            detrend=detrend_func,
         )
         max_powers.append(pxx.max())
     max_powers.sort()

@@ -57,7 +57,7 @@ class ACFPeriodicityDetector:
         window_func: str | float | tuple = "boxcar",
         detrend_func: Literal["constant", "linear"] | None = "linear",
         max_period_count: int | None = None,
-    ) -> NDArray:
+    ) -> NDArray[np.integer]:
         """
         Find periods in the given series.
 
@@ -65,7 +65,7 @@ class ACFPeriodicityDetector:
         ----------
         data : array_like
             Data to be investigated. Must be squeezable to 1-d.
-        window_func : float, str, tuple, optional, default = 'boxcar'
+        window_func : str, float, tuple, optional, default = 'boxcar'
             Window function to apply. See ``scipy.signal.get_window`` for accepted
             formats of the ``window`` parameter.
         detrend_func : {'constant', 'linear'}, optional, default = 'linear'
@@ -76,7 +76,7 @@ class ACFPeriodicityDetector:
 
         Returns
         -------
-        NDArray
+        ndarray
             Array of detected periodicity lengths, sorted by strength in descending
             order
 
