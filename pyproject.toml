@@ -44,7 +44,7 @@ Repository = "https://github.com/iskandergaba/pyriodicity"
 
 [dependency-groups]
 dev = [
-    "ty~=0.0.73",
+    "ty~=0.0.70",
     "ruff~=0.16.0",
     "pandas~=3.0.0",
     "pytest~=9.1.0",
