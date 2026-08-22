@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: uv sync --resolution lowest-direct
 
+      - name: Type check with ty
+        run: uv run ty check
+
       - name: Check line length violations with ruff
         run: uv run ruff check --select=E501 --exit-zero
 
