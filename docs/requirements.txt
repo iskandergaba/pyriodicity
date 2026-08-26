@@ -18,18 +18,17 @@ certifi==2026.7.22 ; python_full_version >= '3.12'
     # via requests
 charset-normalizer==3.5.1 ; python_full_version >= '3.12'
     # via requests
-click==8.4.2 ; python_full_version >= '3.12'
+click==8.5.0 ; python_full_version >= '3.12'
     # via uvicorn
 colorama==0.4.6 ; python_full_version >= '3.12'
     # via
-    #   click
     #   sphinx
     #   sphinx-autobuild
 docutils==0.22.4 ; python_full_version >= '3.12'
     # via
     #   pydata-sphinx-theme
     #   sphinx
-free-threading==1.1.1
+free-threading==1.1.2
     # via pyriodicity
 h11==0.16.0 ; python_full_version >= '3.12'
     # via uvicorn
@@ -37,7 +36,7 @@ idna==3.19 ; python_full_version >= '3.12'
     # via
     #   anyio
     #   requests
-imagesize==2.0.0 ; python_full_version >= '3.12'
+imagesize==2.0.1 ; python_full_version >= '3.12'
     # via sphinx
 jinja2==3.1.6 ; python_full_version >= '3.12'
     # via
@@ -111,5 +110,5 @@ uvicorn==0.52.4 ; python_full_version >= '3.12'
     # via sphinx-autobuild
 watchfiles==1.2.0 ; python_full_version >= '3.12'
     # via sphinx-autobuild
-websockets==17.0.1 ; python_full_version >= '3.12'
+websockets==17.1 ; python_full_version >= '3.12'
     # via sphinx-autobuild
