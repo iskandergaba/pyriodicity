@@ -52,7 +52,7 @@ dev = [
 ]
 docs = [
     "numpydoc~=1.10.0",
-    "pydata-sphinx-theme~=0.20.0",
+    "pydata-sphinx-theme~=0.21.0",
     "sphinx-autobuild~=2025.08.0",
 ]
 

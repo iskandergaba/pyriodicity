@@ -57,7 +57,7 @@ numpy==2.5.2 ; python_full_version >= '3.12'
 numpydoc==1.10.0 ; python_full_version >= '3.12'
 packaging==26.3 ; python_full_version >= '3.12'
     # via sphinx
-pydata-sphinx-theme==0.20.0 ; python_full_version >= '3.12'
+pydata-sphinx-theme==0.21.0 ; python_full_version >= '3.12'
 pygments==2.21.0 ; python_full_version >= '3.12'
     # via
     #   accessible-pygments
