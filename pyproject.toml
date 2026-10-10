@@ -32,10 +32,10 @@ classifiers = [
     "Programming Language :: Python :: 3.15",
 ]
 dependencies = [
-    "numpy~=2.4",
-    "scipy~=1.17",
-    "pywavelets~=1.9",
-    "free-threading~=1.1.0",
+    "numpy~=2.5.2",
+    "scipy~=1.18.1",
+    "pywavelets~=1.10.0",
+    "free-threading~=1.2.0",
 ]
 
 [project.urls]
@@ -44,15 +44,15 @@ Repository = "https://github.com/iskandergaba/pyriodicity"
 
 [dependency-groups]
 dev = [
-    "ty~=0.0.70",
-    "ruff~=0.16.0",
-    "pandas~=3.0.0",
+    "ty~=0.0.80",
+    "ruff~=0.17.0",
+    "pandas~=3.0.6",
     "pytest~=9.1.0",
     "pytest-cov~=7.1.0",
 ]
 docs = [
-    "numpydoc~=1.10.0",
-    "pydata-sphinx-theme~=0.21.0",
+    "numpydoc~=1.11.0",
+    "pydata-sphinx-theme~=0.23.0",
     "sphinx-autobuild~=2025.08.0",
 ]
 
