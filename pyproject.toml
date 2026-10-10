@@ -9,7 +9,7 @@ description = "Efficient periodicity length detection for univariate signals in 
 license = "MIT"
 readme = "README.md"
 authors = [{ name = "Iskander Gaba", email = "iskander@hey.com" }]
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 keywords = [
     "period",
     "periodicity",
@@ -26,7 +26,6 @@ keywords = [
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
@@ -56,9 +55,6 @@ docs = [
     "pydata-sphinx-theme~=0.21.0",
     "sphinx-autobuild~=2025.08.0",
 ]
-
-[tool.uv.dependency-groups]
-docs = { requires-python = ">=3.12" }
 
 [tool.ruff.lint]
 extend-select = ["E501"]
